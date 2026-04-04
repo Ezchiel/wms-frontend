@@ -16,35 +16,28 @@ const NavigationBar: React.FC = () => {
   const navItem: NavItem[] = [
     {
       icon: 'fa-regular fa-message',
-      title: 'User management',
+      title: 'Management',
       subItems: [
-        { title: 'All users', path: '/' },
-        { title: 'Add new user', path: '/users/roles' },
-        { title: 'Roles & Permission', path: '/users/roles' },
+        { title: 'All users', path: '/users' },
+        { title: 'All products', path: '/products' },
       ],
     },
     {
       icon: 'fa-solid fa-shield-halved',
-      title: 'Product management',
+      title: 'Inventory transactions',
       subItems: [
-        { title: 'All products', path: '/products' },
-        { title: 'Categories', path: '/categories' },
+        { title: 'Goods Receipt', path: '/receipt' },
+        { title: 'Goods Issue', path: '/issue' },
       ],
     },
     {
       icon: 'fa-regular fa-bookmark',
-      title: 'Inventory management',
-      subItems: [{ title: 'Overview', path: '/inventory' }],
-    },
-    {
-      icon: 'fa-solid fa-plus',
-      title: 'Order delivery',
-      subItems: [{ title: 'Delivery list', path: '/delivery' }],
-    },
-    {
-      icon: 'fa-regular fa-user',
-      title: 'Account',
-      subItems: [{ title: 'Profile info', path: '/account' }],
+      title: 'Reports & Analytics',
+      subItems: [
+        { title: 'Real-time inventory statistics', path: '/realtime' },
+        { title: 'Goods Movement History', path: '/stockcard' },
+        { title: 'Low Stock Alerts', path: '/alert' },
+      ],
     },
   ];
 
@@ -65,7 +58,7 @@ const NavigationBar: React.FC = () => {
   };
 
   return (
-    <nav className="h-full w-80 bg-wms-dark text-white flex flex-col rounded-r-4xl overflow-hidden">
+    <nav className="h-full w-65 fixed bg-wms-dark text-white flex flex-col rounded-r-4xl overflow-hidden">
       <div className="bg-wms-primary text-white text-[24px] text-center font-bold p-3 rounded-r-4xl tracking-[2px] shrink-0 z-10">
         WMS
       </div>
@@ -100,7 +93,7 @@ const NavigationBar: React.FC = () => {
               <div
                 className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-125 opacity-100' : 'max-h-0 opacity-0'}`}
               >
-                <ul className="flex flex-col list-none pb-2 bg-black/10">
+                <ul className="flex flex-col list-none bg-black/10">
                   {element.subItems.map((sub, subIndex) => (
                     <li key={subIndex}>
                       <NavLink

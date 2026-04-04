@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-import axiosClient from '../api/axiosClient';
+import axiosClient from '../../api/axiosClient';
 
 export interface User {
   id?: number;

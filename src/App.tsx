@@ -1,10 +1,10 @@
 import type React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute.tsx';
-import PublicRoute from './components/PublicRoute.tsx';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import ProtectedRoute from './components/common/ProtectedRoute.tsx';
+import PublicRoute from './components/common/PublicRoute.tsx';
 import MainLayout from './layouts/MainLayout.tsx';
-import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx';
+import UserManagement from './pages/UserManagement.tsx';
 
 const App: React.FC = () => {
   return (
@@ -17,7 +17,8 @@ const App: React.FC = () => {
       {/* Protected pages */}
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
+          <Route index element={<Navigate to="/users" replace />} />
+          <Route path="/users" element={<UserManagement />} />
         </Route>
       </Route>
     </Routes>

@@ -1,6 +1,6 @@
 import type React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAppSelector } from '../store/hooks';
+import { useAppSelector } from '../../store/hooks';
 
 const PublicRoute: React.FC = () => {
   const { token } = useAppSelector((state) => state.auth);

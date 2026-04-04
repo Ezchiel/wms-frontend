@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../store/authSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { loginUser } from '../store/slices/authSlice';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>('');
@@ -157,7 +157,7 @@ const Login: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full p-3.75 rounded-full border-none bg-wms-primary hover:bg-wms-primary-hover text-white text-[16px] font-semibold mt-2.5 mb-6.25 cursor-pointer transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full p-3.75 rounded-full border-none bg-wms-primary hover:bg-wms-primary-hover text-white text-[16px] font-semibold mt-15 mb-6.25 cursor-pointer transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -189,14 +189,6 @@ const Login: React.FC = () => {
                 )}
               </button>
             </form>
-
-            <div className="text-center text-white text-[14px] mb-5 font-medium">Or</div>
-
-            <div className="flex justify-center gap-5 mb-7.5">
-              <i className="fa-brands fa-facebook text-[20px] cursor-pointer transition-colors duration-300 hover:text-wms-primary"></i>
-              <i className="fa-brands fa-instagram text-[20px] cursor-pointer transition-colors duration-300 hover:text-wms-primary"></i>
-              <i className="fa-brands fa-twitter text-[20px] cursor-pointer transition-colors duration-300 hover:text-wms-primary"></i>
-            </div>
           </div>
         </div>
       </div>
