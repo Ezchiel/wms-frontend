@@ -1,5 +1,6 @@
 import type React from 'react';
-import type { User } from '../../store/slices/userSlices';
+import { useAppDispatch } from '../../store/hooks';
+import { lockUser, type User } from '../../store/slices/userSlices';
 
 interface DataTableProps {
   tableHeads: string[];
@@ -7,6 +8,18 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({ tableHeads, users }) => {
+  const actionBtns = ['Lock', 'Delete', 'Edit'];
+  const dispatch = useAppDispatch();
+
+  const handleAction = (type: string, userId: number) => {
+    if (type === 'Lock') {
+      if (window.confirm('Bạn có chắc chắn muốn khóa tài khoản này?')) {
+        dispatch(lockUser(userId));
+      }
+    }
+    // Delete, Edit
+  };
+
   return (
     <table className="w-full border-collapse text-[13px]">
       <thead className="bg-[#f8fafc]">
@@ -45,12 +58,15 @@ const DataTable: React.FC<DataTableProps> = ({ tableHeads, users }) => {
                 </span>
               </td>
               <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
-                <button className="px-5 py-1 mr-2 border border-wms-primary rounded-[7px] text-wms-primary">
-                  Lock
-                </button>
-                <button className="px-5 py-1 border border-wms-primary rounded-md text-wms-primary">
-                  Delete
-                </button>
+                {actionBtns.map((element, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAction(element, user.id)}
+                    className="mr-2 px-5 py-1 border border-wms-primary rounded-[7px] text-wms-primary cursor-pointer"
+                  >
+                    {element}
+                  </button>
+                ))}
               </td>
             </tr>
           ))

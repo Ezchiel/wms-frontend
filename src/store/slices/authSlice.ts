@@ -2,6 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosClient from '../../api/axiosClient';
+import type { ApiResponse } from '../../types/api.types';
 
 export interface User {
   id?: number;
@@ -33,17 +34,6 @@ interface LoginData {
   username: string;
 }
 
-// ApiResponse
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-  meta: {
-    timestamp: string;
-    version: string;
-  };
-}
-
 export const loginUser = createAsyncThunk<LoginData, LoginCredentials, { rejectValue: string }>(
   'auth/login',
   async (userCredentials, { rejectWithValue }) => {
@@ -72,6 +62,20 @@ export const loginUser = createAsyncThunk<LoginData, LoginCredentials, { rejectV
   }
 );
 
+export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await axiosClient.post<ApiResponse<string>>('/auth/logout');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data?.message || 'Đăng xuất thất bại!');
+      }
+      return rejectWithValue('Lỗi kết nối đến máy chủ!');
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -84,6 +88,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -96,6 +101,18 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Đã có lỗi xảy ra';
+      })
+
+      // Logout
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        localStorage.removeItem('token');
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        state.user = null;
+        state.token = null;
+        localStorage.removeItem('token');
       });
   },
 });

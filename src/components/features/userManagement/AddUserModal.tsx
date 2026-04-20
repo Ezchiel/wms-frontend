@@ -15,7 +15,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSave }) 
     email: '',
     role: '',
     phone: '',
-    status: 'ACTIVE', // Mặc định là ACTIVE theo UserStatus enum
+    status: 'ACTIVE',
   };
 
   const [formData, setFormData] = useState<CreateUserPayload>(initialFormState);
@@ -26,7 +26,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onSave }) 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrorMsg(null); // Xóa lỗi khi user bắt đầu gõ lại
+    setErrorMsg(null);
   };
 
   const handleSave = async () => {

@@ -67,7 +67,7 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="px-10 ml-65">
+    <div className="w-full pl-75 pr-10">
       {/* --- PAGE TITLE --- */}
       <div>
         <h1 className="text-[22px] font-semibold mb-1.25">User management</h1>
@@ -77,15 +77,16 @@ const UserManagement: React.FC = () => {
       </div>
 
       {/* --- WORK AREA --- */}
-      <div className="bg-transparent flex flex-col">
+      <div className="bg-transparent flex flex-col overflow-x-auto">
         <TabNavigation
           tabs={tabs}
           getTabColor={getTabColor}
           onTabChange={handleTabChange}
           activeTabIndex={tabIndex}
         />
+
         {/* Table section */}
-        <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)]">
+        <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)] overflow-x-auto">
           {tabIndex === 0 ? (
             <>
               <FilterTable

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosClient from '../../api/axiosClient';
+import type { PaginationMeta } from '../../types/api.types';
 
 export interface User {
   id: number;
@@ -10,13 +11,6 @@ export interface User {
   email: string;
   createdAt?: string;
   status: string;
-}
-
-export interface PaginationMeta {
-  page: number;
-  size: number;
-  totalPages: number;
-  totalElements: number;
 }
 
 export interface CreateUserPayload {
@@ -86,12 +80,43 @@ export const createUser = createAsyncThunk(
   }
 );
 
+export const lockUser = createAsyncThunk(
+  'users/lockUser',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.put(`/users/${id}/lock`);
+      return { id, message: response.data.message };
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data?.message || 'Lỗi khi khoá tài khoản!');
+      }
+      return rejectWithValue('Đã xảy ra lỗi không xác định!');
+    }
+  }
+);
+
+export const unlockUser = createAsyncThunk(
+  'users/unlockUser',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.put(`/users/${id}/unlock`);
+      return { id, message: response.data.message };
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data?.message || 'Lỗi khi mở khóa tài khoản!');
+      }
+      return rejectWithValue('Đã xảy ra lỗi không xác định!');
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch users
       .addCase(fetchUsers.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -103,6 +128,26 @@ const userSlice = createSlice({
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // Lock user
+      .addCase(lockUser.fulfilled, (state, action) => {
+        const user = state.users.find((u) => u.id === action.payload.id);
+        if (user) {
+          user.status = 'LOCKED';
+        }
+      })
+      .addCase(lockUser.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+
+      // Unlock user
+      .addCase(unlockUser.fulfilled, (state, action) => {
+        const user = state.users.find((u) => u.id === action.payload.id);
+        if (user) user.status = 'ACTIVE';
+      })
+      .addCase(unlockUser.rejected, (state, action) => {
         state.error = action.payload as string;
       });
   },

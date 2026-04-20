@@ -15,23 +15,26 @@ const NavigationBar: React.FC = () => {
 
   const navItem: NavItem[] = [
     {
-      icon: 'fa-regular fa-message',
+      icon: 'fa-brands fa-buffer',
       title: 'Management',
       subItems: [
-        { title: 'All users', path: '/users' },
-        { title: 'All products', path: '/products' },
+        { title: 'Users', path: '/users' },
+        { title: 'Product groups', path: '/product-groups' },
+        { title: 'Products', path: '/products' },
+        { title: 'Partners', path: '/partners' },
+        { title: 'Storage location', path: '/storageLocations' },
       ],
     },
     {
-      icon: 'fa-solid fa-shield-halved',
-      title: 'Inventory transactions',
+      icon: 'fa-solid fa-briefcase',
+      title: 'Operations',
       subItems: [
         { title: 'Goods Receipt', path: '/receipt' },
         { title: 'Goods Issue', path: '/issue' },
       ],
     },
     {
-      icon: 'fa-regular fa-bookmark',
+      icon: 'fa-solid fa-chart-area',
       title: 'Reports & Analytics',
       subItems: [
         { title: 'Real-time inventory statistics', path: '/realtime' },
@@ -58,7 +61,7 @@ const NavigationBar: React.FC = () => {
   };
 
   return (
-    <nav className="h-full w-65 fixed bg-wms-dark text-white flex flex-col rounded-r-4xl overflow-hidden">
+    <nav className="h-full w-65 fixed bg-wms-dark text-white flex flex-col rounded-r-4xl overflow-hidden z-10">
       <div className="bg-wms-primary text-white text-[24px] text-center font-bold p-3 rounded-r-4xl tracking-[2px] shrink-0 z-10">
         WMS
       </div>
