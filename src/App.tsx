@@ -2,15 +2,19 @@ import type React from 'react';
 import { Navigate, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import ProtectedRoute from './components/common/ProtectedRoute.tsx';
 import PublicRoute from './components/common/PublicRoute.tsx';
-import MainLayout from './layouts/MainLayout.tsx';
+import AdminLayout from './layouts/AdminLayout';
+import MobileLayout from './layouts/MobileLayout';
 import {
-  Login,
+  InventoryReceipt,
+  InventoryStock,
   PartnerManagement,
   ProductGroupManagement,
   ProductManagement,
   StorageLocationManagement,
   UserManagement,
-} from './pages';
+} from './pages/admin';
+import { Login } from './pages/auth';
+import { CountingAndLabeling, PutawayGuidance, Scan, Tasks } from './pages/mobile';
 
 const router = createBrowserRouter([
   {
@@ -27,9 +31,10 @@ const router = createBrowserRouter([
     // --- PROTECTED ROUTES ---
     element: <ProtectedRoute />,
     children: [
+      // FOR ADMIN (Desktop)
       {
         path: '/',
-        element: <MainLayout />,
+        element: <AdminLayout />,
         children: [
           {
             index: true,
@@ -52,8 +57,44 @@ const router = createBrowserRouter([
             element: <PartnerManagement />,
           },
           {
-            path: 'storageLocations',
+            path: 'storage-locations',
             element: <StorageLocationManagement />,
+          },
+          {
+            path: 'inventory-stocks',
+            element: <InventoryStock />,
+          },
+          {
+            path: 'inventory-receipts',
+            element: <InventoryReceipt />,
+          },
+        ],
+      },
+
+      // FOR MOBILE (HANDHELD)
+      {
+        path: '/mobile',
+        element: <MobileLayout />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/mobile/tasks" replace />,
+          },
+          {
+            path: 'tasks',
+            element: <Tasks />,
+          },
+          {
+            path: 'count-and-label',
+            element: <CountingAndLabeling />,
+          },
+          {
+            path: 'scan',
+            element: <Scan />,
+          },
+          {
+            path: 'put-away',
+            element: <PutawayGuidance />,
           },
         ],
       },

@@ -102,6 +102,7 @@ const productSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch products
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
       })
@@ -113,13 +114,22 @@ const productSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
+
+      // Create product
       .addCase(createProduct.fulfilled, (state, action) => {
         state.products.push(action.payload);
       })
+
+      // Update product
       .addCase(updateProduct.fulfilled, (state, action) => {
         const index = state.products.findIndex((p) => p.id === action.payload.id);
         if (index !== -1) state.products[index] = action.payload;
       })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+
+      // Delete product
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.products = state.products.filter((p) => p.id !== action.payload);
       });

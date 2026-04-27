@@ -1,7 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosClient from '../../api/axiosClient';
-import type { ApiResponse } from '../../types/api.types';
+import type { ApiResponse, PaginationMeta } from '../../types/api.types';
+
+export interface FetchLocationsParams {
+  keyword?: string;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDir?: string;
+  isAvailableOnly?: boolean;
+}
 
 export interface StorageLocation {
   id: number;
@@ -10,7 +19,8 @@ export interface StorageLocation {
   shelf: string;
   barcode: string;
   description?: string;
-  isFull: boolean;
+  full: boolean;
+  pathSequence?: number;
 }
 
 export interface StorageLocationPayload {
@@ -20,53 +30,50 @@ export interface StorageLocationPayload {
   barcode: string;
   description?: string;
   isFull?: boolean;
+  pathSequence?: number;
 }
 
 interface StorageLocationState {
   storageLocations: StorageLocation[];
   loading: boolean;
+  meta: PaginationMeta | null;
   error: string | null;
 }
 
 const initialState: StorageLocationState = {
   storageLocations: [],
   loading: false,
+  meta: null,
   error: null,
 };
 
-export const fetchStorageLocations = createAsyncThunk<
-  StorageLocation[],
-  void,
-  { rejectValue: string }
->('storageLocations/fetchAll', async (_, { rejectWithValue }) => {
-  try {
-    const response = await axiosClient.get<ApiResponse<StorageLocation[]>>('/locations');
-    return response.data.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response) {
-      return rejectWithValue(error.response.data?.message || 'Lỗi khi lấy danh sách vị trí kho!');
-    }
-    return rejectWithValue('Đã xảy ra lỗi kết nối!');
-  }
-});
+export const fetchStorageLocations = createAsyncThunk(
+  'storageLocations/fetchStorageLocations',
+  async (params: FetchLocationsParams = {}, { rejectWithValue }) => {
+    try {
+      const {
+        keyword,
+        page = 1,
+        size = 10,
+        sortBy = 'id',
+        sortDir = 'asc',
+        isAvailableOnly = false,
+      } = params;
 
-export const fetchLocationByBarcode = createAsyncThunk<
-  StorageLocation,
-  string,
-  { rejectValue: string }
->('storageLocations/fetchByBarcode', async (barcode, { rejectWithValue }) => {
-  try {
-    const response = await axiosClient.get<ApiResponse<StorageLocation>>(
-      `/locations/barcode/${barcode}`
-    );
-    return response.data.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response) {
-      return rejectWithValue(error.response.data?.message || 'Lỗi khi lấy vị trí theo barcode!');
+      const endpoint = isAvailableOnly ? '/locations/available' : '/locations';
+      const response = await axiosClient.get(endpoint, {
+        params: { keyword, page, size, sortBy, sortDir },
+      });
+
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data?.message || 'Lỗi khi lấy danh sách vị trí kho!');
+      }
+      return rejectWithValue('Đã xảy ra lỗi kết nối!');
     }
-    return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
-});
+);
 
 export const createStorageLocation = createAsyncThunk<
   StorageLocation,
@@ -79,6 +86,27 @@ export const createStorageLocation = createAsyncThunk<
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
       return rejectWithValue(error.response.data?.message || 'Lỗi khi tạo vị trí kho!');
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});
+
+export const bulkCreateStorageLocation = createAsyncThunk<
+  StorageLocation[],
+  StorageLocationPayload[],
+  { rejectValue: string }
+>('storageLocations/bulkCreate', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.post<ApiResponse<StorageLocation[]>>(
+      '/locations/bulk',
+      payload
+    );
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Lỗi khi import danh sách vị trí kho!'
+      );
     }
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
@@ -115,21 +143,53 @@ export const deleteStorageLocation = createAsyncThunk<number, number, { rejectVa
   }
 );
 
+export const fetchAvailableLocations = createAsyncThunk<
+  StorageLocation[],
+  void,
+  { rejectValue: string }
+>('storageLocations/fetchAvailable', async (_, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.get<ApiResponse<StorageLocation[]>>('/locations/available');
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Lỗi khi lấy danh sách vị trí còn trống!'
+      );
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});
+
 const storageLocationSlice = createSlice({
   name: 'storageLocations',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch All
+      // Fetch locations
       .addCase(fetchStorageLocations.pending, (state) => {
         state.loading = true;
       })
       .addCase(fetchStorageLocations.fulfilled, (state, action) => {
         state.loading = false;
-        state.storageLocations = action.payload;
+        state.storageLocations = action.payload.data;
+        state.meta = action.payload.meta;
       })
       .addCase(fetchStorageLocations.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // Fetch Available Locations
+      .addCase(fetchAvailableLocations.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchAvailableLocations.fulfilled, (state, action) => {
+        state.loading = false;
+        state.storageLocations = action.payload;
+      })
+      .addCase(fetchAvailableLocations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
@@ -137,6 +197,20 @@ const storageLocationSlice = createSlice({
       // Create
       .addCase(createStorageLocation.fulfilled, (state, action) => {
         state.storageLocations.push(action.payload);
+      })
+
+      // Bulk Create
+      .addCase(bulkCreateStorageLocation.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(bulkCreateStorageLocation.fulfilled, (state, action) => {
+        state.loading = false;
+        state.storageLocations.push(...action.payload);
+      })
+      .addCase(bulkCreateStorageLocation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       })
 
       // Update
