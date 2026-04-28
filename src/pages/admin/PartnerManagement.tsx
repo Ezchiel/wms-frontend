@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Pagination from '../../components/admin/Pagination';
 import AddPartnerModal from '../../components/admin/partnerManagement/AddPartnerModal';
 import FilterPartner from '../../components/admin/partnerManagement/FilterPartner';
 import PartnerTable from '../../components/admin/partnerManagement/PartnerTable';
@@ -11,19 +12,50 @@ import {
   updatePartner,
   type Partner,
   type PartnerPayload,
+  type PartnerType,
 } from '../../store/slices/partnerSlice';
+
+// Tabs type
+const TAB_TYPE_MAP: Record<number, PartnerType | undefined> = {
+  0: undefined,
+  1: 'SUPPLIER',
+  2: 'CUSTOMER',
+};
 
 const PartnerManagement: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { partners, loading } = useAppSelector((state) => state.partners);
+  const { partners, loading, meta } = useAppSelector((state) => state.partners);
+
+  // State for search and pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
 
   useEffect(() => {
-    dispatch(fetchPartners());
-  }, [dispatch]);
+    dispatch(
+      fetchPartners({
+        keyword: searchKeyword,
+        page: currentPage,
+        size: pageSize,
+        type: TAB_TYPE_MAP[tabIndex],
+      })
+    );
+  }, [dispatch, currentPage, pageSize, searchKeyword, tabIndex]);
+
+  const handleTabChange = (index: number) => {
+    setTabIndex(index);
+    setCurrentPage(1);
+    setSearchKeyword('');
+  };
+
+  const handleSearch = (keyword: string) => {
+    setCurrentPage(1);
+    setSearchKeyword(keyword);
+  };
 
   const handleOpenAddModal = () => {
     setEditingPartner(null);
@@ -40,9 +72,33 @@ const PartnerManagement: React.FC = () => {
       await dispatch(updatePartner({ id: editingPartner.id, data }));
     } else {
       await dispatch(createPartner(data));
+      setCurrentPage(1);
     }
+
+    dispatch(fetchPartners({ keyword: searchKeyword, page: currentPage, size: pageSize }));
+
     setIsModalOpen(false);
     setEditingPartner(null);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Delete this partner?')) {
+      try {
+        await dispatch(deletePartner(id));
+
+        const isLastItemOnPage = partners.length === 1;
+        const shouldGoBack = currentPage > 1 && isLastItemOnPage;
+        const pageToFetch = shouldGoBack ? currentPage - 1 : currentPage;
+
+        if (shouldGoBack) {
+          setCurrentPage(pageToFetch);
+        }
+
+        dispatch(fetchPartners({ keyword: searchKeyword, page: currentPage, size: pageSize }));
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    }
   };
 
   const getTabColor = (index: number) => {
@@ -64,25 +120,28 @@ const PartnerManagement: React.FC = () => {
         <TabNavigation
           tabs={['All partners', 'Suppliers', 'Customers']}
           activeTabIndex={tabIndex}
-          onTabChange={setTabIndex}
+          onTabChange={handleTabChange}
           getTabColor={getTabColor}
         />
 
         {/* Table section */}
         <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)] overflow-x-auto">
-          <FilterPartner onActionClick={handleOpenAddModal} />
+          <FilterPartner onActionClick={handleOpenAddModal} onSearch={handleSearch} />
 
           {loading ? (
-            <div className="py-10 text-center">Đang tải dữ liệu...</div>
+            <div className="py-10 text-center">Loading data...</div>
           ) : (
-            <PartnerTable
-              heads={['Name', 'Type', 'Phone', 'Email', 'Tax Code', 'Address', 'Actions']}
-              data={partners}
-              onEdit={handleOpenEditModal}
-              onDelete={(id) =>
-                window.confirm('Delete this partner?') && dispatch(deletePartner(id))
-              }
-            />
+            <>
+              <PartnerTable
+                heads={['Name', 'Type', 'Phone', 'Email', 'Tax Code', 'Address', 'Actions']}
+                data={partners}
+                onEdit={handleOpenEditModal}
+                onDelete={handleDelete}
+              />
+
+              {/* Pagination */}
+              <Pagination meta={meta} onPageChange={setCurrentPage} />
+            </>
           )}
         </div>
       </div>

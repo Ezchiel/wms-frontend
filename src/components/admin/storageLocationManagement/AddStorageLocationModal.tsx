@@ -12,6 +12,16 @@ interface Props {
 }
 
 const AddStorageLocationModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData }) => {
+  const defaultData: StorageLocationPayload = {
+    zone: '',
+    rack: '',
+    shelf: '',
+    barcode: '',
+    description: '',
+    isFull: false,
+    pathSequence: 0,
+  };
+
   const [formData, setFormData] = useState<StorageLocationPayload>({
     zone: initialData?.zone || '',
     rack: initialData?.rack || '',
@@ -45,6 +55,7 @@ const AddStorageLocationModal: React.FC<Props> = ({ isOpen, onClose, onSave, ini
       return;
     }
     await onSave(formData);
+    setFormData(defaultData);
   };
 
   return (

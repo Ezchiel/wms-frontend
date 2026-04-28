@@ -44,7 +44,7 @@ const PartnerTable: React.FC<PartnerTableProps> = ({ heads, data, onDelete, onEd
             <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
               <button
                 onClick={() => onEdit?.(partner)}
-                className="px-5 py-1 border border-wms-primary rounded-[7px] text-wms-primary cursor-pointer hover:bg-wms-primary hover:text-white"
+                className="mr-2 px-5 py-1 border border-wms-primary rounded-[7px] text-wms-primary cursor-pointer hover:bg-wms-primary hover:text-white"
               >
                 Edit
               </button>

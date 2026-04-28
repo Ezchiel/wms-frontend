@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosClient from '../../api/axiosClient';
-import type { PaginationMeta } from '../../types/api.types';
+import type { Meta } from '../../types/api.types';
 
 export interface User {
   id: number;
@@ -25,7 +25,7 @@ export interface CreateUserPayload {
 
 interface UserState {
   users: User[];
-  meta: PaginationMeta | null;
+  meta: Meta | null;
   loading: boolean;
   error: string | null;
 }

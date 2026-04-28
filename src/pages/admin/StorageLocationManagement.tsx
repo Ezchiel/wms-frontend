@@ -53,6 +53,11 @@ const StorageLocationManagement: React.FC = () => {
     setSearchKeyword('');
   };
 
+  const handleSearch = (keyword: string) => {
+    setCurrentPage(1);
+    setSearchKeyword(keyword);
+  };
+
   // Handle open Add modal
   const handleOpenAddModal = () => {
     setEditingLocation(null);
@@ -76,9 +81,48 @@ const StorageLocationManagement: React.FC = () => {
       await dispatch(updateStorageLocation({ id: editingLocation.id, data }));
     } else {
       await dispatch(createStorageLocation(data));
+      setCurrentPage(1);
     }
+
+    dispatch(
+      fetchStorageLocations({
+        keyword: searchKeyword,
+        page: currentPage,
+        size: pageSize,
+        isAvailableOnly: tabIndex === 1,
+      })
+    );
+
     setIsModalOpen(false);
     setEditingLocation(null);
+  };
+
+  // Handle delete storage location
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure you want to delete this location?')) {
+      try {
+        await dispatch(deleteStorageLocation(id));
+
+        const isLastItemOnPage = storageLocations.length === 1;
+        const shouldGoBack = currentPage > 1 && isLastItemOnPage;
+        const pageToFetch = shouldGoBack ? currentPage - 1 : currentPage;
+
+        if (shouldGoBack) {
+          setCurrentPage(pageToFetch);
+        }
+
+        dispatch(
+          fetchStorageLocations({
+            keyword: searchKeyword,
+            page: currentPage,
+            size: pageSize,
+            isAvailableOnly: tabIndex === 1,
+          })
+        );
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    }
   };
 
   // Handle Import Excel
@@ -135,10 +179,7 @@ const StorageLocationManagement: React.FC = () => {
         {/* Table section */}
         <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)] overflow-x-auto">
           <FilterStorageLocation
-            onSearch={(keyword) => {
-              setSearchKeyword(keyword);
-              setCurrentPage(1);
-            }}
+            onSearch={handleSearch}
             onActionClick={handleOpenAddModal}
             onImportClick={handleImportExcel}
           />
@@ -161,19 +202,7 @@ const StorageLocationManagement: React.FC = () => {
                 data={storageLocations}
                 onEdit={handleOpenEditModal}
                 onPrintQR={handleOpenPrintModal}
-                onDelete={(id) =>
-                  window.confirm('Are you sure you want to delete this location?') &&
-                  dispatch(deleteStorageLocation(id)).then(() => {
-                    dispatch(
-                      fetchStorageLocations({
-                        keyword: searchKeyword,
-                        page: currentPage,
-                        size: pageSize,
-                        isAvailableOnly: tabIndex === 1,
-                      })
-                    );
-                  })
-                }
+                onDelete={handleDelete}
               />
 
               {/* Pagination */}

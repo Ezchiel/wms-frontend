@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Pagination from '../../components/admin/Pagination';
 import AddProductGroupModal from '../../components/admin/productGroupManagement/AddProductGroupModal';
 import FilterProductGroup from '../../components/admin/productGroupManagement/FilterProductGroup';
 import ProductGroupTable from '../../components/admin/productGroupManagement/ProductGroupTable';
@@ -15,15 +16,25 @@ import {
 
 const ProductGroupManagement: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { productGroups, loading } = useAppSelector((state) => state.productGroups);
+  const { productGroups, loading, meta } = useAppSelector((state) => state.productGroups);
+
+  // States for search and pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<ProductGroup | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
 
   useEffect(() => {
-    dispatch(fetchProductGroups());
-  }, [dispatch]);
+    dispatch(fetchProductGroups({ keyword: searchKeyword, page: currentPage, size: pageSize }));
+  }, [dispatch, searchKeyword, currentPage, pageSize]);
+
+  const handleSearch = (keyword: string) => {
+    setCurrentPage(1);
+    setSearchKeyword(keyword);
+  };
 
   const handleOpenAddModal = () => {
     setEditingGroup(null);
@@ -40,9 +51,33 @@ const ProductGroupManagement: React.FC = () => {
       await dispatch(updateProductGroup({ id: editingGroup.id, data }));
     } else {
       await dispatch(createProductGroup(data));
+      setCurrentPage(1);
     }
+
+    dispatch(fetchProductGroups({ keyword: searchKeyword, page: currentPage, size: pageSize }));
+
     setIsAddModalOpen(false);
     setEditingGroup(null);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Delete this product group?')) {
+      try {
+        await dispatch(deleteProductGroup(id));
+
+        const isLastItemOnPage = productGroups.length === 1;
+        const shouldGoBack = currentPage > 1 && isLastItemOnPage;
+        const pageToFetch = shouldGoBack ? currentPage - 1 : currentPage;
+
+        if (shouldGoBack) {
+          setCurrentPage(pageToFetch);
+        }
+
+        dispatch(fetchProductGroups({ keyword: searchKeyword, page: currentPage, size: pageSize }));
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    }
   };
 
   const getTabColor = (index: number) => {
@@ -72,17 +107,22 @@ const ProductGroupManagement: React.FC = () => {
 
         {/* Table section */}
         <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)] overflow-x-auto">
-          <FilterProductGroup onActionClick={handleOpenAddModal} />
+          <FilterProductGroup onSearch={handleSearch} onActionClick={handleOpenAddModal} />
 
           {loading ? (
-            <div className="py-10 text-center">Đang tải dữ liệu...</div>
+            <div className="py-10 text-center">Loading data...</div>
           ) : (
-            <ProductGroupTable
-              tableHeads={['Group code', 'Group name', 'Description', 'Actions']}
-              data={productGroups}
-              onEdit={handleOpenEditModal}
-              onDelete={(id) => dispatch(deleteProductGroup(id))}
-            />
+            <>
+              <ProductGroupTable
+                tableHeads={['Group code', 'Group name', 'Description', 'Actions']}
+                data={productGroups}
+                onEdit={handleOpenEditModal}
+                onDelete={handleDelete}
+              />
+
+              {/* Pagination */}
+              <Pagination meta={meta} onPageChange={setCurrentPage} />
+            </>
           )}
         </div>
       </div>

@@ -9,9 +9,18 @@ interface Props {
 }
 
 const AddPartnerModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData }) => {
+  const defaultData: PartnerPayload = {
+    name: '',
+    type: 'CUSTOMER',
+    phone: '',
+    email: '',
+    address: '',
+    taxCode: '',
+  };
+
   const [formData, setFormData] = useState<PartnerPayload>({
     name: initialData?.name || '',
-    type: initialData?.type || 'OTHER',
+    type: initialData?.type || 'CUSTOMER',
     phone: initialData?.phone || '',
     email: initialData?.email || '',
     address: initialData?.address || '',
@@ -19,6 +28,11 @@ const AddPartnerModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData
   });
 
   if (!isOpen) return null;
+
+  const handleSubmit = async () => {
+    await onSave(formData);
+    setFormData(defaultData);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity">
@@ -104,7 +118,7 @@ const AddPartnerModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData
             <label className="font-medium text-wms-text-main">Address</label>
             <input
               className="py-2 px-3.5 border border-solid border-wms-border-color rounded-md outline-none text-wms-text-main placeholder:text-wms-muted focus:border-wms-primary transition-colors"
-              value={formData.phone}
+              value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             />
           </div>
@@ -119,7 +133,7 @@ const AddPartnerModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData
             Cancel
           </button>
           <button
-            onClick={() => onSave(formData)}
+            onClick={handleSubmit}
             className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-wms-primary border border-solid border-wms-primary text-white hover:bg-wms-primary-hover transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
           >
             Save

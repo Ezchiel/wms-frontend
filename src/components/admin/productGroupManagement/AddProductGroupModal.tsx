@@ -9,6 +9,12 @@ interface Props {
 }
 
 const AddProductGroupModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData }) => {
+  const defaultData: ProductGroupPayload = {
+    groupCode: '',
+    groupName: '',
+    description: '',
+  };
+
   const [formData, setFormData] = useState<ProductGroupPayload>({
     groupCode: initialData?.groupCode || '',
     groupName: initialData?.groupName || '',
@@ -23,6 +29,7 @@ const AddProductGroupModal: React.FC<Props> = ({ isOpen, onClose, onSave, initia
       return;
     }
     await onSave(formData);
+    setFormData(defaultData);
   };
 
   return (

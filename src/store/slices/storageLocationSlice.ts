@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosClient from '../../api/axiosClient';
-import type { ApiResponse, PaginationMeta } from '../../types/api.types';
+import type { ApiResponse, Meta } from '../../types/api.types';
 
 export interface FetchLocationsParams {
   keyword?: string;
@@ -36,7 +36,7 @@ export interface StorageLocationPayload {
 interface StorageLocationState {
   storageLocations: StorageLocation[];
   loading: boolean;
-  meta: PaginationMeta | null;
+  meta: Meta | null;
   error: string | null;
 }
 

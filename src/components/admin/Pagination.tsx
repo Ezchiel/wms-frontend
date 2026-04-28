@@ -1,15 +1,17 @@
 import type React from 'react';
-import type { PaginationMeta } from '../../types/api.types';
+import type { Meta } from '../../types/api.types';
 
 interface PaginationProps {
-  meta: PaginationMeta | null;
+  meta: Meta | null;
   onPageChange: (page: number) => void;
 }
 
 const Pagination: React.FC<PaginationProps> = ({ meta, onPageChange }) => {
-  if (!meta || meta.totalPages <= 1) return null;
+  if (!meta) return null;
 
-  const { page, totalPages } = meta;
+  const { page = 1, totalPages = 0 } = meta;
+
+  if (totalPages <= 1) return null;
 
   const handlePrevClick = () => {
     if (page > 1) {

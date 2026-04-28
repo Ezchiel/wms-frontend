@@ -8,6 +8,12 @@ interface FilterPartnerProps {
 const FilterPartner: React.FC<FilterPartnerProps> = ({ onSearch, onActionClick }) => {
   const [keyword, setKeyword] = useState('');
 
+  const handleSearchClick = () => {
+    if (onSearch) {
+      onSearch(keyword.trim());
+    }
+  };
+
   return (
     <div className="flex justify-between items-center mb-6.25">
       <div className="flex items-center gap-3.75">
@@ -19,10 +25,11 @@ const FilterPartner: React.FC<FilterPartnerProps> = ({ onSearch, onActionClick }
             placeholder="Please enter here"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
           />
         </div>
         <button
-          onClick={() => onSearch?.(keyword)}
+          onClick={handleSearchClick}
           className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer transition-all duration-300 bg-transparent border border-solid border-wms-primary text-wms-primary"
         >
           Search

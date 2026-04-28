@@ -45,7 +45,7 @@ const ProductGroupTable: React.FC<ProductGroupTableProps> = ({
                 Edit
               </button>
               <button
-                onClick={() => window.confirm('Xoá nhóm này?') && onDelete(group.id)}
+                onClick={() => onDelete(group.id)}
                 className="mr-2 px-5 py-1 border border-red-500 rounded-[7px] text-red-500 cursor-pointer hover:bg-red-500 hover:text-white"
               >
                 Delete

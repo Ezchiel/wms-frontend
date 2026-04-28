@@ -21,8 +21,6 @@ const UserManagement: React.FC = () => {
     role: '',
   });
 
-  const tabs = ['All users', 'Deleted'];
-  const tableHeads = ['User name', 'Full name', 'Role', 'Email', 'Status', 'Action'];
   const [tabIndex, setTabIndex] = useState<number>(0);
 
   useEffect(() => {
@@ -56,10 +54,6 @@ const UserManagement: React.FC = () => {
     dispatch(fetchUsers({ ...queryParams, page: 1 }));
   };
 
-  const handleTabChange = (newIndex: number) => {
-    setTabIndex(newIndex);
-  };
-
   const getTabColor = (index: number) => {
     if (index === tabIndex) return '#ffffff';
     const lightness = Math.max(92 - index * 4, 60);
@@ -79,9 +73,9 @@ const UserManagement: React.FC = () => {
       {/* --- WORK AREA --- */}
       <div className="bg-transparent flex flex-col overflow-x-auto">
         <TabNavigation
-          tabs={tabs}
+          tabs={['All users', 'Deleted']}
           getTabColor={getTabColor}
-          onTabChange={handleTabChange}
+          onTabChange={setTabIndex}
           activeTabIndex={tabIndex}
         />
 
@@ -99,7 +93,10 @@ const UserManagement: React.FC = () => {
               {loading ? (
                 <div className="py-10 text-center">Đang tải dữ liệu...</div>
               ) : (
-                <DataTable tableHeads={tableHeads} users={users} />
+                <DataTable
+                  tableHeads={['User name', 'Full name', 'Role', 'Email', 'Status', 'Action']}
+                  users={users}
+                />
               )}
 
               <Pagination meta={meta} onPageChange={handlePageChange} />

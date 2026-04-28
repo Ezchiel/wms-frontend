@@ -1,8 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosClient from '../../api/axiosClient';
-import type { ApiResponse } from '../../types/api.types';
+import type { ApiResponse, Meta } from '../../types/api.types';
 import type { ProductGroup } from './productGroupSlice';
+
+export interface FetchProductsParams {
+  keyword?: string;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDir?: string;
+}
 
 export interface Product {
   id: number;
@@ -26,29 +34,37 @@ export interface ProductPayload {
 interface ProductState {
   products: Product[];
   loading: boolean;
+  meta: Meta | null;
   error: string | null;
 }
 
 const initialState: ProductState = {
   products: [],
   loading: false,
+  meta: null,
   error: null,
 };
 
-export const fetchProducts = createAsyncThunk<Product[], void, { rejectValue: string }>(
-  'products/fetchAll',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axiosClient.get<ApiResponse<Product[]>>('/products');
-      return response.data.data;
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response) {
-        return rejectWithValue(error.response.data?.message || 'Lỗi khi lấy danh sách sản phẩm!');
-      }
-      return rejectWithValue('Đã xảy ra lỗi kết nối!');
+export const fetchProducts = createAsyncThunk<
+  ApiResponse<Product[]>,
+  FetchProductsParams,
+  { rejectValue: string }
+>('products/fetchAll', async (params: FetchProductsParams = {}, { rejectWithValue }) => {
+  try {
+    const { keyword, page = 1, size = 10, sortBy = 'id', sortDir = 'asc' } = params;
+
+    const response = await axiosClient.get<ApiResponse<Product[]>>('/products', {
+      params: { keyword, page, size, sortBy, sortDir },
+    });
+
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data?.message || 'Lỗi khi lấy danh sách sản phẩm!');
     }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
-);
+});
 
 export const createProduct = createAsyncThunk<Product, ProductPayload, { rejectValue: string }>(
   'products/create',
@@ -102,25 +118,27 @@ const productSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch products
+      // --- FETCH ---
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        state.products = action.payload.data;
+        state.meta = action.payload.meta;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
 
-      // Create product
+      // --- CREATE ---
       .addCase(createProduct.fulfilled, (state, action) => {
         state.products.push(action.payload);
       })
 
-      // Update product
+      // --- UPDATE ---
       .addCase(updateProduct.fulfilled, (state, action) => {
         const index = state.products.findIndex((p) => p.id === action.payload.id);
         if (index !== -1) state.products[index] = action.payload;
@@ -129,7 +147,7 @@ const productSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // Delete product
+      // --- DELETE ---
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.products = state.products.filter((p) => p.id !== action.payload);
       });
