@@ -1,7 +1,7 @@
-export { default as InventoryReceipt } from './InventoryReceipt';
-export { default as InventoryStock } from './InventoryStock';
-export { default as PartnerManagement } from './PartnerManagement';
-export { default as ProductGroupManagement } from './ProductGroupManagement';
-export { default as ProductManagement } from './ProductManagement';
-export { default as StorageLocationManagement } from './StorageLocationManagement';
-export { default as UserManagement } from './UserManagement';
+export { default as InventoryReceiptPage } from './InventoryReceiptPage';
+export { default as InventoryStockPage } from './InventoryStockPage';
+export { default as PartnerPage } from './PartnerPage';
+export { default as ProductGroupPage } from './ProductGroupPage';
+export { default as ProductPage } from './ProductPage';
+export { default as StorageLocationPage } from './StorageLocationPage';
+export { default as UserPage } from './UserPage';

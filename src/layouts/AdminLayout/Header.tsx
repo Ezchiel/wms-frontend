@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useState } from 'react';
-import { useAppDispatch } from '../../store/hooks';
-import { logoutUser } from '../../store/slices/authSlice';
+import { useAppDispatch } from '../../app/hooks';
+import { logoutUser } from '../../features/auth/authThunks';
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // create an instance of Axios
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: 'http://192.168.30.104:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,7 +33,7 @@ axiosClient.interceptors.response.use(
     const { response } = error;
 
     // catching 401 (Unauthorized) cause token has expired
-    if (response && response.status === 401) {
+    if (response && response.status === 403) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
