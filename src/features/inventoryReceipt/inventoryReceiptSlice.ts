@@ -1,5 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { confirmReceipt, createReceipt, fetchReceipts } from './inventoryReceiptThunks';
+import {
+  confirmReceipt,
+  countAndLabel,
+  createReceipt,
+  fetchReceipts,
+} from './inventoryReceiptThunks';
 import type { ReceiptState } from './inventoryReceiptTypes';
 
 const initialState: ReceiptState = {
@@ -55,6 +60,19 @@ const receiptSlice = createSlice({
         }
       })
       .addCase(confirmReceipt.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // CountAndLabel
+      .addCase(countAndLabel.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(countAndLabel.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(countAndLabel.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

@@ -48,3 +48,19 @@ export interface ReceiptState {
   loading: boolean;
   error: string | null;
 }
+
+export interface CountAndLabelPayload {
+  receiptId: number;
+  detailId: number;
+  countedQuantity: number;
+  batchNo?: string;
+  serialNumber?: string;
+  expiryDate?: string;
+}
+
+export interface CountAndLabelResponse {
+  lpnCode: string;
+  productName: string;
+  quantity: number;
+  zplCommand: string;
+}

@@ -2,7 +2,12 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosClient from '../../api/axiosClient';
 import type { ApiResponse } from '../../types/api.types';
-import type { InventoryReceipt, InventoryReceiptPayload } from './inventoryReceiptTypes';
+import type {
+  CountAndLabelPayload,
+  CountAndLabelResponse,
+  InventoryReceipt,
+  InventoryReceiptPayload,
+} from './inventoryReceiptTypes';
 
 export const fetchReceipts = createAsyncThunk<InventoryReceipt[], void, { rejectValue: string }>(
   'receipts/fetchAll',
@@ -53,3 +58,27 @@ export const confirmReceipt = createAsyncThunk<InventoryReceipt, number, { rejec
     }
   }
 );
+
+export const countAndLabel = createAsyncThunk<
+  CountAndLabelResponse,
+  CountAndLabelPayload,
+  { rejectValue: string }
+>('receipts/countAndLabel', async (payload, { rejectWithValue }) => {
+  try {
+    // Tách receiptId và detailId ra khỏi payload để dùng cho URL
+    const { receiptId, detailId, ...requestBody } = payload;
+
+    const response = await axiosClient.post<ApiResponse<CountAndLabelResponse>>(
+      `/receipts/${receiptId}/details/${detailId}/count-and-label`,
+      requestBody
+    );
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Lỗi khi kiểm đếm và tạo lệnh in tem!'
+      );
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});
