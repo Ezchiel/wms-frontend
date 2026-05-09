@@ -26,7 +26,7 @@ export const TasksFeature: React.FC = () => {
           </div>
 
           <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar">
-            {['All', 'Pending', 'Putaway', 'Completed'].map((tab, idx) => (
+            {['Receiving', 'Putaway', 'Completed'].map((tab, idx) => (
               <button
                 key={tab}
                 className={`px-4.5 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors shadow-sm ${
@@ -43,9 +43,9 @@ export const TasksFeature: React.FC = () => {
 
         {/* Task List Title */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[15px] font-bold text-wms-text-main">Phiếu chờ xử lý (RECEIVING)</h2>
+          <h2 className="text-[15px] font-bold text-wms-text-main">Receipts in processing</h2>
           <span className="text-[13px] font-medium text-wms-primary bg-wms-primary/10 px-2.5 py-0.5 rounded-full">
-            {state.receivingReceipts.length} nhiệm vụ
+            {state.receivingReceipts.length} tasks
           </span>
         </div>
 
@@ -66,9 +66,9 @@ export const TasksFeature: React.FC = () => {
       </main>
 
       {/* Floating Action Button */}
-      <button className="fixed bottom-28 right-5 w-14 h-14 bg-wms-primary text-white rounded-full shadow-[0_4px_15px_rgba(59,130,246,0.4)] flex items-center justify-center active:scale-90 transition-transform z-40">
+      {/* <button className="fixed bottom-28 right-5 w-14 h-14 bg-wms-primary text-white rounded-full shadow-[0_4px_15px_rgba(59,130,246,0.4)] flex items-center justify-center active:scale-90 transition-transform z-40">
         <i className="fa-solid fa-qrcode text-[24px]"></i>
-      </button>
+      </button> */}
     </>
   );
 };

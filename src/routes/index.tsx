@@ -11,7 +11,7 @@ import {
   UserPage,
 } from '../pages/admin/index.ts';
 import { LoginPage } from '../pages/auth';
-import { CountingAndLabeling, PutawayGuidance, Scan, TasksPage } from '../pages/mobile';
+import { CountingAndLabelingPage, PutawayGuidance, Scan, TasksPage } from '../pages/mobile';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import PublicRoute from './PublicRoute.tsx';
 
@@ -84,8 +84,8 @@ export const router = createBrowserRouter([
             element: <TasksPage />,
           },
           {
-            path: 'count-and-label',
-            element: <CountingAndLabeling />,
+            path: 'count-and-label/:receiptId',
+            element: <CountingAndLabelingPage />,
           },
           {
             path: 'scan',

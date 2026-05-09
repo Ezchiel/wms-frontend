@@ -46,6 +46,8 @@ export const useStorageLocationManagement = () => {
     setSearchKeyword('');
   };
 
+  // ── Handlers ────────────────────────────────────────────────────────────
+
   const handleSearch = (keyword: string) => {
     setCurrentPage(1);
     setSearchKeyword(keyword);

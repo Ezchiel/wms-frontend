@@ -4,13 +4,14 @@ import NavigationBar from './NavigationBar';
 
 function MobileLayout() {
   const location = useLocation();
-
-  // Get "/mobile/count-and-label"
   const currentPath = location.pathname;
+
+  // Check URL '/mobile/count-and-label'
+  const isCountingPage = currentPath.startsWith('/mobile/count-and-label');
 
   return (
     <div className="bg-wms-bg min-h-screen pb-24 font-sans">
-      {currentPath === '/mobile/count-and-label' || <Header />}
+      {!isCountingPage && <Header />}
       <Outlet />
       <NavigationBar />
     </div>

@@ -10,7 +10,8 @@ export const useTasks = () => {
 
   // Derived data
   const receivingReceipts = receipts.filter(
-    (receipt: InventoryReceipt) => receipt.status !== 'EXPECTED'
+    (receipt: InventoryReceipt) =>
+      receipt.status !== 'EXPECTED' && receipt.status !== 'PUTAWAY_PENDING'
   );
 
   useEffect(() => {
