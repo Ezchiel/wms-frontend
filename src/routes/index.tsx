@@ -11,7 +11,7 @@ import {
   UserPage,
 } from '../pages/admin/index.ts';
 import { LoginPage } from '../pages/auth';
-import { CountingAndLabelingPage, PutawayGuidance, Scan, TasksPage } from '../pages/mobile';
+import { CountingAndLabelingPage, PutawayPage, Scan, TasksPage } from '../pages/mobile';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import PublicRoute from './PublicRoute.tsx';
 
@@ -93,7 +93,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'put-away',
-            element: <PutawayGuidance />,
+            element: <PutawayPage />,
           },
         ],
       },

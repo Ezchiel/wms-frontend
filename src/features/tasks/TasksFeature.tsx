@@ -1,10 +1,13 @@
 import React from 'react';
 import type { InventoryReceipt } from '../inventoryReceipt/inventoryReceiptTypes';
 import TaskCard from './components/TaskCard';
+import type { TabKey } from './tasksTypes';
 import { useTasks } from './useTasks';
 
 export const TasksFeature: React.FC = () => {
-  const { state } = useTasks();
+  const { state, actions } = useTasks();
+
+  const tabs: TabKey[] = ['receiving', 'putaway'];
 
   return (
     <>
@@ -26,7 +29,7 @@ export const TasksFeature: React.FC = () => {
           </div>
 
           <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar">
-            {['Receiving', 'Putaway', 'Completed'].map((tab, idx) => (
+            {tabs.map((tab, idx) => (
               <button
                 key={tab}
                 className={`px-4.5 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors shadow-sm ${
@@ -34,6 +37,7 @@ export const TasksFeature: React.FC = () => {
                     ? 'bg-wms-primary text-white border border-wms-primary'
                     : 'bg-white border border-wms-border-color text-wms-text-main active:bg-gray-50'
                 }`}
+                onClick={() => actions.setActiveTab(tab)}
               >
                 {tab}
               </button>

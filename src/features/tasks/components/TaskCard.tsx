@@ -80,13 +80,24 @@ const TaskCard = ({ receipt }: TaskProps) => {
       )}
 
       {/* Action button — pass receiptId in URL */}
-      <Link
-        to={`/mobile/count-and-label/${receipt.id}`}
-        className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1"
-      >
-        <i className="fa-solid fa-qrcode text-[18px]"></i>
-        Count and label now
-      </Link>
+      {receipt.status === 'RECEIVING' && (
+        <Link
+          to={`/mobile/count-and-label/${receipt.id}`}
+          className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1"
+        >
+          <i className="fa-solid fa-qrcode text-[18px]"></i>
+          Count and label now
+        </Link>
+      )}
+      {receipt.status === 'PUTAWAY_PENDING' && (
+        <Link
+          to="/mobile/put-away"
+          className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1"
+        >
+          <i className="fa-solid fa-qrcode text-[18px]"></i>
+          Start putaway
+        </Link>
+      )}
     </div>
   );
 };

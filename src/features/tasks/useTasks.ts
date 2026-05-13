@@ -1,18 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchReceipts } from '../inventoryReceipt/inventoryReceiptThunks';
 import type { InventoryReceipt } from '../inventoryReceipt/inventoryReceiptTypes';
+import type { TabKey } from './tasksTypes';
 
 export const useTasks = () => {
   const dispatch = useAppDispatch();
 
   const { receipts, loading } = useAppSelector((state) => state.inventoryReceipts);
 
-  // Derived data
-  const receivingReceipts = receipts.filter(
-    (receipt: InventoryReceipt) =>
-      receipt.status !== 'EXPECTED' && receipt.status !== 'PUTAWAY_PENDING'
-  );
+  const [activeTab, setActiveTab] = useState<TabKey>('receiving');
+
+  const receivingReceipts = receipts.filter((r: InventoryReceipt) => r.status === 'RECEIVING');
+
+  const putawayReceipts = receipts.filter((r: InventoryReceipt) => r.status === 'PUTAWAY_PENDING');
 
   useEffect(() => {
     dispatch(fetchReceipts());
@@ -21,7 +22,12 @@ export const useTasks = () => {
   return {
     state: {
       receivingReceipts,
+      putawayReceipts,
       loading,
+      activeTab,
+    },
+    actions: {
+      setActiveTab,
     },
   };
 };

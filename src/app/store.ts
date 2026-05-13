@@ -5,6 +5,7 @@ import inventoryStockReducer from '../features/inventoryStock/inventoryStockSlic
 import partnerReducer from '../features/partners/partnerSlice.ts';
 import productGroupReducer from '../features/productGroups/productGroupSlice.ts';
 import productReducer from '../features/products/productSlice.ts';
+import putawayReducer from '../features/putaway/putawaySlice.ts';
 import storageLocationReducer from '../features/storageLocation/storageLocationSlice.ts';
 import userReducer from '../features/users/userSlices.ts';
 
@@ -18,6 +19,7 @@ export const store = configureStore({
     storageLocations: storageLocationReducer,
     inventoryReceipts: inventoryReceiptReducer,
     inventoryStocks: inventoryStockReducer,
+    putaway: putawayReducer,
   },
 });
 
