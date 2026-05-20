@@ -1,9 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { loginUser, logoutUser } from './authThunks';
-import type { AuthState } from './authTypes';
+import { loginUser } from './authThunks';
+import type { AuthState, UserRole } from './authTypes';
 
 const initialState: AuthState = {
-  user: null,
+  user: localStorage.getItem('token')
+    ? {
+        username: localStorage.getItem('username') || '',
+        role: (localStorage.getItem('role') as UserRole) || 'USER',
+      }
+    : null,
   token: localStorage.getItem('token') || null,
   loading: false,
   error: null,
@@ -17,6 +22,8 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('role');
     },
   },
   extraReducers: (builder) => {
@@ -34,18 +41,6 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as string) || 'Đã có lỗi xảy ra';
-      })
-
-      // Logout
-      .addCase(logoutUser.fulfilled, (state) => {
-        state.user = null;
-        state.token = null;
-        localStorage.removeItem('token');
-      })
-      .addCase(logoutUser.rejected, (state) => {
-        state.user = null;
-        state.token = null;
-        localStorage.removeItem('token');
       });
   },
 });

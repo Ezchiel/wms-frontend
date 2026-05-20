@@ -1,19 +1,30 @@
-import React from 'react';
-import type { InventoryReceipt } from '../inventoryReceipt/inventoryReceiptTypes';
+import React, { useEffect } from 'react';
 import TaskCard from './components/TaskCard';
 import type { TabKey } from './tasksTypes';
 import { useTasks } from './useTasks';
 
 export const TasksFeature: React.FC = () => {
   const { state, actions } = useTasks();
-
   const tabs: TabKey[] = ['receiving', 'putaway'];
+
+  // Scroll down to the bottom of the page detection logic
+  useEffect(() => {
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      if (scrollTop + clientHeight >= scrollHeight - 20) {
+        actions.handleLoadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [actions, state.loading, state.mobileHasMore]);
 
   return (
     <>
       <main className="px-5 py-6">
         {/* Search & Filter Area */}
-        <div className="flex flex-col gap-4 mb-7">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2.5">
             <div className="relative flex-1">
               <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-wms-muted text-[16px]"></i>
@@ -28,16 +39,17 @@ export const TasksFeature: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar">
-            {tabs.map((tab, idx) => (
+          {/* Tab Navigation */}
+          <div className="flex gap-2.5 mb-7 overflow-x-auto no-scrollbar">
+            {tabs.map((tab) => (
               <button
                 key={tab}
-                className={`px-4.5 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors shadow-sm ${
-                  idx === 0
-                    ? 'bg-wms-primary text-white border border-wms-primary'
-                    : 'bg-white border border-wms-border-color text-wms-text-main active:bg-gray-50'
+                className={`px-6 py-2 rounded-full text-[13px] font-semibold capitalize transition-all ${
+                  state.activeTab === tab
+                    ? 'bg-wms-primary text-white'
+                    : 'bg-white border border-wms-border-color text-wms-text-main'
                 }`}
-                onClick={() => actions.setActiveTab(tab)}
+                onClick={() => actions.handleTabChange(tab)}
               >
                 {tab}
               </button>
@@ -45,26 +57,32 @@ export const TasksFeature: React.FC = () => {
           </div>
         </div>
 
-        {/* Task List Title */}
+        {/* Title */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[15px] font-bold text-wms-text-main">Receipts in processing</h2>
           <span className="text-[13px] font-medium text-wms-primary bg-wms-primary/10 px-2.5 py-0.5 rounded-full">
-            {state.receivingReceipts.length} tasks
+            {state.meta?.totalElements} tasks
           </span>
         </div>
 
-        {/* Task Cards Grid */}
-        {state.loading ? (
-          <div className="py-10 text-center text-wms-muted text-[13px]">Loading data...</div>
-        ) : state.receivingReceipts.length === 0 ? (
-          <div className="py-10 text-center text-wms-muted text-[13px]">
-            No receipts are pending.
+        {/* Task List */}
+        <div className="space-y-4">
+          {state.receipts.map((receipt) => (
+            <TaskCard key={receipt.id} receipt={receipt} />
+          ))}
+        </div>
+
+        {/* Loading Indicator */}
+        {state.loading && (
+          <div className="py-4 text-center text-wms-muted text-[13px]">
+            <i className="fa-solid fa-spinner animate-spin mr-2"></i>
+            Loading more...
           </div>
-        ) : (
-          <div className="space-y-4">
-            {state.receivingReceipts.map((receipt: InventoryReceipt) => (
-              <TaskCard key={receipt.id} receipt={receipt} />
-            ))}
+        )}
+
+        {!state.mobileHasMore && state.receipts.length > 0 && (
+          <div className="py-10 text-center text-wms-muted text-[12px]">
+            You have reached the end of the list.
           </div>
         )}
       </main>

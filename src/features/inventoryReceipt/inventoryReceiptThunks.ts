@@ -5,26 +5,54 @@ import type { ApiResponse } from '../../types/api.types';
 import type {
   CountAndLabelPayload,
   CountAndLabelResponse,
+  FetchReceiptsParams,
   InventoryReceipt,
   InventoryReceiptPayload,
 } from './inventoryReceiptTypes';
 
-export const fetchReceipts = createAsyncThunk<InventoryReceipt[], void, { rejectValue: string }>(
-  'receipts/fetchAll',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axiosClient.get<ApiResponse<InventoryReceipt[]>>('/receipts');
-      return response.data.data;
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response) {
-        return rejectWithValue(
-          error.response.data?.message || 'Lỗi khi tải danh sách phiếu nhập kho!'
-        );
-      }
-      return rejectWithValue('Đã xảy ra lỗi kết nối!');
+export const fetchReceipts = createAsyncThunk<
+  ApiResponse<InventoryReceipt[]>,
+  FetchReceiptsParams,
+  { rejectValue: string }
+>('receipts/fetch', async (params: FetchReceiptsParams, { rejectWithValue }) => {
+  try {
+    const { keyword, status, page = 1, size = 10, sortBy = 'id', sortDir = 'asc' } = params;
+
+    const response = await axiosClient.get<ApiResponse<InventoryReceipt[]>>('/receipts', {
+      params: { keyword, status, page, size, sortBy, sortDir },
+    });
+
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Lỗi khi tải danh sách phiếu nhập kho!'
+      );
     }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
-);
+});
+
+export const fetchReceiptsMobile = createAsyncThunk<
+  ApiResponse<InventoryReceipt[]>,
+  FetchReceiptsParams,
+  { rejectValue: string }
+>('receipts/fetchMobile', async (params, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.get<ApiResponse<InventoryReceipt[]>>('/receipts', {
+      params,
+    });
+
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Lỗi khi tải danh sách phiếu nhập kho!'
+      );
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});
 
 export const createReceipt = createAsyncThunk<
   InventoryReceipt,

@@ -6,12 +6,13 @@ function MobileLayout() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // Check URL '/mobile/count-and-label'
-  const isCountingPage = currentPath.startsWith('/mobile/count-and-label');
+  // No header needed
+  const pathsWithoutHeader = ['/mobile/count-and-label', '/mobile/put-away'];
+  const shouldHideHeader = pathsWithoutHeader.some((path) => currentPath.startsWith(path));
 
   return (
     <div className="bg-wms-bg min-h-screen pb-24 font-sans">
-      {!isCountingPage && <Header />}
+      {!shouldHideHeader && <Header />}
       <Outlet />
       <NavigationBar />
     </div>

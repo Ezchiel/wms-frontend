@@ -4,6 +4,7 @@ import {
   countAndLabel,
   createReceipt,
   fetchReceipts,
+  fetchReceiptsMobile,
 } from './inventoryReceiptThunks';
 import type { ReceiptState } from './inventoryReceiptTypes';
 
@@ -11,29 +12,69 @@ const initialState: ReceiptState = {
   receipts: [],
   loading: false,
   error: null,
+  meta: null,
+
+  mobilePage: 1,
+  mobileHasMore: true,
+  mobileLoading: false,
 };
 
 const receiptSlice = createSlice({
   name: 'receipts',
   initialState,
-  reducers: {},
+  reducers: {
+    resetMobileList: (state) => {
+      state.receipts = [];
+      state.mobilePage = 1;
+      state.mobileHasMore = true;
+    },
+  },
   extraReducers: (builder) => {
     builder
-      // FetchReceipts
+      // Fetch receipts
       .addCase(fetchReceipts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchReceipts.fulfilled, (state, action) => {
         state.loading = false;
-        state.receipts = action.payload;
+        state.receipts = action.payload.data;
+        state.meta = action.payload.meta;
       })
       .addCase(fetchReceipts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
 
-      // CreateReceipt
+      // Fetch receipt mobile
+      .addCase(fetchReceiptsMobile.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchReceiptsMobile.fulfilled, (state, action) => {
+        state.loading = false;
+        const { data, meta } = action.payload;
+
+        // If it's page 1, overwrite; if it's page > 1, append the data
+        if (meta.page === 1) {
+          state.receipts = data;
+        } else {
+          // Filter duplicate
+          const newItems = data.filter(
+            (newItem) => !state.receipts.some((existingItem) => existingItem.id === newItem.id)
+          );
+          state.receipts = [...state.receipts, ...newItems];
+        }
+
+        state.meta = meta;
+
+        // HasMore logic
+        if (meta.page !== undefined && meta.totalPages !== undefined) {
+          state.mobileHasMore = meta.page < meta.totalPages;
+          state.mobilePage = meta.page;
+        }
+      })
+
+      // Create receipt
       .addCase(createReceipt.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -47,7 +88,7 @@ const receiptSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // ConfirmReceipt
+      // Confirm receipt
       .addCase(confirmReceipt.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -64,7 +105,7 @@ const receiptSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // CountAndLabel
+      // Count and label
       .addCase(countAndLabel.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -80,3 +121,4 @@ const receiptSlice = createSlice({
 });
 
 export default receiptSlice.reducer;
+export const { resetMobileList } = receiptSlice.actions;

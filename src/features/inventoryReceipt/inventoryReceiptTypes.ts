@@ -1,5 +1,15 @@
+import type { Meta } from '../../types/api.types';
+
 export type ReceiptStatus = 'EXPECTED' | 'RECEIVING' | 'PUTAWAY_PENDING';
 
+export const TAB_STATUS_MAP: Record<number, ReceiptStatus | undefined> = {
+  0: undefined,
+  1: 'EXPECTED',
+  2: 'RECEIVING',
+  3: 'PUTAWAY_PENDING',
+};
+
+// --- Receipt detail data ---
 export interface InventoryReceiptDetail {
   id: number;
   productId: number;
@@ -14,6 +24,7 @@ export interface InventoryReceiptDetail {
   serialNumber: string | null;
 }
 
+// --- Receipt data ---
 export interface InventoryReceipt {
   id: number;
   receiptCode: string;
@@ -27,6 +38,7 @@ export interface InventoryReceipt {
   details: InventoryReceiptDetail[];
 }
 
+// --- Receipt detail payload ---
 export interface ReceiptDetailPayload {
   productId: number;
   locationId?: number;
@@ -37,16 +49,34 @@ export interface ReceiptDetailPayload {
   serialNumber?: string;
 }
 
+// --- Receipt payload ---
 export interface InventoryReceiptPayload {
   supplierId: number;
   notes?: string;
   details: ReceiptDetailPayload[];
 }
 
+// --- Pagination params ---
+export interface FetchReceiptsParams {
+  keyword?: string;
+  status?: string;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDir?: string;
+}
+
+// --- Receipt state ---
 export interface ReceiptState {
   receipts: InventoryReceipt[];
   loading: boolean;
   error: string | null;
+  meta: Meta | null;
+
+  // Mobile infinite scroll state
+  mobilePage: number;
+  mobileHasMore: boolean;
+  mobileLoading: boolean;
 }
 
 export interface CountAndLabelPayload {

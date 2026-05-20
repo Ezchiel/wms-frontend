@@ -4,15 +4,24 @@ import { fetchAllPartners } from '../partners/partnerThunks';
 import { fetchAllProducts } from '../products/productThunks';
 import { fetchAvailableLocations } from '../storageLocation/storageLocationThunks';
 import { confirmReceipt, createReceipt, fetchReceipts } from './inventoryReceiptThunks';
-import type { InventoryReceipt, InventoryReceiptPayload } from './inventoryReceiptTypes';
+import {
+  TAB_STATUS_MAP,
+  type InventoryReceipt,
+  type InventoryReceiptPayload,
+} from './inventoryReceiptTypes';
 
 export const useInventoryReceipt = () => {
   const dispatch = useAppDispatch();
 
   // Redux Selectors
-  const { receipts, loading } = useAppSelector((state) => state.inventoryReceipts);
+  const { receipts, loading, meta } = useAppSelector((state) => state.inventoryReceipts);
   const { products } = useAppSelector((state) => state.products);
   const { partners } = useAppSelector((state) => state.partners);
+
+  // State for search and pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   // Local State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,13 +31,33 @@ export const useInventoryReceipt = () => {
 
   // Fetch initial data
   useEffect(() => {
-    dispatch(fetchReceipts());
+    dispatch(
+      fetchReceipts({
+        keyword: searchKeyword,
+        page: currentPage,
+        size: pageSize,
+        status: TAB_STATUS_MAP[tabIndex],
+      })
+    );
     dispatch(fetchAllProducts());
     dispatch(fetchAllPartners());
     dispatch(fetchAvailableLocations());
-  }, [dispatch]);
+  }, [currentPage, dispatch, pageSize, searchKeyword, tabIndex]);
 
-  // Handlers
+  // Tab change handler
+  const handleTabChange = (index: number) => {
+    setTabIndex(index);
+    setCurrentPage(1);
+    setSearchKeyword('');
+  };
+
+  // Search handler
+  const handleSearch = (keyword: string) => {
+    setCurrentPage(1);
+    setSearchKeyword(keyword);
+  };
+
+  // Create receipt handler
   const handleCreateReceipt = async (data: InventoryReceiptPayload) => {
     try {
       await dispatch(createReceipt(data)).unwrap();
@@ -38,6 +67,7 @@ export const useInventoryReceipt = () => {
     }
   };
 
+  // Confirm receipt handler
   const handleConfirm = (id: number) => {
     if (
       window.confirm(
@@ -50,29 +80,23 @@ export const useInventoryReceipt = () => {
     }
   };
 
-  // Derived Data
-  const filteredData = receipts.filter((item: InventoryReceipt) => {
-    if (tabIndex === 0) return true;
-    if (tabIndex === 1) return item.status === 'EXPECTED';
-    if (tabIndex === 2) return item.status === 'RECEIVING';
-    if (tabIndex === 3) return item.status === 'PUTAWAY_PENDING';
-    return true;
-  });
-
   return {
     state: {
       loading,
+      meta,
       products,
       partners,
       isModalOpen,
       tabIndex,
       selectedReceipt,
       isDetailModalOpen,
-      filteredData,
+      receipts,
     },
     actions: {
+      setCurrentPage,
+      handleSearch,
+      handleTabChange,
       setIsModalOpen,
-      setTabIndex,
       setSelectedReceipt,
       setIsDetailModalOpen,
       handleCreateReceipt,

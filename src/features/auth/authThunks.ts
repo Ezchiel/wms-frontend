@@ -16,6 +16,8 @@ export const loginUser = createAsyncThunk<
 
     if (responseBody.success) {
       localStorage.setItem('token', responseBody.data.token);
+      localStorage.setItem('username', responseBody.data.username);
+      localStorage.setItem('role', responseBody.data.role);
     }
 
     return response.data;
@@ -26,17 +28,3 @@ export const loginUser = createAsyncThunk<
     return rejectWithValue('Lỗi kết nối đến máy chủ!');
   }
 });
-
-export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      await axiosClient.post<ApiResponse<string>>('/auth/logout');
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        return rejectWithValue(error.response.data?.message || 'Đăng xuất thất bại!');
-      }
-      return rejectWithValue('Lỗi kết nối đến máy chủ!');
-    }
-  }
-);

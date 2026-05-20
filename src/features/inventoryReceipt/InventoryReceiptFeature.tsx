@@ -6,6 +6,7 @@ import FilterInventoryReceipt from './components/FilterInventoryReceipt';
 import InventoryReceiptTable from './components/InventoryReceiptTable';
 import ReceiptDetailModal from './components/ReceiptDetailModal';
 import { useInventoryReceipt } from './useInventoryReceipt';
+import Pagination from '../../components/Pagination';
 
 export const InventoryReceiptFeature: React.FC = () => {
   const { state, actions } = useInventoryReceipt();
@@ -31,31 +32,38 @@ export const InventoryReceiptFeature: React.FC = () => {
         <TabNavigation
           tabs={['All Receipts', 'Expected', 'Receiving', 'Putaway']}
           activeTabIndex={state.tabIndex}
-          onTabChange={actions.setTabIndex}
+          onTabChange={actions.handleTabChange}
           getTabColor={getTabColor}
         />
 
         <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)] overflow-x-auto">
-          <FilterInventoryReceipt onActionClick={() => actions.setIsModalOpen(true)} />
+          <FilterInventoryReceipt
+            onActionClick={() => actions.setIsModalOpen(true)}
+            onSearch={actions.handleSearch}
+          />
 
           {state.loading ? (
             <div className="py-10 text-center text-wms-muted text-[13px]">Loading data...</div>
           ) : (
-            <InventoryReceiptTable
-              heads={[
-                'Receipt Code',
-                'Supplier',
-                'Date Created',
-                'Total Amount',
-                'Status',
-                'Actions',
-              ]}
-              data={state.filteredData}
-              onViewDetail={(receipt) => {
-                actions.setSelectedReceipt(receipt);
-                actions.setIsDetailModalOpen(true);
-              }}
-            />
+            <>
+              <InventoryReceiptTable
+                heads={[
+                  'Receipt Code',
+                  'Supplier',
+                  'Date Created',
+                  'Total Amount',
+                  'Status',
+                  'Actions',
+                ]}
+                data={state.receipts}
+                onViewDetail={(receipt) => {
+                  actions.setSelectedReceipt(receipt);
+                  actions.setIsDetailModalOpen(true);
+                }}
+              />
+
+              <Pagination meta={state.meta} onPageChange={actions.setCurrentPage} />
+            </>
           )}
         </div>
       </div>

@@ -1,14 +1,14 @@
 import type React from 'react';
 import { useState } from 'react';
 import { useAppDispatch } from '../../app/hooks';
-import { logoutUser } from '../../features/auth/authThunks';
+import { logout } from '../../features/auth/authSlice';
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
-    dispatch(logoutUser());
+    dispatch(logout());
     setIsOpen(false);
   };
 

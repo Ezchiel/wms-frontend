@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { clearError, clearSuggestion } from './putawaySlice';
+import { clearSuggestion } from './putawaySlice';
 import { confirmPutaway, fetchPutawaySuggestion } from './putawayThunks';
 
 type Step = 'scan_lpn' | 'show_guidance' | 'scan_shelf' | 'success';
@@ -28,18 +28,20 @@ export const usePutaway = () => {
     if (step === 'scan_shelf') shelfInputRef.current?.focus();
   }, [step]);
 
-  const handleScanLpn = useCallback(async () => {
-    const code = lpnInput.trim();
-    if (!code) return;
+  const handleScanLpn = useCallback(
+    async (explicitLpn?: string) => {
+      const codeToScan = explicitLpn || lpnInput;
 
-    dispatch(clearError());
+      if (!codeToScan) return;
 
-    const result = await dispatch(fetchPutawaySuggestion(code));
+      const result = await dispatch(fetchPutawaySuggestion(codeToScan));
 
-    if (fetchPutawaySuggestion.fulfilled.match(result)) {
-      setStep('show_guidance');
-    }
-  }, [lpnInput, dispatch]);
+      if (fetchPutawaySuggestion.fulfilled.match(result)) {
+        setStep('show_guidance');
+      }
+    },
+    [lpnInput, dispatch]
+  );
 
   const handleProceedToScan = useCallback(() => {
     setShelfInput('');
@@ -49,16 +51,19 @@ export const usePutaway = () => {
   }, []);
 
   const handleScanShelf = useCallback(async () => {
-    const code = shelfInput.trim();
-    if (!code || !suggestion) return;
+    // 1. Kiểm tra trạng thái
+    if (confirming || !suggestion) return;
 
-    if (code !== suggestion.suggestedLocationCode) {
-      setShelfError(`Mã kệ không khớp. Vui lòng quét đúng kệ: ${suggestion.suggestedLocationCode}`);
-      setShelfInput('');
+    // 2. Lấy giá trị input (trim để tránh lỗi khoảng trắng)
+    const input = shelfInput.trim().toUpperCase();
+    const target = suggestion.suggestedLocationCode.toUpperCase();
+
+    if (input !== target) {
+      setShelfError(`Mã kệ không khớp! Yêu cầu: ${target}`);
       return;
     }
 
-    setShelfError(null);
+    // 3. Gọi API xác nhận
     const result = await dispatch(
       confirmPutaway({
         lpnCode: suggestion.lpnCode,
@@ -66,16 +71,13 @@ export const usePutaway = () => {
       })
     );
 
+    // 4. Xử lý kết quả
     if (confirmPutaway.fulfilled.match(result)) {
-      setSuccessData({
-        lpnCode: suggestion.lpnCode,
-        productName: suggestion.productName,
-        locationCode: suggestion.suggestedLocationCode,
-      });
-      setCompletedCount((c) => c + 1);
+      // Chuyển sang step thành công
       setStep('success');
+      // ... các logic setSuccessData khác
     }
-  }, [shelfInput, suggestion, dispatch]);
+  }, [shelfInput, suggestion, confirming, dispatch]);
 
   const handleReset = useCallback(() => {
     dispatch(clearSuggestion());
@@ -114,6 +116,7 @@ export const usePutaway = () => {
     actions: {
       setLpnInput,
       setShelfInput,
+      setCompletedCount,
       handleScanLpn,
       handleProceedToScan,
       handleScanShelf,
