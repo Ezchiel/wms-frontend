@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Khai báo nhóm màu wms */
+  /* System colors */
   --color-wms-dark: #1e2436;
   --color-wms-card: rgba(33, 40, 60, 0.85);
   --color-wms-input: #323d5a;
@@ -15,6 +15,12 @@
 
   /* Đặt Inter làm font mặc định cho sans */
   --font-sans: 'Inter', sans-serif;
+
+  /* Inventory check feature */
+  --color-brand-primary: #0058be;
+  --color-brand-light: #e6f0ff;
+  --color-brand-outline: #c2c6d6;
+  --color-brand-bg: #f9f9ff;
 }
 
 @media print {
