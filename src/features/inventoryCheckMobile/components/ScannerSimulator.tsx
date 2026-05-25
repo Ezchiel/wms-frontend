@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { MOCK_PRODUCTS, type Product } from '../inventoryCheckMobileTypes';
+import { type Product } from '../inventoryCheckMobileTypes';
+import { ScanQrCode, X } from 'lucide-react';
 
 interface ScannerSimulatorProps {
   onScan: (sku: string) => void;
@@ -11,12 +12,6 @@ export default function ScannerSimulator({ onScan, onClose, allowedZone }: Scann
   const [successSku, setSuccessSku] = useState<string | null>(null);
   const [laserPosition, setLaserPosition] = useState(10);
   const [direction, setDirection] = useState(1);
-
-  // Filter products that belong to the allowed zone if any
-  const availableProducts = MOCK_PRODUCTS.filter((p) => {
-    if (!allowedZone) return true;
-    return p.zone === allowedZone;
-  });
 
   // Animated laser line effect
   useEffect(() => {
@@ -38,7 +33,16 @@ export default function ScannerSimulator({ onScan, onClose, allowedZone }: Scann
   // Audio web api beep effect helper
   const playBeep = () => {
     try {
-      const audioCtx = new window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+
+      if (!AudioContextClass) {
+        console.warn('Browser does not support AudioContext');
+        return;
+      }
+
+      const audioCtx = new AudioContextClass();
       const oscillator = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
 
@@ -52,7 +56,8 @@ export default function ScannerSimulator({ onScan, onClose, allowedZone }: Scann
       oscillator.start();
       setTimeout(() => {
         oscillator.stop();
-        audioCtx.close();
+        // Clean up
+        audioCtx.close().catch(() => {});
       }, 100);
     } catch (e) {
       console.warn('Audio play failed', e);
@@ -77,7 +82,7 @@ export default function ScannerSimulator({ onScan, onClose, allowedZone }: Scann
           className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/35 active:scale-90 transition-transform"
           id="close-scanner-btn"
         >
-          <span className="material-symbols-outlined">close</span>
+          <X />
         </button>
       </div>
 
@@ -105,64 +110,13 @@ export default function ScannerSimulator({ onScan, onClose, allowedZone }: Scann
           </div>
         ) : (
           <div className="flex flex-col items-center text-center p-4">
-            <span className="material-symbols-outlined text-4xl text-zinc-400 animate-pulse">
-              qr_code_scanner
-            </span>
-            <p className="mt-2 text-sm text-zinc-300 font-medium">Đặt mã vạch vào khung hình</p>
-            <p className="text-xs text-zinc-500 mt-1">Đang giả lập camera quét...</p>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-6 text-center max-w-sm">
-        <h3 className="text-base font-semibold">Giả lập máy quét Barcode</h3>
-        <p className="text-xs text-zinc-400 mt-1">
-          Tại thiết bị di động, camera sẽ quét trực tiếp. Ở đây bạn có thể nhấn chọn một sản phẩm
-          bên dưới để giả lập hành động quét thành công:
-        </p>
-
-        {allowedZone && (
-          <div className="mt-2 text-xs text-amber-300 bg-amber-500/10 px-3 py-1 rounded inline-block">
-            Lọc theo: {allowedZone}
-          </div>
-        )}
-      </div>
-
-      {/* Product List Selector Simulation */}
-      <div className="mt-4 w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col max-h-56">
-        <p className="text-xs text-zinc-400 font-semibold mb-2 uppercase tracking-wide">
-          Click để &quot;Quét&quot; các sản phẩm có sẵn:
-        </p>
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
-          {availableProducts.length === 0 ? (
-            <p className="text-xs text-zinc-500 text-center py-4">
-              Không có sản phẩm thích hợp trong Zone này.
+            <ScanQrCode size={50} />
+            <p className="mt-2 text-sm text-zinc-300 font-medium">
+              Place the barcode within the frame.
             </p>
-          ) : (
-            availableProducts.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => handleSimulateScan(p)}
-                disabled={successSku !== null}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700/50 hover:border-blue-500 transition-all text-left active:scale-[0.99]"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-2xl">📦</span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-white truncate">{p.name}</p>
-                    <p className="text-[10px] font-mono text-zinc-400">
-                      SKU: <span className="text-blue-300">{p.sku}</span> | Khay: {p.zone} -{' '}
-                      {p.rack}
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[10px] bg-blue-500/25 text-blue-300 px-2 py-0.5 rounded shrink-0 font-medium font-mono">
-                  Quét nhanh
-                </span>
-              </button>
-            ))
-          )}
-        </div>
+            <p className="text-xs text-zinc-500 mt-1">Simulating camera scanning...</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { QrCode, ClipboardList, History, LogOut, CheckCircle, Package, User } from 'lucide-react';
+import { QrCode, ClipboardList, History, Package, User } from 'lucide-react';
 import ScanTab from './components/ScanTab';
 import HistoryTab from './components/HistoryTab';
 import InventoryTab from './components/InventoryTab';

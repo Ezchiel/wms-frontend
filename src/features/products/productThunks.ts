@@ -88,3 +88,20 @@ export const deleteProduct = createAsyncThunk<number, number, { rejectValue: str
     }
   }
 );
+
+export const fetchProductByLpn = createAsyncThunk<Product, string, { rejectValue: string }>(
+  'products/fetchByLpn',
+  async (lpn, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.get<ApiResponse<Product>>(`/products/lpn/${lpn}`);
+      return response.data.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(
+          error.response.data?.message || 'Không tìm thấy sản phẩm với LPN này!'
+        );
+      }
+      return rejectWithValue('Lỗi kết nối máy chủ!');
+    }
+  }
+);

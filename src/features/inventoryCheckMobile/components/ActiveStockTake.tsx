@@ -108,31 +108,21 @@ export default function ActiveStockTake({
   };
 
   const handleFinalizeClick = () => {
-    // Check if there are uncounted items
-    const uncountedCount = items.filter((i) => i.actualQty === null).length;
+    // Check if all quantities have been entered
+    const uncounted = items.filter((item) => item.actualQty === null);
 
-    let confirmMsg =
-      'Bạn có chắc chắn muốn HOÀN THÀNH phiếu kiểm kê này?\nSau khi hoàn thành, số lượng sẽ được chốt báo cáo và không thể sửa đổi.';
-    if (uncountedCount > 0) {
-      confirmMsg = `⚠️ Có ${uncountedCount} sản phẩm CHƯA được đếm số lượng!\n\nNếu nhấn Đồng ý, các sản phẩm này sẽ được ghi nhận thực thực tế là 0 cái (hoặc xem như sai lệch lớn).\n\nBạn có muốn tiếp tục Hoàn Thành không?`;
+    if (uncounted.length > 0) {
+      if (!window.confirm(`Còn ${uncounted.length} mặt hàng chưa nhập số lượng. Vẫn tiếp tục?`)) {
+        return;
+      }
     }
 
-    if (confirm(confirmMsg)) {
-      // Set all null counted values to 0 before saving
-      const finalizedItems = items.map((item) => ({
-        ...item,
-        actualQty: item.actualQty === null ? 0 : item.actualQty,
-      }));
-
-      const finalizedSheet: StockTakeSheet = {
-        ...sheet,
-        items: finalizedItems,
-        status: 'completed',
-        completedAt: new Date().toISOString(),
-      };
-
-      onFinalize(finalizedSheet);
-    }
+    // Call callback props to send data to the API
+    onFinalize({
+      ...sheet,
+      items: items,
+      completedAt: new Date().toISOString(),
+    });
   };
 
   const handleSaveDraftClick = () => {
@@ -177,7 +167,7 @@ export default function ActiveStockTake({
   ).length;
 
   return (
-    <div className="bg-[#f9f9ff] min-h-screen flex flex-col font-sans">
+    <div className="bg-brand-bg min-h-screen flex flex-col font-sans">
       {/* Dynamic top bar header */}
       <header className="bg-white border-b border-slate-100 flex items-center justify-between px-4 py-3.5 sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-3">

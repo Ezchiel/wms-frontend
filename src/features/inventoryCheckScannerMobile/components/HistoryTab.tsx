@@ -10,6 +10,7 @@ import {
   User,
 } from 'lucide-react';
 import type { ScanHistory } from '../inventoryCheckScannerMobileTypes';
+import { toast } from 'react-toastify';
 
 interface HistoryTabProps {
   onRefreshProducts: () => void;
@@ -52,8 +53,16 @@ export default function HistoryTab({ onRefreshProducts }: HistoryTabProps) {
         fetchHistory();
         onRefreshProducts();
       }
-    } catch (e) {
-      alert('Đặt lại không thành công.');
+    } catch (error: unknown) {
+      let errorMessage = 'Không thể xóa lịch sử kiểm kê';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
+      toast.error(errorMessage);
     }
   };
 

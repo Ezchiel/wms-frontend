@@ -10,6 +10,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import type { Product } from '../inventoryCheckScannerMobileTypes';
+import { toast } from 'react-toastify';
 
 interface InventoryTabProps {
   products: Product[];
@@ -67,8 +68,16 @@ export default function InventoryTab({
         const err = await res.json();
         alert(err.error || 'Không thể khởi tạo mã sản phẩm này');
       }
-    } catch (e) {
-      alert('Lỗi kết nối máy chủ');
+    } catch (error: unknown) {
+      let errorMessage = 'Lỗi kết nối máy chủ';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -92,8 +101,16 @@ export default function InventoryTab({
       if (res.ok) {
         onRefreshProducts();
       }
-    } catch (err) {
-      alert('Không thể lưu thay đổi');
+    } catch (error: unknown) {
+      let errorMessage = 'Không thể lưu thay đổi';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
+      toast.error(errorMessage);
     }
   };
 

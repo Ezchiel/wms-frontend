@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AdminLayout from '../layouts/AdminLayout';
 import MobileLayout from '../layouts/MobileLayout';
 import {
+  InventoryCheckPage,
   InventoryReceiptPage,
   InventoryStockPage,
   PartnerPage,
@@ -11,9 +12,16 @@ import {
   UserPage,
 } from '../pages/admin/index.ts';
 import { LoginPage } from '../pages/auth';
-import { CountingAndLabelingPage, PutawayPage, Scan, TasksPage } from '../pages/mobile';
+import {
+  CountingAndLabelingPage,
+  InventoryCheckMobilePage,
+  PutawayPage,
+  Scan,
+  TasksPage,
+} from '../pages/mobile';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import PublicRoute from './PublicRoute.tsx';
+import InventoryCheckScannerMobileFeature from '../features/inventoryCheckScannerMobile/InventoryCheckScannerMobileFeature.tsx';
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +75,10 @@ export const router = createBrowserRouter([
             path: 'inventory-receipts',
             element: <InventoryReceiptPage />,
           },
+          {
+            path: 'inventory-checks',
+            element: <InventoryCheckPage />,
+          },
         ],
       },
 
@@ -94,6 +106,14 @@ export const router = createBrowserRouter([
           {
             path: 'put-away',
             element: <PutawayPage />,
+          },
+          {
+            path: 'inventory-check-mobile',
+            element: <InventoryCheckMobilePage />,
+          },
+          {
+            path: 'inventory-check-scanner-mobile',
+            element: <InventoryCheckScannerMobileFeature />,
           },
         ],
       },

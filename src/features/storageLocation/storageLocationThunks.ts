@@ -121,3 +121,23 @@ export const fetchAvailableLocations = createAsyncThunk<
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
 });
+
+export const fetchLocationByBarcode = createAsyncThunk<
+  StorageLocation,
+  string,
+  { rejectValue: string }
+>('storageLocations/fetchByBarcode', async (barcode, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.get<ApiResponse<StorageLocation>>(
+      `/locations/barcode/${barcode}`
+    );
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Không tìm thấy vị trí với Barcode này!'
+      );
+    }
+    return rejectWithValue('Lỗi kết nối máy chủ!');
+  }
+});

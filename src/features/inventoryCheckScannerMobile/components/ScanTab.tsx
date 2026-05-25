@@ -8,11 +8,11 @@ import {
   AlertTriangle,
   CheckCircle,
   Upload,
-  Image as ImageIcon,
   Sparkles,
   RefreshCw,
 } from 'lucide-react';
 import type { Product } from '../inventoryCheckScannerMobileTypes';
+import { toast } from 'react-toastify';
 
 interface ScanTabProps {
   products: Product[];
@@ -170,7 +170,16 @@ export default function ScanTab({
               'Không nhận dạng được mã vạch từ ảnh này. Vui lòng chọn ảnh chứa mã vạch rõ ràng.'
           );
         }
-      } catch (err: any) {
+      } catch (error: unknown) {
+        let errorMessage = 'Không thể upload được ảnh này';
+
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+
+        toast.error(errorMessage);
         setScanError('Lỗi kết nối AI Scanner. Hãy thử lại hoặc nhập mã thủ công.');
       } finally {
         setIsScanningImage(false);
@@ -274,8 +283,16 @@ export default function ScanTab({
           status: statusValue,
         });
       }, 1500);
-    } catch (err) {
-      alert('Đã xảy ra lỗi khi lưu kết quả kiểm kê.');
+    } catch (error: unknown) {
+      let errorMessage = 'Đã xảy ra lỗi khi lưu kết quả kiểm kê';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
+      toast.error(errorMessage);
       setConfirmStatus('idle');
     }
   };
@@ -338,8 +355,16 @@ export default function ScanTab({
         status: 'reported',
         note: noteText,
       });
-    } catch (err) {
-      alert('Lỗi khi gửi báo cáo.');
+    } catch (error: unknown) {
+      let errorMessage = 'Lỗi khi gửi báo cáo.';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
+      toast.error(errorMessage);
     }
   };
 
