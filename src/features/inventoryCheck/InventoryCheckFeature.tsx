@@ -3,8 +3,7 @@ import Pagination from '../../components/Pagination';
 import TabNavigation from '../../components/TabNavigation';
 import FilterInventoryCheck from './components/FilterInventoryCheck';
 import InventoryCheckTable from './components/InventoryCheckTable';
-import InventoryCheckDetailModal from './components/InventoryCheckDetailModal';
-import CreateCheckModal from './components/CreateCheckModal';
+import CheckDetailModal from './components/CheckDetailModal';
 import { useInventoryCheck } from './useInventoryCheck';
 
 const InventoryCheckFeature: React.FC = () => {
@@ -37,10 +36,7 @@ const InventoryCheckFeature: React.FC = () => {
 
         {/* Table section */}
         <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)] overflow-x-auto">
-          <FilterInventoryCheck
-            onSearch={actions.handleSearch}
-            onActionClick={actions.handleOpenCreateModal}
-          />
+          <FilterInventoryCheck onSearch={actions.handleSearch} />
 
           {state.loading ? (
             <div className="py-10 text-center text-wms-muted text-[13px]">Loading data...</div>
@@ -67,22 +63,17 @@ const InventoryCheckFeature: React.FC = () => {
         </div>
       </div>
 
-      {state.isDetailModalOpen && (
-        <InventoryCheckDetailModal
-          onClose={() => actions.setIsDetailModalOpen(false)}
-          onConfirmSuccess={actions.handleConfirmSuccess}
-        />
-      )}
-
-      {state.isModalOpen && (
-        <CreateCheckModal
-          onClose={() => actions.setIsModalOpen(false)}
-          onSuccess={actions.handleCreateSuccess}
-        />
-      )}
+      <CheckDetailModal
+        isOpen={state.isDetailModalOpen}
+        check={state.selectedCheck}
+        onClose={() => {
+          actions.setIsDetailModalOpen(false);
+          actions.setSelectedCheck(null);
+        }}
+        onConfirm={actions.handleConfirm}
+      />
     </div>
   );
 };
 
 export default InventoryCheckFeature;
-

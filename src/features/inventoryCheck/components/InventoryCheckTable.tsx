@@ -10,15 +10,15 @@ interface Props {
 const STATUS_CONFIG: Record<CheckStatus, { label: string; className: string }> = {
   PENDING: {
     label: 'Pending',
-    className: 'bg-amber-50 text-amber-700 border-amber-200',
+    className: 'bg-yellow-100 text-yellow-700',
   },
   COMPLETED: {
     label: 'Completed',
-    className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    className: 'bg-blue-100 text-blue-700',
   },
   CANCELLED: {
     label: 'Cancelled',
-    className: 'bg-red-50 text-red-600 border-red-200',
+    className: 'bg-gray-100 text-gray-700',
   },
 };
 
@@ -62,15 +62,15 @@ const InventoryCheckTable: React.FC<Props> = ({ heads, data, onViewDetail }) => 
 
             return (
               <tr key={check.id} className="hover:bg-gray-50 transition-colors">
-                <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main font-semibold font-mono text-[13px]">
+                <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main font-medium">
                   {check.checkCode}
                 </td>
-                <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-muted text-[13px]">
+                <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
                   {formatDate(check.checkDate)}
                 </td>
                 <td className="py-4.5 px-3.75 border-b border-b-wms-border-color">
                   <span
-                    className={`inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-semibold border ${statusCfg.className}`}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusCfg.className} uppercase`}
                   >
                     {statusCfg.label}
                   </span>
@@ -88,13 +88,14 @@ const InventoryCheckTable: React.FC<Props> = ({ heads, data, onViewDetail }) => 
                     )}
                   </div>
                 </td>
-                <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-muted max-w-48 truncate">
+                <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main max-w-48 truncate">
                   {check.notes || '—'}
                 </td>
                 <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
                   <button
                     onClick={() => onViewDetail(check)}
                     className="mr-2 px-4 py-1 border border-wms-primary rounded-[7px] text-wms-primary hover:bg-wms-primary hover:text-white transition-all cursor-pointer"
+                    title="View detail"
                   >
                     Detail
                   </button>
@@ -109,4 +110,3 @@ const InventoryCheckTable: React.FC<Props> = ({ heads, data, onViewDetail }) => 
 };
 
 export default InventoryCheckTable;
-

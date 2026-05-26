@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { fetchInventoryChecks } from './inventoryCheckThunks';
-import { setSelectedCheck } from './inventoryCheckSlice';
+import { fetchInventoryChecks, confirmInventoryCheck } from './inventoryCheckThunks';
 import type { InventoryCheck, CheckStatus } from './inventoryCheckTypes';
 
 const TAB_STATUS_MAP: Record<number, CheckStatus | ''> = {
@@ -18,9 +17,9 @@ export const useInventoryCheck = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
+  const [selectedCheck, setSelectedCheck] = useState<InventoryCheck | null>(null);
 
   useEffect(() => {
     dispatch(
@@ -46,29 +45,21 @@ export const useInventoryCheck = () => {
     setSearchKeyword(keyword);
   };
 
-  const handleOpenCreateModal = () => {
-    setIsModalOpen(true);
-  };
-
   const handleOpenDetailModal = (check: InventoryCheck) => {
-    dispatch(setSelectedCheck(check));
+    setSelectedCheck(check);
     setIsDetailModalOpen(true);
   };
 
-  const handleCreateSuccess = () => {
-    setIsModalOpen(false);
-    setCurrentPage(1);
-    dispatch(
-      fetchInventoryChecks({
-        keyword: searchKeyword,
-        status: TAB_STATUS_MAP[tabIndex],
-        page: 1,
-        size: pageSize,
-        sortBy: 'id',
-        sortDir: 'desc',
-      })
-    );
+  const handleConfirm = async (id: number) => {
+    const result = await dispatch(confirmInventoryCheck(id));
+    if (confirmInventoryCheck.fulfilled.match(result)) {
+      // Update selectedCheck với data mới nhất từ server
+      setSelectedCheck(result.payload.data);
+      handleConfirmSuccess();
+    }
   };
+
+
 
   const handleConfirmSuccess = () => {
     dispatch(
@@ -89,22 +80,20 @@ export const useInventoryCheck = () => {
       loading,
       meta,
       tabIndex,
-      isModalOpen,
       isDetailModalOpen,
       currentPage,
+      selectedCheck,
     },
     actions: {
       setTabIndex,
       handleTabChange,
       setCurrentPage,
       handleSearch,
-      handleOpenCreateModal,
       handleOpenDetailModal,
-      setIsModalOpen,
       setIsDetailModalOpen,
-      handleCreateSuccess,
+      setSelectedCheck,
       handleConfirmSuccess,
+      handleConfirm,
     },
   };
 };
-

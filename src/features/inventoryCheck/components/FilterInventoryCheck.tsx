@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 
 interface FilterInventoryCheckProps {
   onSearch?: (keyword: string) => void;
-  onActionClick?: () => void;
 }
 
-const FilterInventoryCheck: React.FC<FilterInventoryCheckProps> = ({ onSearch, onActionClick }) => {
+const FilterInventoryCheck: React.FC<FilterInventoryCheckProps> = ({ onSearch }) => {
   const [keyword, setKeyword] = useState('');
 
   const handleSearchClick = () => {
@@ -36,14 +35,6 @@ const FilterInventoryCheck: React.FC<FilterInventoryCheckProps> = ({ onSearch, o
           Search
         </button>
       </div>
-
-      <button
-        onClick={onActionClick}
-        className="py-2.25 px-5 rounded-md text-[13px] font-medium cursor-pointer transition-all duration-300 bg-wms-primary border border-solid border-wms-primary text-white flex items-center gap-2"
-      >
-        <i className="fa-solid fa-plus"></i>
-        Add new check
-      </button>
     </div>
   );
 };
