@@ -1,3 +1,5 @@
+import type { Meta } from '../../types/api.types';
+
 export type CheckStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED';
 
 export interface CheckDetail {
@@ -42,6 +44,7 @@ export interface InventoryCheckState {
   loading: boolean;
   actionLoading: boolean;
   error: string | null;
+  meta: Meta | null;
 }
 
 export interface InventoryCheckFilters {
@@ -52,3 +55,4 @@ export interface InventoryCheckFilters {
   sortBy: string;
   sortDir: string;
 }
+

@@ -12,6 +12,7 @@ const initialState: InventoryCheckState = {
   loading: false,
   actionLoading: false,
   error: null,
+  meta: null,
 };
 
 const inventoryCheckSlice = createSlice({
@@ -38,6 +39,7 @@ const inventoryCheckSlice = createSlice({
       .addCase(fetchInventoryChecks.fulfilled, (state, action) => {
         state.loading = false;
         state.checks = action.payload.data;
+        state.meta = action.payload.meta;
       })
       .addCase(fetchInventoryChecks.rejected, (state, action) => {
         state.loading = false;
