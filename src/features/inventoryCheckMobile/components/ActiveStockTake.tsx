@@ -1,493 +1,499 @@
 import { useState, useRef } from 'react';
-import {
-  type StockTakeSheet,
-  type StockTakeItem,
-  MOCK_PRODUCTS,
-} from '../inventoryCheckMobileTypes';
+import type { Product } from '../../products/productTypes';
+import type { StorageLocation } from '../../storageLocation/storageLocationTypes';
+import type { InventoryStock } from '../../inventoryStock/inventoryStockTypes';
 import ScannerSimulator from './ScannerSimulator';
+import { ArrowLeft, ChevronLeft, CircleCheckBig, CirclePlus, Delete, ListFilter, ScanQrCode, SquareParkingOff, X } from 'lucide-react';
 
-interface ActiveStockTakeProps {
-  sheet: StockTakeSheet;
-  onSaveDraft: (updatedSheet: StockTakeSheet) => void;
-  onFinalize: (finalizedSheet: StockTakeSheet) => void;
-  onCancel: () => void;
+// ─── Public types ──────────────────────────────────────────────────────────────
+
+/** One line in the counting session that the employee fills in */
+export interface CountingItem {
+  /** Unique key for UI rendering */
+  uiKey: string;
+  productId: number;
+  productName: string;
+  locationId: number;
+  batchNo: string;
+  systemQuantity: number;
+  actualQuantity: number | null;
+  reason: string;
 }
 
+interface ActiveStockTakeProps {
+  /** Stock items at the selected location (pre-loaded system quantities) */
+  stockItems: InventoryStock[];
+  /** Full product list (used for autocomplete when adding extra items) */
+  products: Product[];
+  /** The location being counted */
+  location: StorageLocation;
+  /** Notes entered during setup */
+  notes: string;
+  /** Called when the operator finalises the count – passes the completed list */
+  onFinalize: (items: CountingItem[], notes: string) => void;
+  /** Go back to location selection */
+  onBack: () => void;
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+let _keyCounter = 0;
+const nextKey = () => `item-${++_keyCounter}`;
+
+function buildFromStock(stocks: InventoryStock[]): CountingItem[] {
+  return stocks.map((s) => ({
+    uiKey: nextKey(),
+    productId: s.productId,
+    productName: s.productName,
+    locationId: s.locationId,
+    batchNo: s.batchNo ?? '',
+    systemQuantity: s.quantity,
+    actualQuantity: null,
+    reason: '',
+  }));
+}
+
+// ─── Component ─────────────────────────────────────────────────────────────────
+
 export default function ActiveStockTake({
-  sheet,
-  onSaveDraft,
+  stockItems,
+  products,
+  location,
+  notes,
   onFinalize,
-  onCancel,
+  onBack,
 }: ActiveStockTakeProps) {
-  const [items, setItems] = useState<StockTakeItem[]>([...sheet.items]);
+  const [items, setItems] = useState<CountingItem[]>(() => buildFromStock(stockItems));
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'matched' | 'discrepant'>('all');
-  const [searchSkuPattern, setSearchSkuPattern] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [showScanner, setShowScanner] = useState(false);
   const [scannedFeedback, setScannedFeedback] = useState<string | null>(null);
 
-  // References for items to allow scroll stimulation on scanning
-  const itemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  // Add-extra-product state
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [addSearch, setAddSearch] = useState('');
+  const [addBatchNo, setAddBatchNo] = useState('');
 
-  const handleQtyChange = (productId: string, newValue: number | null) => {
-    setItems((curr) =>
-      curr.map((item) => {
-        if (item.productId === productId) {
-          // Keep quantity at minimum 0 if not null
-          const val = newValue === null ? null : Math.max(0, newValue);
-          return { ...item, actualQty: val };
-        }
-        return item;
-      })
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // ── Quantity adjustments ──────────────────────────────────────────────────
+
+  const setQty = (uiKey: string, val: number | null) => {
+    setItems((prev) =>
+      prev.map((it) =>
+        it.uiKey === uiKey
+          ? { ...it, actualQuantity: val === null ? null : Math.max(0, val) }
+          : it
+      )
     );
   };
 
-  const handleShortcutAdjust = (productId: string, increment: number) => {
-    setItems((curr) =>
-      curr.map((item) => {
-        if (item.productId === productId) {
-          const currentVal = item.actualQty ?? 0;
-          const val = Math.max(0, currentVal + increment);
-          return { ...item, actualQty: val };
-        }
-        return item;
-      })
+  const adjustQty = (uiKey: string, delta: number) => {
+    setItems((prev) =>
+      prev.map((it) =>
+        it.uiKey === uiKey
+          ? { ...it, actualQuantity: Math.max(0, (it.actualQuantity ?? 0) + delta) }
+          : it
+      )
     );
   };
 
-  const handleQuickMarkMatch = (productId: string) => {
-    setItems((curr) =>
-      curr.map((item) => {
-        if (item.productId === productId) {
-          return { ...item, actualQty: item.expectedQty };
-        }
-        return item;
-      })
+  const setReason = (uiKey: string, reason: string) => {
+    setItems((prev) => prev.map((it) => (it.uiKey === uiKey ? { ...it, reason } : it)));
+  };
+
+  const quickMatch = (uiKey: string) => {
+    setItems((prev) =>
+      prev.map((it) =>
+        it.uiKey === uiKey ? { ...it, actualQuantity: it.systemQuantity } : it
+      )
     );
   };
 
-  const handleQuickSetZero = (productId: string) => {
-    setItems((curr) =>
-      curr.map((item) => {
-        if (item.productId === productId) {
-          return { ...item, actualQty: 0 };
-        }
-        return item;
-      })
-    );
+  const quickZero = (uiKey: string) => {
+    setItems((prev) => prev.map((it) => (it.uiKey === uiKey ? { ...it, actualQuantity: 0 } : it)));
   };
 
-  // Helper scan barcode trigger
-  const handleScannerScan = (scannedSku: string) => {
-    // Search item in active sheet matching the scanned sku
-    const itemIdx = items.findIndex((i) => i.sku.toLowerCase() === scannedSku.toLowerCase());
-    if (itemIdx !== -1) {
-      const targetItem = items[itemIdx];
-      // Auto increment count by 1 or set to 1 if null
-      const current = targetItem.actualQty ?? 0;
-      handleQtyChange(targetItem.productId, current + 1);
+  // ── Scanner ───────────────────────────────────────────────────────────────
 
-      setScannedFeedback(`Đã quét SKU: ${targetItem.sku} (+1)`);
+  const handleScannerScan = (scannedText: string) => {
+    // Match against productName or batchNo for simplicity
+    const idx = items.findIndex(
+      (it) =>
+        it.productName.toLowerCase().includes(scannedText.toLowerCase()) ||
+        it.batchNo.toLowerCase() === scannedText.toLowerCase()
+    );
+    if (idx !== -1) {
+      const target = items[idx];
+      adjustQty(target.uiKey, 1);
+      setScannedFeedback(`Đã quét: ${target.productName} (+1)`);
       setShowScanner(false);
-
-      // Scroll to that element smoothly
       setTimeout(() => {
-        itemRefs.current[targetItem.productId]?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-
-        // Remove feedback after a few seconds
+        itemRefs.current[target.uiKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => setScannedFeedback(null), 3000);
       }, 300);
     } else {
-      alert(
-        `Sản phẩm với SKU [${scannedSku}] không tồn tại trong danh sách kiểm kê của phiếu này.`
-      );
+      alert(`Không tìm thấy sản phẩm khớp với mã: ${scannedText}`);
       setShowScanner(false);
     }
   };
 
+  // ── Add extra product ─────────────────────────────────────────────────────
+
+  const filteredForAdd = addSearch
+    ? products
+      .filter(
+        (p) =>
+          !items.some((it) => it.productId === p.id && it.batchNo === addBatchNo) &&
+          (p.productName.toLowerCase().includes(addSearch.toLowerCase()) ||
+            p.productCode?.toLowerCase().includes(addSearch.toLowerCase()))
+      )
+      .slice(0, 8)
+    : [];
+
+  const addExtraProduct = (product: Product) => {
+    setItems((prev) => [
+      ...prev,
+      {
+        uiKey: nextKey(),
+        productId: product.id,
+        productName: product.productName,
+        locationId: location.id,
+        batchNo: addBatchNo,
+        systemQuantity: 0,
+        actualQuantity: null,
+        reason: '',
+      },
+    ]);
+    setAddSearch('');
+    setAddBatchNo('');
+    setShowAddProduct(false);
+  };
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+
   const handleFinalizeClick = () => {
-    // Check if all quantities have been entered
-    const uncounted = items.filter((item) => item.actualQty === null);
-
+    const uncounted = items.filter((it) => it.actualQuantity === null);
     if (uncounted.length > 0) {
-      if (!window.confirm(`Còn ${uncounted.length} mặt hàng chưa nhập số lượng. Vẫn tiếp tục?`)) {
+      if (!window.confirm(`Còn ${uncounted.length} mặt hàng chưa nhập số lượng. Vẫn tiếp tục?`))
         return;
-      }
     }
-
-    // Call callback props to send data to the API
-    onFinalize({
-      ...sheet,
-      items: items,
-      completedAt: new Date().toISOString(),
-    });
+    onFinalize(items, notes);
   };
 
-  const handleSaveDraftClick = () => {
-    const updatedSheet: StockTakeSheet = {
-      ...sheet,
-      items,
-      status: 'in_progress',
-    };
-    onSaveDraft(updatedSheet);
-  };
+  // ── Filtering ─────────────────────────────────────────────────────────────
 
-  // Filtering logic
-  const filteredItems = items.filter((item) => {
-    // Tab status checks:
-    const isPending = item.actualQty === null;
-    const isMatched = item.actualQty !== null && item.actualQty === item.expectedQty;
-    const isDiscrepant = item.actualQty !== null && item.actualQty !== item.expectedQty;
+  const visibleItems = items.filter((it) => {
+    const isPending = it.actualQuantity === null;
+    const isMatched = it.actualQuantity !== null && it.actualQuantity === it.systemQuantity;
+    const isDiscrepant = it.actualQuantity !== null && it.actualQuantity !== it.systemQuantity;
 
-    const matchesTab =
+    const tabOk =
       activeTab === 'all' ||
       (activeTab === 'pending' && isPending) ||
       (activeTab === 'matched' && isMatched) ||
       (activeTab === 'discrepant' && isDiscrepant);
 
-    // Search bar check:
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchSkuPattern.toLowerCase()) ||
-      item.sku.toLowerCase().includes(searchSkuPattern.toLowerCase()) ||
-      item.shelf.toLowerCase().includes(searchSkuPattern.toLowerCase());
+    const searchOk =
+      !searchTerm ||
+      it.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      it.batchNo.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesTab && matchesSearch;
+    return tabOk && searchOk;
   });
 
-  // Calculate quick stats for active sheet view
   const totalCount = items.length;
-  const pendingCount = items.filter((i) => i.actualQty === null).length;
+  const pendingCount = items.filter((i) => i.actualQuantity === null).length;
   const matchedCount = items.filter(
-    (i) => i.actualQty !== null && i.actualQty === i.expectedQty
+    (i) => i.actualQuantity !== null && i.actualQuantity === i.systemQuantity
   ).length;
   const discrepantCount = items.filter(
-    (i) => i.actualQty !== null && i.actualQty !== i.expectedQty
+    (i) => i.actualQuantity !== null && i.actualQuantity !== i.systemQuantity
   ).length;
 
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
-    <div className="bg-brand-bg min-h-screen flex flex-col font-sans">
-      {/* Dynamic top bar header */}
+    <div className="bg-slate-50 min-h-screen flex flex-col font-sans">
+      {/* ── Sticky Header ── */}
       <header className="bg-white border-b border-slate-100 flex items-center justify-between px-4 py-3.5 sticky top-0 z-40 shadow-xs">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={handleSaveDraftClick} // saving draft on back button
-            className="transition-colors duration-200 active:opacity-75 p-1.5 rounded-full hover:bg-slate-50 border border-slate-100/60"
-            title="Lưu nháp và quay lại"
+            onClick={onBack}
+            className="transition-colors active:opacity-75 p-1.5"
             id="active-back-btn"
           >
-            <span className="material-symbols-outlined text-blue-600 block">arrow_back</span>
+            <ChevronLeft />
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-sans antialiased font-extrabold text-sm text-slate-800">
-                {sheet.code}
+              <h1 className="font-extrabold text-sm text-slate-800">
+                {location.zone} – {location.rack} – {location.shelf}
               </h1>
-              <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.2 rounded">
-                Đang kiểm kho
+              <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.5 rounded">
+                Đang kiểm
               </span>
             </div>
             <p className="text-[10px] text-slate-400 font-medium">
-              Vị trí: {sheet.zone || 'Nhiều nơi'} {sheet.rack ? `• ${sheet.rack}` : ''}
+              Mã vị trí: {location.barcode}
             </p>
           </div>
         </div>
 
-        {/* Scan Barcode overlay trigger button */}
         <button
           onClick={() => setShowScanner(true)}
-          className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 transition-all flex items-center gap-1.5"
+          className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-md transition-all flex items-center gap-1.5"
           id="scanner-active-trigger-btn"
         >
-          <span className="material-symbols-outlined text-sm font-bold block">camera_alt</span>
+          <ScanQrCode />
           <span>Quét kiểm</span>
         </button>
       </header>
 
-      {/* Main interactive items container */}
+      {/* ── Main ── */}
       <main className="flex-1 max-w-md mx-auto w-full px-4 py-4 space-y-4 pb-40">
-        {/* Scanned alert banner notification */}
+        {/* Scanned feedback banner */}
         {scannedFeedback && (
           <div className="p-3 bg-emerald-500/20 border border-emerald-500/30 text-emerald-800 rounded-xl text-xs font-bold text-center animate-bounce flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-sm">check_circle</span>
+            <CircleCheckBig size={15} />
             <span>{scannedFeedback}</span>
           </div>
         )}
 
-        {/* Status filters scroll row */}
+        {/* Tab filter strip */}
         <div className="grid grid-cols-4 gap-1.5 p-1 bg-slate-100 rounded-xl">
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`py-2 text-[10px] font-extrabold rounded-lg text-center transition-all ${
-              activeTab === 'all'
-                ? 'bg-white text-slate-800 shadow-xs'
-                : 'text-slate-500 hover:text-slate-800'
-            }`}
-            id="active-tab-all"
-          >
-            Tất cả ({totalCount})
-          </button>
-          <button
-            onClick={() => setActiveTab('pending')}
-            className={`py-2 text-[10px] font-extrabold rounded-lg text-center transition-all ${
-              activeTab === 'pending'
-                ? 'bg-white text-teal-700 shadow-xs'
-                : 'text-slate-500 hover:text-teal-700'
-            }`}
-            id="active-tab-pending"
-          >
-            Chưa đếm ({pendingCount})
-          </button>
-          <button
-            onClick={() => setActiveTab('matched')}
-            className={`py-2 text-[10px] font-extrabold rounded-lg text-center transition-all ${
-              activeTab === 'matched'
-                ? 'bg-white text-emerald-700 shadow-xs'
-                : 'text-slate-500 hover:text-emerald-700'
-            }`}
-            id="active-tab-matched"
-          >
-            Đúng khớp ({matchedCount})
-          </button>
-          <button
-            onClick={() => setActiveTab('discrepant')}
-            className={`py-2 text-[10px] font-extrabold rounded-lg text-center transition-all ${
-              activeTab === 'discrepant'
-                ? 'bg-white text-rose-700 shadow-xs'
-                : 'text-slate-500 hover:text-rose-700'
-            }`}
-            id="active-tab-discrepant"
-          >
-            Lệch ({discrepantCount})
-          </button>
+          {[
+            { key: 'all', label: `Tất cả (${totalCount})`, color: 'text-slate-800' },
+            { key: 'pending', label: `Chưa (${pendingCount})`, color: 'text-teal-700' },
+            { key: 'matched', label: `Khớp (${matchedCount})`, color: 'text-emerald-700' },
+            { key: 'discrepant', label: `Lệch (${discrepantCount})`, color: 'text-rose-700' },
+          ].map(({ key, label, color }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key as typeof activeTab)}
+              className={`py-2 text-[10px] font-extrabold rounded-lg text-center transition-all ${activeTab === key ? `bg-white ${color} shadow-xs` : 'text-slate-500 hover:text-slate-700'
+                }`}
+              id={`active-tab-${key}`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
-        {/* Filter lookup input */}
+        {/* Search filter */}
         <div className="relative">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-            filter_alt
-          </span>
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <ListFilter size={15} />
+          </div>
           <input
             type="text"
-            value={searchSkuPattern}
-            onChange={(e) => setSearchSkuPattern(e.target.value)}
-            className="w-full bg-white border border-slate-100 rounded-xl pl-9 pr-4 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-100 placeholder-slate-400"
-            placeholder="Lọc nhanh danh sách (Tên, SKU, Khay kệ)..."
+            value={searchTerm}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+            className="w-full bg-white border border-slate-100 rounded-xl pl-8 pr-4 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-100 placeholder-slate-400"
+            placeholder="Lọc nhanh (Tên sản phẩm, Số lô)..."
             id="local-filter-input"
           />
-          {searchSkuPattern && (
+          {searchTerm && (
             <button
-              onClick={() => setSearchSkuPattern('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
             >
-              <span className="material-symbols-outlined text-xs">close</span>
+              <Delete size={16} />
             </button>
           )}
         </div>
 
-        {/* List of active product items to execute check */}
+        {/* Items list */}
         <div className="space-y-3">
-          {filteredItems.length === 0 ? (
+          {visibleItems.length === 0 ? (
             <div className="p-8 text-center bg-white border border-slate-100 rounded-2xl">
-              <span className="material-symbols-outlined text-3xl text-slate-300">search_off</span>
-              <p className="text-xs text-slate-400 font-bold mt-1.5">Không khớp mặt hàng nào</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">
-                Vui lòng thay đổi tab hoặc nhập từ khóa.
-              </p>
+              <SquareParkingOff size={24} className='text-slate-400 mx-auto mb-2' />
+              <p className="text-xs text-slate-400 font-bold">Không có mặt hàng nào</p>
             </div>
           ) : (
-            filteredItems.map((item) => {
-              // Retrieve image thumbnail from main list
-              const actualProd = MOCK_PRODUCTS.find((p) => p.id === item.productId);
-              const imgUrl =
-                actualProd?.image ||
-                'https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=100';
-
-              const isPending = item.actualQty === null;
-              const isMatched = item.actualQty !== null && item.actualQty === item.expectedQty;
-              const diff = item.actualQty !== null ? item.actualQty - item.expectedQty : 0;
+            visibleItems.map((item) => {
+              const isPending = item.actualQuantity === null;
+              const isMatched =
+                item.actualQuantity !== null && item.actualQuantity === item.systemQuantity;
+              const diff = item.actualQuantity !== null ? item.actualQuantity - item.systemQuantity : 0;
 
               return (
                 <div
-                  key={item.productId}
+                  key={item.uiKey}
                   ref={(el) => {
-                    itemRefs.current[item.productId] = el;
+                    itemRefs.current[item.uiKey] = el;
                   }}
-                  className={`bg-white border rounded-2xl p-3.5 space-y-3.5 transition-all shadow-xs ${
-                    isPending
-                      ? 'border-slate-100'
-                      : isMatched
-                        ? 'border-emerald-200 bg-emerald-50/10'
-                        : 'border-rose-200 bg-rose-50/10'
-                  }`}
-                  id={`item-check-row-${item.sku}`}
+                  className={`bg-white border rounded-2xl p-3.5 space-y-3.5 transition-all shadow-xs ${isPending
+                    ? 'border-slate-100'
+                    : isMatched
+                      ? 'border-emerald-200 bg-emerald-50/10'
+                      : 'border-rose-200 bg-rose-50/10'
+                    }`}
+                  id={`item-check-row-${item.uiKey}`}
                 >
-                  {/* Top info block */}
+                  {/* Top info */}
                   <div className="flex items-start gap-3">
-                    <img
-                      src={imgUrl}
-                      alt={item.name}
-                      referrerPolicy="no-referrer"
-                      className="w-12 h-12 object-cover rounded-xl shrink-0 border border-slate-100"
-                    />
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-xs font-extrabold text-slate-800 leading-snug wrap-break-word">
-                        {item.name}
+                      <h4 className="text-xs font-extrabold text-slate-800 leading-snug break-words">
+                        {item.productName}
                       </h4>
-                      <p className="text-[10px] font-mono text-slate-400 mt-0.5">
-                        SKU: <span className="text-slate-600 font-extrabold">{item.sku}</span>
-                      </p>
-
-                      {/* Location metadata breadcrumb */}
-                      <div className="mt-1 text-[9px] text-slate-400 items-center gap-1 font-semibold bg-slate-50 px-2 py-0.5 rounded-md inline-flex border border-slate-100/50">
-                        <span className="material-symbols-outlined text-[10px] text-blue-500">
-                          grid_on
+                      {item.batchNo && (
+                        <p className="text-[10px] text-slate-400 mt-0.5">Lô: {item.batchNo}</p>
+                      )}
+                      {item.systemQuantity === 0 && (
+                        <span className="text-[9px] bg-purple-100 text-purple-700 font-bold px-1.5 py-0.5 rounded-md inline-block mt-1">
+                          Thêm ngoài danh sách
                         </span>
-                        <span>
-                          {item.zone} • {item.rack} • {item.shelf}
-                        </span>
-                      </div>
+                      )}
                     </div>
-
-                    {/* Quick status indicator chip */}
                     <div className="shrink-0">
                       {isPending ? (
                         <span className="text-[9px] bg-slate-100 text-slate-500 font-extrabold px-2 py-0.5 rounded-md">
-                          Chờ Đếm
+                          Chờ đếm
                         </span>
                       ) : isMatched ? (
-                        <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                        <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-md">
                           🟢 Khớp
                         </span>
                       ) : (
-                        <span className="text-[9px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                          🚨 Lệch {diff > 0 ? `+${diff}` : diff}
+                        <span className="text-[9px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-md">
+                          🚨 {diff > 0 ? `+${diff}` : diff}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Stock tracking comparison widgets */}
+                  {/* System vs actual comparison */}
                   <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs border border-slate-100/50 gap-4">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-slate-400 uppercase font-extrabold">
-                        Số Hệ Thống
+                    <div>
+                      <span className="text-[10px] text-slate-400 uppercase font-extrabold block">
+                        Số hệ thống
                       </span>
-                      <span className="font-extrabold text-slate-700 mt-0.5">
-                        {item.expectedQty}{' '}
-                        <span className="text-[10px] font-normal text-slate-400">{item.unit}</span>
+                      <span className="font-extrabold text-slate-700 mt-0.5 block">
+                        {item.systemQuantity}
                       </span>
                     </div>
-
-                    <div className="flex flex-col text-right">
-                      <span className="text-[10px] text-slate-400 uppercase font-extrabold">
-                        Sai lệch thực tế
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-400 uppercase font-extrabold block">
+                        Sai lệch
                       </span>
                       <span
-                        className={`font-mono font-black mt-0.5 ${isPending ? 'text-slate-400 font-normal italic text-[10px]' : isMatched ? 'text-emerald-600' : 'text-rose-600'}`}
+                        className={`font-mono font-black mt-0.5 block ${isPending
+                          ? 'text-slate-400 font-normal italic text-[10px]'
+                          : isMatched
+                            ? 'text-emerald-600'
+                            : 'text-rose-600'
+                          }`}
                       >
                         {isPending
                           ? 'Chưa rõ'
                           : diff === 0
                             ? 'Hoàn toàn khớp'
-                            : `${diff > 0 ? '+' : ''}${diff} ${item.unit}`}
+                            : `${diff > 0 ? '+' : ''}${diff}`}
                       </span>
                     </div>
                   </div>
 
-                  {/* Quantity Counting buttons row */}
+                  {/* Quantity row */}
                   <div className="flex items-center gap-2 pt-1">
-                    {/* Decrease decrementors */}
+                    {/* Decrement */}
                     <div className="flex gap-1 shrink-0">
                       <button
                         type="button"
-                        onClick={() => handleShortcutAdjust(item.productId, -10)}
+                        onClick={() => adjustQty(item.uiKey, -10)}
                         className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold active:scale-95 transition-all border border-slate-200/50"
-                        title="Bỏ 10"
                       >
                         -10
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleShortcutAdjust(item.productId, -1)}
+                        onClick={() => adjustQty(item.uiKey, -1)}
                         className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-black active:scale-90 transition-all border border-slate-200/50"
-                        title="Bỏ 1"
                       >
-                        -
+                        −
                       </button>
                     </div>
 
-                    {/* Central main state inputs */}
+                    {/* Input */}
                     <div className="flex-1 relative">
                       <input
                         type="number"
                         min="0"
-                        value={item.actualQty ?? ''}
+                        value={item.actualQuantity ?? ''}
                         onChange={(e) => {
-                          const val = e.target.value === '' ? null : parseInt(e.target.value, 10);
-                          handleQtyChange(item.productId, val);
+                          const v = e.target.value === '' ? null : parseInt(e.target.value, 10);
+                          setQty(item.uiKey, v);
                         }}
                         placeholder="Số lượng đếm"
                         className="w-full text-center bg-white border border-slate-200 py-2.5 rounded-xl text-sm font-black text-slate-800 outline-none focus:ring-1 focus:ring-blue-100"
-                        id={`quantity-input-${item.sku}`}
+                        id={`qty-input-${item.uiKey}`}
                       />
                       {!isPending && (
                         <button
                           type="button"
-                          onClick={() => handleQtyChange(item.productId, null)}
+                          onClick={() => setQty(item.uiKey, null)}
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
-                          title="Xóa kết quả đếm"
-                          id={`clear-item-${item.sku}`}
+                          id={`clear-item-${item.uiKey}`}
                         >
-                          <span className="material-symbols-outlined text-sm block">backspace</span>
+                          <Delete />
                         </button>
                       )}
                     </div>
 
-                    {/* Increase incrementors & smart buttons */}
+                    {/* Increment */}
                     <div className="flex gap-1 shrink-0">
                       <button
                         type="button"
-                        onClick={() => handleShortcutAdjust(item.productId, 1)}
-                        className="w-10 h-10 flex items-center justify-center bg-blue-50 hover:bg-md hover:bg-blue-100 text-blue-600 rounded-xl font-bold active:scale-90 transition-all border border-blue-100"
-                        title="Thêm 1"
+                        onClick={() => adjustQty(item.uiKey, 1)}
+                        className="w-10 h-10 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-bold active:scale-90 transition-all border border-blue-100"
                       >
                         +
                       </button>
-
                       <button
                         type="button"
-                        onClick={() => handleShortcutAdjust(item.productId, 10)}
+                        onClick={() => adjustQty(item.uiKey, 10)}
                         className="w-10 h-10 flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-extrabold active:scale-95 transition-all border border-blue-100"
-                        title="Thêm 10"
                       >
                         +10
                       </button>
                     </div>
                   </div>
 
-                  {/* Tiny Helper utilities under count input */}
+                  {/* Quick shortcuts */}
                   {isPending && (
                     <div className="flex gap-2 justify-end text-[10px]">
                       <button
                         type="button"
-                        onClick={() => handleQuickMarkMatch(item.productId)}
+                        onClick={() => quickMatch(item.uiKey)}
                         className="text-blue-600 hover:underline font-semibold"
-                        id={`quick-match-${item.sku}`}
+                        id={`quick-match-${item.uiKey}`}
                       >
-                        Khớp hệ thống ({item.expectedQty})
+                        Khớp hệ thống ({item.systemQuantity})
                       </button>
                       <span className="text-slate-300">|</span>
                       <button
                         type="button"
-                        onClick={() => handleQuickSetZero(item.productId)}
+                        onClick={() => quickZero(item.uiKey)}
                         className="text-amber-600 hover:underline font-semibold"
-                        id={`quick-zero-${item.sku}`}
+                        id={`quick-zero-${item.uiKey}`}
                       >
                         Báo hết hàng (0)
                       </button>
+                    </div>
+                  )}
+
+                  {/* Reason field – shown when discrepant */}
+                  {!isPending && !isMatched && (
+                    <div>
+                      <input
+                        type="text"
+                        value={item.reason}
+                        onChange={(e) => setReason(item.uiKey, e.target.value)}
+                        placeholder="Lý do lệch kho (tuỳ chọn)..."
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 outline-none focus:ring-1 focus:ring-blue-100 placeholder-slate-400"
+                        id={`reason-input-${item.uiKey}`}
+                      />
                     </div>
                   )}
                 </div>
@@ -495,40 +501,108 @@ export default function ActiveStockTake({
             })
           )}
         </div>
+
+        {/* Add extra product button */}
+        <button
+          onClick={() => setShowAddProduct(true)}
+          className="w-full flex items-center justify-center gap-2 py-3.5 bg-white border border-dashed border-blue-200 rounded-2xl text-blue-600 text-xs font-bold hover:bg-blue-50 transition-colors"
+          id="add-extra-product-btn"
+        >
+          <CirclePlus size={12} />
+          Thêm sản phẩm ngoài danh sách
+        </button>
       </main>
 
-      {/* Floating Action footer control bars */}
-      <footer className="fixed bottom-0 left-0 w-full z-30 bg-white/95 backdrop-blur-md border-t border-slate-100 px-4 pb-6 pt-3.5 shadow-[0_-4px_22px_rgba(0,0,0,0.04)]">
+      {/* ── Sticky Footer Actions ── */}
+      <footer className="w-full z-30 bg-white/95 backdrop-blur-md border-t border-slate-100 px-4 pb-6 pt-3.5 shadow-[0_-4px_22px_rgba(0,0,0,0.04)]">
         <div className="max-w-md mx-auto flex items-center gap-3">
-          {/* Draft Save button */}
           <button
-            onClick={handleSaveDraftClick}
+            onClick={onBack}
             className="flex-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 active:scale-95"
-            id="draft-save-btn"
+            id="draft-back-btn"
           >
-            <span className="material-symbols-outlined text-sm block">save_as</span>
-            <span>Lưu Tạm Nháp</span>
+            <ArrowLeft size={16} />
+            <span>Quay lại</span>
           </button>
-
-          {/* Complete checking button */}
           <button
             onClick={handleFinalizeClick}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 flex items-center justify-center gap-1.5 active:scale-95"
+            className="flex-2 min-w-0 bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3.5 px-6 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5 active:scale-95"
             id="finalize-sheet-btn"
           >
-            <span className="material-symbols-outlined text-sm block font-bold">check_circle</span>
-            <span>Chốt Phiếu Kiểm</span>
+            <CircleCheckBig size={16} />
+            <span>Nộp phiếu kiểm</span>
           </button>
         </div>
       </footer>
 
-      {/* Simulated Scanner camera overlay triggers */}
+      {/* ── Scanner Overlay ── */}
       {showScanner && (
-        <ScannerSimulator
-          onClose={() => setShowScanner(false)}
-          onScan={handleScannerScan}
-          allowedZone={sheet.zone !== 'Tất cả khu vực' ? sheet.zone : null}
-        />
+        <ScannerSimulator onClose={() => setShowScanner(false)} onScan={handleScannerScan} />
+      )}
+
+      {/* ── Add Extra Product Modal ── */}
+      {showAddProduct && (
+        <div className="fixed w-full mb-20 inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-extrabold text-sm text-slate-800">Thêm sản phẩm</h3>
+              <button
+                onClick={() => {
+                  setShowAddProduct(false);
+                  setAddSearch('');
+                  setAddBatchNo('');
+                }}
+                className="p-1.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200"
+                id="close-add-product-btn"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <input
+              type="text"
+              value={addSearch}
+              onChange={(e) => setAddSearch(e.target.value)}
+              placeholder="Tìm sản phẩm theo tên hoặc SKU..."
+              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
+              autoFocus
+              id="add-product-search-input"
+            />
+
+            <input
+              type="text"
+              value={addBatchNo}
+              onChange={(e) => setAddBatchNo(e.target.value)}
+              placeholder="Số lô (tuỳ chọn)"
+              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
+              id="add-product-batch-input"
+            />
+
+            <div className="space-y-1.5 max-h-52 overflow-y-auto">
+              {filteredForAdd.length > 0 ? (
+                filteredForAdd.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => addExtraProduct(p)}
+                    className="w-full flex flex-col items-start px-4 py-3 hover:bg-blue-50 rounded-xl text-left border border-slate-100 transition-colors"
+                    id={`add-product-option-${p.id}`}
+                  >
+                    <span className="text-xs font-bold text-slate-800">{p.productName}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">{p.productCode}</span>
+                  </button>
+                ))
+              ) : addSearch ? (
+                <div className="py-4 text-center text-xs text-slate-400">
+                  Không tìm thấy sản phẩm nào khớp
+                </div>
+              ) : (
+                <div className="py-4 text-center text-xs text-slate-400">
+                  Nhập tên hoặc SKU để tìm sản phẩm
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

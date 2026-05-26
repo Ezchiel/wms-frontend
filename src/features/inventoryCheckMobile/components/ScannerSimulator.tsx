@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { type Product } from '../inventoryCheckMobileTypes';
 import { ScanQrCode, X } from 'lucide-react';
+import type { Product } from '../inventoryCheckMobileTypes';
+
 
 interface ScannerSimulatorProps {
-  onScan: (sku: string) => void;
+  onScan: (value: string) => void;
   onClose: () => void;
-  allowedZone?: string | null;
 }
 
-export default function ScannerSimulator({ onScan, onClose, allowedZone }: ScannerSimulatorProps) {
+export default function ScannerSimulator({ onScan, onClose }: ScannerSimulatorProps) {
   const [successSku, setSuccessSku] = useState<string | null>(null);
   const [laserPosition, setLaserPosition] = useState(10);
   const [direction, setDirection] = useState(1);
@@ -57,7 +57,7 @@ export default function ScannerSimulator({ onScan, onClose, allowedZone }: Scann
       setTimeout(() => {
         oscillator.stop();
         // Clean up
-        audioCtx.close().catch(() => {});
+        audioCtx.close().catch(() => { });
       }, 100);
     } catch (e) {
       console.warn('Audio play failed', e);
