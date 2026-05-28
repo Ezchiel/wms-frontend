@@ -1,159 +1,216 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { X, RefreshCw, CameraOff, Keyboard, Loader2 } from 'lucide-react';
-
 
 interface QrCameraScannerProps {
   onScan: (value: string) => void;
   onClose: () => void;
 }
 
+const SCANNER_ELEMENT_ID = 'qr-reader';
+
 export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProps) {
   const [permissionStatus, setPermissionStatus] = useState<'pending' | 'granted' | 'denied' | 'error'>('pending');
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [manualValue, setManualValue] = useState('');
-  const [isInitializing, setIsInitializing] = useState(true);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [isInitializing, setIsInitializing] = useState(false);
 
-  // Audio Web API beep helper
+  // Refs to track scanner lifecycle — avoids stale closures & race conditions
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isScannerRunning = useRef(false);
+  const isUnmounted = useRef(false);
+
+  // ── Audio beep ──────────────────────────────────────────────────────────
   const playBeep = () => {
     try {
-      const AudioContextClass =
+      const AudioCtx =
         window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-
-      if (!AudioContextClass) {
-        console.warn('Browser does not support AudioContext');
-        return;
-      }
-
-      const audioCtx = new AudioContextClass();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // 800Hz beep
-      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-
-      oscillator.start();
-      setTimeout(() => {
-        oscillator.stop();
-        audioCtx.close().catch(() => { });
-      }, 100);
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      osc.start();
+      setTimeout(() => { osc.stop(); ctx.close().catch(() => { }); }, 100);
     } catch (e) {
       console.warn('Audio play failed', e);
     }
   };
 
-  // 1. Request/Verify Camera Permission
+  // ── Stop scanner safely ─────────────────────────────────────────────────
+  const stopScanner = useCallback(async () => {
+    if (scannerRef.current && isScannerRunning.current) {
+      isScannerRunning.current = false;
+      try {
+        await scannerRef.current.stop();
+      } catch (err) {
+        console.warn('stopScanner error (ignored):', err);
+      }
+      try {
+        scannerRef.current.clear();
+      } catch (_) { }
+      scannerRef.current = null;
+    }
+  }, []);
+
+  // ── Start scanner ───────────────────────────────────────────────────────
+  const startScanner = useCallback(async (facing: 'environment' | 'user') => {
+    if (isUnmounted.current) return;
+
+    // Stop any running instance first
+    await stopScanner();
+
+    if (isUnmounted.current) return;
+
+    setIsInitializing(true);
+
+    // Wait for the #qr-reader div to be in the DOM
+    // Use a polling approach — more reliable than a fixed timeout
+    const waitForElement = (): Promise<void> =>
+      new Promise((resolve, reject) => {
+        let attempts = 0;
+        const check = () => {
+          if (isUnmounted.current) { reject(new Error('unmounted')); return; }
+          const el = document.getElementById(SCANNER_ELEMENT_ID);
+          if (el) { resolve(); return; }
+          attempts++;
+          if (attempts > 30) { reject(new Error('element not found')); return; }
+          setTimeout(check, 100);
+        };
+        check();
+      });
+
+    try {
+      await waitForElement();
+    } catch (err) {
+      if (!isUnmounted.current) {
+        console.error('QR reader element never appeared:', err);
+        setPermissionStatus('error');
+        setIsInitializing(false);
+      }
+      return;
+    }
+
+    if (isUnmounted.current) return;
+
+    const html5QrCode = new Html5Qrcode(SCANNER_ELEMENT_ID);
+    scannerRef.current = html5QrCode;
+
+    try {
+      await html5QrCode.start(
+        { facingMode: facing },
+        {
+          fps: 10,
+          qrbox: (width: number, height: number) => {
+            const size = Math.min(width, height) * 0.7;
+            return { width: size, height: size };
+          },
+        },
+        (decodedText: string) => {
+          if (!isUnmounted.current) {
+            playBeep();
+            isScannerRunning.current = false;
+            html5QrCode
+              .stop()
+              .catch(() => { })
+              .finally(() => {
+                scannerRef.current = null;
+                onScan(decodedText);
+              });
+          }
+        },
+        () => {
+          // Ignore per-frame errors — normal when no QR in frame
+        }
+      );
+
+      if (!isUnmounted.current) {
+        isScannerRunning.current = true;
+        setIsInitializing(false);
+      } else {
+        // Component unmounted while we were starting — clean up
+        isScannerRunning.current = true; // so stopScanner works
+        await stopScanner();
+      }
+    } catch (err) {
+      console.error('Html5Qrcode start error:', err);
+      scannerRef.current = null;
+      if (!isUnmounted.current) {
+        setIsInitializing(false);
+        setPermissionStatus('error');
+      }
+    }
+  }, [onScan, stopScanner]);
+
+  // ── Step 1: Check camera permission ────────────────────────────────────
   useEffect(() => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    isUnmounted.current = false;
+
+    if (!navigator.mediaDevices?.getUserMedia) {
       setPermissionStatus('error');
-      setIsInitializing(false);
       return;
     }
 
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: 'environment' } })
       .then((stream) => {
-        // Stop the temporary stream right away
-        stream.getTracks().forEach((track) => track.stop());
-        setPermissionStatus('granted');
+        stream.getTracks().forEach((t) => t.stop());
+        if (!isUnmounted.current) {
+          setPermissionStatus('granted');
+        }
       })
       .catch((err) => {
-        console.warn('Camera permission check failed:', err);
-        setPermissionStatus('denied');
-        setIsInitializing(false);
+        console.warn('Camera permission denied:', err);
+        if (!isUnmounted.current) {
+          setPermissionStatus('denied');
+        }
       });
+
+    return () => {
+      isUnmounted.current = true;
+    };
   }, []);
 
-  // 2. Initialize and Start/Stop Scanner
+  // ── Step 2: Start scanner once permission granted ───────────────────────
   useEffect(() => {
     if (permissionStatus !== 'granted') return;
 
-    let isMounted = true;
-    setIsInitializing(true);
-
-    // Give react time to mount the #qr-reader div
-    const timer = setTimeout(() => {
-      if (!isMounted) return;
-
-      const html5QrCode = new Html5Qrcode('qr-reader');
-      scannerRef.current = html5QrCode;
-
-      html5QrCode
-        .start(
-          { facingMode: facingMode },
-          {
-            fps: 10,
-            qrbox: (width, height) => {
-              const size = Math.min(width, height) * 0.7;
-              return { width: size, height: size };
-            },
-          },
-          (decodedText) => {
-            if (isMounted) {
-              playBeep();
-              // Stop scanning and trigger callback
-              html5QrCode
-                .stop()
-                .then(() => {
-                  onScan(decodedText);
-                })
-                .catch((err) => {
-                  console.error('Failed to stop camera after success scan:', err);
-                  onScan(decodedText);
-                });
-            }
-          },
-          () => {
-            // Quietly ignore scan failures (common when QR is not in camera field of view)
-          }
-        )
-        .then(() => {
-          if (isMounted) {
-            setIsInitializing(false);
-          }
-        })
-        .catch((err) => {
-          console.error('Html5Qrcode start error:', err);
-          if (isMounted) {
-            setIsInitializing(false);
-            // Fallback to error/denied state if start failed
-            setPermissionStatus('error');
-          }
-        });
-    }, 300);
+    startScanner(facingMode);
 
     return () => {
-      isMounted = false;
-      clearTimeout(timer);
-      if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch((err) => {
-          console.warn('Cleanup stop error:', err);
-        });
-      }
+      // Cleanup on facingMode change or unmount
+      stopScanner();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [permissionStatus, facingMode]);
 
-  // Handle Manual Input Submit
+  // ── Global unmount cleanup ──────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      isUnmounted.current = true;
+      stopScanner();
+    };
+  }, [stopScanner]);
+
+  // ── Manual input ────────────────────────────────────────────────────────
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualValue.trim()) return;
-
     playBeep();
     onScan(manualValue.trim());
   };
 
-  // Toggle Camera Facing Mode
   const toggleCamera = () => {
     if (isInitializing) return;
     setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'));
   };
 
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-zinc-950/95 p-4 text-white font-sans backdrop-blur-md">
       <style>{`
@@ -165,14 +222,19 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
         .scanner-laser {
           animation: laser 2.5s infinite linear;
         }
-        /* Override html5-qrcode standard styling dynamically */
-        #qr-reader video {
+        #${SCANNER_ELEMENT_ID} video {
           object-fit: cover !important;
           border-radius: 1rem !important;
         }
+        /* Hide the default html5-qrcode UI chrome */
+        #${SCANNER_ELEMENT_ID} > img,
+        #${SCANNER_ELEMENT_ID} > div[style*="display: none"],
+        #${SCANNER_ELEMENT_ID} > div > select {
+          display: none !important;
+        }
       `}</style>
 
-      {/* Header Bar */}
+      {/* Header */}
       <div className="flex w-full max-w-md items-center justify-between py-2">
         <h2 className="text-base font-extrabold tracking-wide text-zinc-200">Quét mã QR / Barcode</h2>
         <div className="flex gap-2">
@@ -183,7 +245,7 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
               title="Đổi camera"
               id="scanner-toggle-camera-btn"
             >
-              <RefreshCw size={20} className={isInitializing ? 'animate-spin' : ''} />
+              <RefreshCw size={20} />
             </button>
           )}
           <button
@@ -196,30 +258,39 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
         </div>
       </div>
 
-      {/* Main scanner viewport */}
+      {/* Scanner viewport */}
       <div className="relative flex flex-1 flex-col items-center justify-center w-full max-w-md my-4">
-        {permissionStatus === 'pending' || isInitializing ? (
+        {permissionStatus === 'pending' ? (
           <div className="flex flex-col items-center justify-center space-y-3 p-8 text-center">
             <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
-            <p className="text-sm font-medium text-zinc-400">Đang chuẩn bị camera...</p>
+            <p className="text-sm font-medium text-zinc-400">Đang xin quyền camera...</p>
           </div>
         ) : permissionStatus === 'granted' ? (
           <div className="relative w-[285px] h-[285px] rounded-3xl overflow-hidden border-2 border-zinc-800 bg-zinc-900 shadow-2xl">
-            {/* The html5-qrcode element */}
-            <div id="qr-reader" className="w-full h-full" />
+            {/* The html5-qrcode mount point — always in DOM when granted */}
+            <div id={SCANNER_ELEMENT_ID} className="w-full h-full" />
 
-            {/* Target overlay corners */}
-            <div className="absolute top-4 left-4 h-6 w-6 border-t-4 border-l-4 border-blue-500 rounded-tl-md pointer-events-none z-10" />
-            <div className="absolute top-4 right-4 h-6 w-6 border-t-4 border-r-4 border-blue-500 rounded-tr-md pointer-events-none z-10" />
-            <div className="absolute bottom-4 left-4 h-6 w-6 border-b-4 border-l-4 border-blue-500 rounded-bl-md pointer-events-none z-10" />
-            <div className="absolute bottom-4 right-4 h-6 w-6 border-b-4 border-r-4 border-blue-500 rounded-br-md pointer-events-none z-10" />
+            {/* Loading overlay — shown on top while initialising */}
+            {isInitializing && (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-900/90 rounded-3xl gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                <p className="text-xs font-semibold text-zinc-400">Đang khởi động camera...</p>
+              </div>
+            )}
 
-            {/* Scanning red laser line */}
-            <div className="scanner-laser absolute left-4 right-4 h-0.5 bg-red-500 shadow-[0_0_8px_#ef4444] z-10 pointer-events-none" />
-
-            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300 font-bold bg-black/60 px-3 py-1 rounded-full z-10 pointer-events-none tracking-wide">
-              Đang quét...
-            </p>
+            {/* Corner targets */}
+            {!isInitializing && (
+              <>
+                <div className="absolute top-4 left-4 h-6 w-6 border-t-4 border-l-4 border-blue-500 rounded-tl-md pointer-events-none z-10" />
+                <div className="absolute top-4 right-4 h-6 w-6 border-t-4 border-r-4 border-blue-500 rounded-tr-md pointer-events-none z-10" />
+                <div className="absolute bottom-4 left-4 h-6 w-6 border-b-4 border-l-4 border-blue-500 rounded-bl-md pointer-events-none z-10" />
+                <div className="absolute bottom-4 right-4 h-6 w-6 border-b-4 border-r-4 border-blue-500 rounded-br-md pointer-events-none z-10" />
+                <div className="scanner-laser absolute left-4 right-4 h-0.5 bg-red-500 shadow-[0_0_8px_#ef4444] z-10 pointer-events-none" />
+                <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300 font-bold bg-black/60 px-3 py-1 rounded-full z-10 pointer-events-none tracking-wide">
+                  Đang quét...
+                </p>
+              </>
+            )}
           </div>
         ) : permissionStatus === 'denied' ? (
           <div className="flex flex-col items-center justify-center p-6 text-center space-y-4 max-w-xs bg-zinc-900/60 rounded-3xl border border-zinc-800">
@@ -248,14 +319,13 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
         )}
       </div>
 
-      {/* Manual Input Fallback (At bottom) */}
+      {/* Manual input fallback */}
       <div className="w-full max-w-md bg-zinc-900/80 border border-zinc-800/80 rounded-3xl p-5 mb-26 shadow-xl">
         <form onSubmit={handleManualSubmit} className="space-y-3">
           <div className="flex items-center gap-2 text-zinc-300">
             <Keyboard size={16} className="text-blue-400" />
             <span className="text-xs font-bold uppercase tracking-wider">Nhập mã thủ công</span>
           </div>
-
           <div className="flex gap-2">
             <input
               type="text"
@@ -268,7 +338,7 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
             <button
               type="submit"
               disabled={!manualValue.trim()}
-              className="bg-blue-600 disabled:bg-zinc-800 hover:bg-blue-700 disabled:text-zinc-500 text-white font-extrabold text-xs px-5 rounded-xl transition-colors active:scale-95 transition-transform"
+              className="bg-blue-600 disabled:bg-zinc-800 hover:bg-blue-700 disabled:text-zinc-500 text-white font-extrabold text-xs px-5 rounded-xl transition-colors active:scale-95"
               id="manual-scanner-submit-btn"
             >
               Xác nhận

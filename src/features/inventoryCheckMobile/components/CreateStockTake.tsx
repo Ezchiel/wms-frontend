@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import QrCameraScanner from './QrCameraScanner';
-import { ChevronLeft, MapPin, ScanQrCode } from 'lucide-react';
+import { ChevronLeft, Delete, MapPin, ScanQrCode } from 'lucide-react';
 import type { StorageLocation as Location } from '../../storageLocation/storageLocationTypes';
 import { useAppDispatch } from '../../../app/hooks';
 import { fetchLocationByBarcode } from '../../storageLocation/storageLocationThunks';
@@ -137,7 +137,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
                   }}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
                 >
-                  <span className="material-symbols-outlined text-sm">close</span>
+                  <Delete />
                 </button>
               )}
 
@@ -187,7 +187,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
                   className="text-blue-400 hover:text-blue-600"
                   id="clear-location-btn"
                 >
-                  <span className="material-symbols-outlined text-sm">close</span>
+                  <Delete />
                 </button>
               </div>
             )}
