@@ -93,7 +93,7 @@ export const fetchProductByLpn = createAsyncThunk<Product, string, { rejectValue
   'products/fetchByLpn',
   async (lpn, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get<ApiResponse<Product>>(`/products/lpn/${lpn}`);
+      const response = await axiosClient.get<ApiResponse<Product>>(`/products/lpncode/${lpn}`);
       return response.data.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {

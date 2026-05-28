@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import ScannerSimulator from './ScannerSimulator';
+import QrCameraScanner from './QrCameraScanner';
 import { ChevronLeft, MapPin, ScanQrCode } from 'lucide-react';
 import type { StorageLocation as Location } from '../../storageLocation/storageLocationTypes';
 import { useAppDispatch } from '../../../app/hooks';
 import { fetchLocationByBarcode } from '../../storageLocation/storageLocationThunks';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 export interface CreateCheckSetup {
   locationId: number;
@@ -43,7 +44,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
 
   const handleStartInventory = () => {
     if (!selectedLocationId) {
-      alert('Vui lòng quét hoặc chọn vị trí kiểm kê!');
+      toast.error('Vui lòng quét hoặc chọn vị trí kiểm kê!');
       return;
     }
     onCreate({ locationId: Number(selectedLocationId), notes: notes.trim() });
@@ -55,10 +56,11 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
       setSelectedLocationId(location.id.toString());
       setShowScanner(false);
     } catch (error: unknown) {
+      setShowScanner(false);
       if (axios.isAxiosError(error) && error.response) {
-        alert('Lỗi khi tìm vị trí ứng với mã vạch này!');
+        toast.error('Lỗi khi tìm vị trí ứng với mã vạch này!');
       } else {
-        alert('Không tìm thấy vị trí ứng với mã vạch này!');
+        toast.error('Không tìm thấy vị trí ứng với mã vạch này!');
       }
     }
   };
@@ -219,7 +221,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
 
       {/* ── Scanner ── */}
       {showScanner && (
-        <ScannerSimulator onClose={() => setShowScanner(false)} onScan={handleScannerScan} />
+        <QrCameraScanner onClose={() => setShowScanner(false)} onScan={handleScannerScan} />
       )}
     </div>
   );

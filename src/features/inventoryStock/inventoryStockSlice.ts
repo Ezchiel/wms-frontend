@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchInventoryStocks, fetchStocksByProduct, fetchStocksByLocation } from './inventoryStockThunks';
+import { fetchInventoryStocks, fetchStocksByProduct, fetchStocksByLocation, fetchStocksByLocationAndProduct } from './inventoryStockThunks';
 import type { InventoryStockState } from './inventoryStockTypes';
 
 const initialState: InventoryStockState = {
@@ -56,6 +56,19 @@ const inventoryStockSlice = createSlice({
         state.stocks = action.payload;
       })
       .addCase(fetchStocksByLocation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // Fetch By Location And Product
+      .addCase(fetchStocksByLocationAndProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchStocksByLocationAndProduct.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(fetchStocksByLocationAndProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

@@ -21,7 +21,6 @@ function ItemCard({
   receiptStatus,
 }: ItemCardProps) {
   const [expanded, setExpanded] = useState(!state.isPrinted);
-  const remaining = detail.quantity - (detail.quantity > 0 ? 0 : 0);
   const isComplete = state.countedQty >= detail.quantity;
   const isLocked = state.isPrinted || receiptStatus !== 'RECEIVING';
 

@@ -2,8 +2,12 @@ import { useState, useRef } from 'react';
 import type { Product } from '../../products/productTypes';
 import type { StorageLocation } from '../../storageLocation/storageLocationTypes';
 import type { InventoryStock } from '../../inventoryStock/inventoryStockTypes';
-import ScannerSimulator from './ScannerSimulator';
+import QrCameraScanner from './QrCameraScanner';
 import { ArrowLeft, ChevronLeft, CircleCheckBig, CirclePlus, Delete, ListFilter, ScanQrCode, SquareParkingOff, X } from 'lucide-react';
+import { useAppDispatch } from '../../../app/hooks';
+import { fetchProductByLpn } from '../../products/productThunks';
+import { fetchStocksByLocationAndProduct } from '../../inventoryStock/inventoryStockThunks';
+import { toast } from 'react-toastify';
 
 // ─── Public types ──────────────────────────────────────────────────────────────
 
@@ -63,6 +67,7 @@ export default function ActiveStockTake({
   onFinalize,
   onBack,
 }: ActiveStockTakeProps) {
+  const dispatch = useAppDispatch();
   const [items, setItems] = useState<CountingItem[]>(() => buildFromStock(stockItems));
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'matched' | 'discrepant'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -116,25 +121,64 @@ export default function ActiveStockTake({
 
   // ── Scanner ───────────────────────────────────────────────────────────────
 
-  const handleScannerScan = (scannedText: string) => {
-    // Match against productName or batchNo for simplicity
-    const idx = items.findIndex(
+  const handleScannerScan = async (scannedText: string) => {
+    setShowScanner(false);
+
+    // 1. Try to find in existing items
+    const existingIdx = items.findIndex(
       (it) =>
-        it.productName.toLowerCase().includes(scannedText.toLowerCase()) ||
-        it.batchNo.toLowerCase() === scannedText.toLowerCase()
+        it.batchNo.toLowerCase() === scannedText.toLowerCase() ||
+        it.productName.toLowerCase().includes(scannedText.toLowerCase())
     );
-    if (idx !== -1) {
-      const target = items[idx];
+
+    if (existingIdx !== -1) {
+      const target = items[existingIdx];
       adjustQty(target.uiKey, 1);
       setScannedFeedback(`Đã quét: ${target.productName} (+1)`);
-      setShowScanner(false);
       setTimeout(() => {
         itemRefs.current[target.uiKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => setScannedFeedback(null), 3000);
       }, 300);
-    } else {
-      alert(`Không tìm thấy sản phẩm khớp với mã: ${scannedText}`);
-      setShowScanner(false);
+      return;
+    }
+
+    // 2. Fetch from backend APIs
+    try {
+      const productResult = await dispatch(fetchProductByLpn(scannedText)).unwrap();
+      
+      let systemQty = 0;
+      try {
+        const stockResult = await dispatch(
+          fetchStocksByLocationAndProduct({
+            locationId: location.id,
+            productId: productResult.id,
+          })
+        ).unwrap();
+        
+        if (stockResult && stockResult.length > 0) {
+          const matchingStock = stockResult.find(s => s.batchNo?.toLowerCase() === scannedText.toLowerCase()) || stockResult[0];
+          systemQty = matchingStock.quantity;
+        }
+      } catch (err) {
+        console.warn('Failed to fetch system stocks, defaulting systemQuantity to 0:', err);
+      }
+
+      const newItem: CountingItem = {
+        uiKey: nextKey(),
+        productId: productResult.id,
+        productName: productResult.productName,
+        locationId: location.id,
+        batchNo: scannedText,
+        systemQuantity: systemQty,
+        actualQuantity: 1,
+        reason: '',
+      };
+
+      setItems((prev) => [newItem, ...prev]);
+      setScannedFeedback(`Thêm mới: ${productResult.productName} (+1)`);
+      setTimeout(() => setScannedFeedback(null), 3000);
+    } catch {
+      toast.warning(`Không tìm thấy sản phẩm với mã: ${scannedText}`);
     }
   };
 
@@ -537,7 +581,7 @@ export default function ActiveStockTake({
 
       {/* ── Scanner Overlay ── */}
       {showScanner && (
-        <ScannerSimulator onClose={() => setShowScanner(false)} onScan={handleScannerScan} />
+        <QrCameraScanner onClose={() => setShowScanner(false)} onScan={handleScannerScan} />
       )}
 
       {/* ── Add Extra Product Modal ── */}

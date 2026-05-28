@@ -18,7 +18,6 @@ export const StepScanShelf: React.FC<Props> = ({
   shelfRef,
   shelfError,
   apiError,
-  confirming,
   onInputChange,
   onConfirm,
 }) => {

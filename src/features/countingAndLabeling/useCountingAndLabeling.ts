@@ -18,7 +18,7 @@ export const useCountingAndLabeling = () => {
   // Fetch receipts if store is empty (e.g. user navigated directly via URL)
   useEffect(() => {
     if (receipts.length === 0) {
-      dispatch(fetchReceipts());
+      dispatch(fetchReceipts({}));
     }
   }, [dispatch, receipts.length]);
 

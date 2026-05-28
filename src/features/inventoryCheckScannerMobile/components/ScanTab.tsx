@@ -25,7 +25,6 @@ interface ScanTabProps {
 export default function ScanTab({
   products,
   onRefreshProducts,
-  onSetTab,
   selectedProductFromInventory,
 }: ScanTabProps) {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);

@@ -59,3 +59,24 @@ export const fetchStocksByLocation = createAsyncThunk<
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
 });
+
+export const fetchStocksByLocationAndProduct = createAsyncThunk<
+  InventoryStock[],
+  { locationId: number; productId: number },
+  { rejectValue: string }
+>(
+  'inventoryStocks/fetchByLocationAndProduct',
+  async ({ locationId, productId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.get<ApiResponse<InventoryStock[]>>(
+        `/inventory-stocks/location/${locationId}/product/${productId}`
+      );
+      return response.data.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data?.message || 'Lỗi khi lấy tồn kho!');
+      }
+      return rejectWithValue('Đã xảy ra lỗi kết nối!');
+    }
+  }
+);
