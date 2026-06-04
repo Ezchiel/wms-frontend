@@ -61,15 +61,17 @@ const inventoryStockSlice = createSlice({
       })
 
       // Fetch By Location And Product
+      // NOTE: Do NOT set loading = true here!
+      // This thunk is dispatched during QR scanning inside ActiveStockTake.
+      // Setting loading = true would cause InventoryCheckMobileFeature to unmount
+      // ActiveStockTake (via isTransitioning check), destroying all local counting state.
       .addCase(fetchStocksByLocationAndProduct.pending, (state) => {
-        state.loading = true;
         state.error = null;
       })
-      .addCase(fetchStocksByLocationAndProduct.fulfilled, (state) => {
-        state.loading = false;
+      .addCase(fetchStocksByLocationAndProduct.fulfilled, () => {
+        // no-op: result is consumed via .unwrap() at the call site
       })
       .addCase(fetchStocksByLocationAndProduct.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload as string;
       });
   },

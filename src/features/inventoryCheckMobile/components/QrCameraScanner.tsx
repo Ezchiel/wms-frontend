@@ -232,6 +232,10 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
         #${SCANNER_ELEMENT_ID} > div > select {
           display: none !important;
         }
+        /* Style the default scan region border corners to match our blue theme */
+        #qr-shaded-region > div {
+          border-color: #3b82f6 !important; /* blue-500 */
+        }
       `}</style>
 
       {/* Header */}
@@ -278,13 +282,9 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
               </div>
             )}
 
-            {/* Corner targets */}
+            {/* Scanning laser & status label */}
             {!isInitializing && (
               <>
-                <div className="absolute top-4 left-4 h-6 w-6 border-t-4 border-l-4 border-blue-500 rounded-tl-md pointer-events-none z-10" />
-                <div className="absolute top-4 right-4 h-6 w-6 border-t-4 border-r-4 border-blue-500 rounded-tr-md pointer-events-none z-10" />
-                <div className="absolute bottom-4 left-4 h-6 w-6 border-b-4 border-l-4 border-blue-500 rounded-bl-md pointer-events-none z-10" />
-                <div className="absolute bottom-4 right-4 h-6 w-6 border-b-4 border-r-4 border-blue-500 rounded-br-md pointer-events-none z-10" />
                 <div className="scanner-laser absolute left-4 right-4 h-0.5 bg-red-500 shadow-[0_0_8px_#ef4444] z-10 pointer-events-none" />
                 <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300 font-bold bg-black/60 px-3 py-1 rounded-full z-10 pointer-events-none tracking-wide">
                   Đang quét...
@@ -331,8 +331,8 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
               type="text"
               value={manualValue}
               onChange={(e) => setManualValue(e.target.value)}
-              placeholder="Nhập barcode vị trí hoặc LPN sản phẩm..."
-              className="flex-1 bg-zinc-950/80 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white font-medium placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+              placeholder="Nhập barcode..."
+              className="w-50 bg-zinc-950/80 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white font-medium placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
               id="manual-scanner-input"
             />
             <button

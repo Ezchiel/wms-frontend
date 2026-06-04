@@ -17,7 +17,9 @@ export interface Product {
   productGroup: ProductGroup;
   description?: string;
   minStockLevel: number;
+  batchNo?: string;
 }
+
 
 export interface ProductPayload {
   productCode: string;

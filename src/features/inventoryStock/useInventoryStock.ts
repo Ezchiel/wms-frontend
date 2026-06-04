@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchInventoryStocks } from './inventoryStockThunks';
+import { fetchStorageLocations } from '../storageLocation/storageLocationThunks';
+
 
 export const useInventoryStock = () => {
   const dispatch = useAppDispatch();
@@ -17,7 +19,7 @@ export const useInventoryStock = () => {
   // Fetch initial data
   useEffect(() => {
     dispatch(fetchInventoryStocks());
-    // dispatch(fetchStorageLocations());
+    dispatch(fetchStorageLocations({ size: 1000 }));
   }, [dispatch]);
 
   // Derived Data

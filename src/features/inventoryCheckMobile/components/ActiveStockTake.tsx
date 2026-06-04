@@ -124,63 +124,71 @@ export default function ActiveStockTake({
   const handleScannerScan = async (scannedText: string) => {
     setShowScanner(false);
 
-    // 1. Try to find in existing items
-    const existingIdx = items.findIndex(
-      (it) =>
-        it.batchNo.toLowerCase() === scannedText.toLowerCase() ||
-        it.productName.toLowerCase().includes(scannedText.toLowerCase())
-    );
-
-    if (existingIdx !== -1) {
-      const target = items[existingIdx];
-      adjustQty(target.uiKey, 1);
-      setScannedFeedback(`Đã quét: ${target.productName} (+1)`);
-      setTimeout(() => {
-        itemRefs.current[target.uiKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => setScannedFeedback(null), 3000);
-      }, 300);
-      return;
-    }
-
-    // 2. Fetch from backend APIs
     try {
+      // 1. Gọi API lấy thông tin sản phẩm từ mã LPN
+      //    Backend sẽ trả về cả batchNo của LPN này trong productResult
       const productResult = await dispatch(fetchProductByLpn(scannedText)).unwrap();
-      
+      const productId = productResult.id;
+
+      // 2. batchNo lấy trực tiếp từ kết quả tra cứu LPN (nguồn chính xác nhất)
+      const batchNo = productResult.batchNo ?? '';
+
+      // 3. Gọi API lấy thông tin tồn kho cho vị trí và sản phẩm này (để cập nhật systemQty nếu cần)
       let systemQty = 0;
       try {
         const stockResult = await dispatch(
           fetchStocksByLocationAndProduct({
             locationId: location.id,
-            productId: productResult.id,
+            productId: productId,
           })
         ).unwrap();
-        
+
         if (stockResult && stockResult.length > 0) {
-          const matchingStock = stockResult.find(s => s.batchNo?.toLowerCase() === scannedText.toLowerCase()) || stockResult[0];
-          systemQty = matchingStock.quantity;
+          // Ưu tiên tìm đúng lô hàng, nếu không tìm thấy thì lấy stock đầu tiên
+          const matchingStock = stockResult.find((s) => (s.batchNo ?? '') === batchNo);
+          systemQty = matchingStock ? matchingStock.quantity : 0;
         }
       } catch (err) {
         console.warn('Failed to fetch system stocks, defaulting systemQuantity to 0:', err);
       }
 
-      const newItem: CountingItem = {
-        uiKey: nextKey(),
-        productId: productResult.id,
-        productName: productResult.productName,
-        locationId: location.id,
-        batchNo: scannedText,
-        systemQuantity: systemQty,
-        actualQuantity: 1,
-        reason: '',
-      };
+      // 4. Tìm xem trên giao diện có dòng nào khớp chính xác cả productId lẫn batchNo không
+      //    KHÔNG fallback về productId đơn thuần – điều đó gây ra lỗi tăng nhầm lô hàng
+      const existingItem = items.find(
+        (it) => it.productId === productId && it.batchNo === batchNo
+      );
 
-      setItems((prev) => [newItem, ...prev]);
-      setScannedFeedback(`Thêm mới: ${productResult.productName} (+1)`);
-      setTimeout(() => setScannedFeedback(null), 3000);
+      if (existingItem) {
+        // Tăng số lượng đúng dòng
+        adjustQty(existingItem.uiKey, 1);
+        setScannedFeedback(`Đã quét: ${existingItem.productName} – Lô ${batchNo || '(không có lô)'} (+1)`);
+        const targetUiKey = existingItem.uiKey;
+        setTimeout(() => {
+          itemRefs.current[targetUiKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => setScannedFeedback(null), 3000);
+        }, 300);
+      } else {
+        // Lô hàng chưa có trong danh sách → thêm mới
+        const newItem: CountingItem = {
+          uiKey: nextKey(),
+          productId: productId,
+          productName: productResult.productName,
+          locationId: location.id,
+          batchNo: batchNo,
+          systemQuantity: systemQty,
+          actualQuantity: 1,
+          reason: '',
+        };
+
+        setItems((prev) => [newItem, ...prev]);
+        setScannedFeedback(`Thêm mới: ${productResult.productName} – Lô ${batchNo || '(không có lô)'} (+1)`);
+        setTimeout(() => setScannedFeedback(null), 3000);
+      }
     } catch {
-      toast.warning(`Không tìm thấy sản phẩm với mã: ${scannedText}`);
+      toast.warning(`Không tìm thấy sản phẩm với mã LPN: ${scannedText}`);
     }
   };
+
 
   // ── Add extra product ─────────────────────────────────────────────────────
 

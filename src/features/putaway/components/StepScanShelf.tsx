@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import QRScanner from './QRScanner';
+import QrCameraScanner from '../../inventoryCheckMobile/components/QrCameraScanner';
 
 interface Props {
   suggestedCode: string;
@@ -21,18 +21,17 @@ export const StepScanShelf: React.FC<Props> = ({
   onInputChange,
   onConfirm,
 }) => {
-  const [useCamera, setUseCamera] = useState(true);
+  const [showScanner, setShowScanner] = useState(false);
 
   const handleShelfScan = (decodedText: string) => {
     const cleanCode = decodedText.toUpperCase().trim();
-    onInputChange(cleanCode); // Vẫn cập nhật để hiển thị UI
+    setShowScanner(false);
+    onInputChange(cleanCode);
 
-    // Kiểm tra nếu mã quét đúng với mã gợi ý thì tự động confirm luôn
+    // Auto-confirm if code matches
     if (cleanCode === suggestedCode.toUpperCase()) {
-      onConfirm();
-    } else {
-      // Nếu sai mã, tắt camera để hiện ô nhập tay cho user sửa
-      setUseCamera(false);
+      // Use a short timeout to allow state to settle before confirming
+      setTimeout(() => onConfirm(), 50);
     }
   };
 
@@ -49,42 +48,52 @@ export const StepScanShelf: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Camera Scanner */}
+      {/* Scan button */}
+      <button
+        onClick={() => setShowScanner(true)}
+        className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-sm px-4 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+      >
+        <i className="fa-solid fa-qrcode text-[18px]"></i>
+        Quét mã QR kệ
+      </button>
+
+      {/* Manual input fallback */}
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-wms-border-color">
-        {useCamera ? (
-          <div className="p-2">
-            <QRScanner onScanSuccess={handleShelfScan} />
+        <div className="p-4">
+          <p className="text-[11px] font-bold text-wms-muted uppercase tracking-wider mb-2">
+            Hoặc nhập thủ công
+          </p>
+          <input
+            ref={shelfRef}
+            value={shelfInput}
+            onChange={(e) => onInputChange(e.target.value.toUpperCase())}
+            onKeyDown={(e) => e.key === 'Enter' && onConfirm()}
+            placeholder="Nhập mã kệ..."
+            className="w-full py-2.5 px-3 border border-wms-border-color rounded-xl font-bold text-[13px] outline-none focus:border-wms-primary transition-colors"
+          />
+          {shelfInput && (
             <button
-              onClick={() => setUseCamera(false)}
-              className="w-full py-2 text-[12px] text-wms-muted font-medium italic"
+              onClick={onConfirm}
+              className="mt-3 w-full py-2.5 bg-wms-primary text-white font-bold rounded-xl text-[13px] hover:bg-wms-primary-hover active:scale-95 transition-all"
             >
-              Dùng nhập tay nếu không quét được
+              Xác nhận
             </button>
-          </div>
-        ) : (
-          <div className="p-4">
-            <input
-              ref={shelfRef}
-              value={shelfInput}
-              onChange={(e) => onInputChange(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === 'Enter' && onConfirm()}
-              placeholder="Nhập mã kệ..."
-              className="w-full py-2.5 px-3 border border-wms-border-color rounded-xl font-bold"
-            />
-            <button
-              onClick={() => setUseCamera(true)}
-              className="mt-2 text-wms-primary text-[12px] font-bold"
-            >
-              Mở lại Camera
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {(shelfError || apiError) && (
         <p className="text-center text-[13px] text-red-600 font-bold px-4">
           {shelfError || apiError}
         </p>
+      )}
+
+      {/* QrCameraScanner overlay */}
+      {showScanner && (
+        <QrCameraScanner
+          onClose={() => setShowScanner(false)}
+          onScan={handleShelfScan}
+        />
       )}
     </div>
   );
