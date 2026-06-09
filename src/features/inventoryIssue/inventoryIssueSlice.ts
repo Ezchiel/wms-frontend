@@ -1,0 +1,132 @@
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  approveInventoryIssue,
+  cancelInventoryIssue,
+  confirmInventoryIssue,
+  createInventoryIssue,
+  fetchInventoryIssues,
+  fetchIssueById,
+} from './inventoryIssueThunks';
+import type { InventoryIssue, InventoryIssueState } from './inventoryIssueTypes';
+
+const initialState: InventoryIssueState = {
+  issues: [],
+  selectedIssue: null,
+  loading: false,
+  actionLoading: false,
+  error: null,
+  meta: null,
+};
+
+const inventoryIssueSlice = createSlice({
+  name: 'inventoryIssues',
+  initialState,
+  reducers: {
+    setSelectedIssue: (state, action: PayloadAction<InventoryIssue | null>) => {
+      state.selectedIssue = action.payload;
+    },
+    clearSelectedIssue: (state) => {
+      state.selectedIssue = null;
+    },
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // ─── Fetch list ───────────────────────────────────────────────────────
+      .addCase(fetchInventoryIssues.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchInventoryIssues.fulfilled, (state, action) => {
+        state.loading = false;
+        state.issues = action.payload.data;
+        state.meta = action.payload.meta;
+      })
+      .addCase(fetchInventoryIssues.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // ─── Fetch by id ─────────────────────────────────────────────────────
+      .addCase(fetchIssueById.pending, (state) => {
+        state.actionLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchIssueById.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.selectedIssue = action.payload;
+      })
+      .addCase(fetchIssueById.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // ─── Create ───────────────────────────────────────────────────────────
+      .addCase(createInventoryIssue.pending, (state) => {
+        state.actionLoading = true;
+        state.error = null;
+      })
+      .addCase(createInventoryIssue.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.issues.unshift(action.payload);
+      })
+      .addCase(createInventoryIssue.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // ─── Approve ─────────────────────────────────────────────────────────
+      .addCase(approveInventoryIssue.pending, (state) => {
+        state.actionLoading = true;
+        state.error = null;
+      })
+      .addCase(approveInventoryIssue.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.selectedIssue = action.payload;
+        const idx = state.issues.findIndex((i) => i.id === action.payload.id);
+        if (idx !== -1) state.issues[idx] = action.payload;
+      })
+      .addCase(approveInventoryIssue.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // ─── Confirm ─────────────────────────────────────────────────────────
+      .addCase(confirmInventoryIssue.pending, (state) => {
+        state.actionLoading = true;
+        state.error = null;
+      })
+      .addCase(confirmInventoryIssue.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.selectedIssue = action.payload;
+        const idx = state.issues.findIndex((i) => i.id === action.payload.id);
+        if (idx !== -1) state.issues[idx] = action.payload;
+      })
+      .addCase(confirmInventoryIssue.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // ─── Cancel ──────────────────────────────────────────────────────────
+      .addCase(cancelInventoryIssue.pending, (state) => {
+        state.actionLoading = true;
+        state.error = null;
+      })
+      .addCase(cancelInventoryIssue.fulfilled, (state, action) => {
+        state.actionLoading = false;
+        state.selectedIssue = action.payload;
+        const idx = state.issues.findIndex((i) => i.id === action.payload.id);
+        if (idx !== -1) state.issues[idx] = action.payload;
+      })
+      .addCase(cancelInventoryIssue.rejected, (state, action) => {
+        state.actionLoading = false;
+        state.error = action.payload as string;
+      });
+  },
+});
+
+export const { setSelectedIssue, clearSelectedIssue, clearError } =
+  inventoryIssueSlice.actions;
+export default inventoryIssueSlice.reducer;

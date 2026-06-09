@@ -6,3 +6,5 @@ export { default as ProductPage } from './ProductPage';
 export { default as StorageLocationPage } from './StorageLocationPage';
 export { default as UserPage } from './UserPage';
 export { default as InventoryCheckPage } from './InventoryCheckPage';
+export { default as InventoryIssuePage } from './InventoryIssuePage';
+

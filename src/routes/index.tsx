@@ -10,6 +10,7 @@ import {
   ProductPage,
   StorageLocationPage,
   UserPage,
+  InventoryIssuePage,
 } from '../pages/admin/index.ts';
 import { LoginPage } from '../pages/auth';
 import {
@@ -74,6 +75,10 @@ export const router = createBrowserRouter([
           {
             path: 'inventory-receipts',
             element: <InventoryReceiptPage />,
+          },
+          {
+            path: 'inventory-issues',
+            element: <InventoryIssuePage />,
           },
           {
             path: 'inventory-checks',
