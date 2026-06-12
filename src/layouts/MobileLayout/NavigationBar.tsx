@@ -19,6 +19,12 @@ function NavigationBar() {
         active={location.pathname === '/mobile/inventory-check-mobile'}
       />
       <NavItem
+        icon="fa-solid fa-dolly"
+        label="Picking"
+        path="/mobile/picking"
+        active={location.pathname === '/mobile/picking'}
+      />
+      <NavItem
         icon="fa-solid fa-qrcode"
         label="Scan"
         path="/mobile/scan"

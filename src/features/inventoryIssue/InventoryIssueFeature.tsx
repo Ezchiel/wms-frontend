@@ -31,7 +31,7 @@ export const InventoryIssueFeature: React.FC = () => {
       {/* --- WORK AREA --- */}
       <div className="bg-transparent flex flex-col overflow-x-auto">
         <TabNavigation
-          tabs={['All Issues', 'Draft', 'Approved', 'Completed', 'Cancelled']}
+          tabs={['All Issues', 'Draft', 'Picking', 'Completed', 'Cancelled']}
           activeTabIndex={state.tabIndex}
           onTabChange={actions.handleTabChange}
           getTabColor={getTabColor}

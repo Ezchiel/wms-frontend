@@ -10,6 +10,7 @@ import storageLocationReducer from '../features/storageLocation/storageLocationS
 import userReducer from '../features/users/userSlices.ts';
 import inventoryCheckReducer from '../features/inventoryCheck/inventoryCheckSlice.ts';
 import inventoryIssueReducer from '../features/inventoryIssue/inventoryIssueSlice.ts';
+import pickingReducer from '../features/picking/pickingSlice';
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     putaway: putawayReducer,
     inventoryCheck: inventoryCheckReducer,
     inventoryIssues: inventoryIssueReducer,
+    picking: pickingReducer,
   },
 });
 

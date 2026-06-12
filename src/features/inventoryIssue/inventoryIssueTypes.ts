@@ -1,11 +1,11 @@
 import type { Meta } from '../../types/api.types';
 
-export type IssueStatus = 'DRAFT' | 'APPROVED' | 'COMPLETED' | 'CANCELLED';
+export type IssueStatus = 'DRAFT' | 'APPROVED' | 'PICKING' | 'COMPLETED' | 'CANCELLED';
 
 export const TAB_STATUS_MAP: Record<number, IssueStatus | ''> = {
   0: '',
   1: 'DRAFT',
-  2: 'APPROVED',
+  2: 'PICKING',
   3: 'COMPLETED',
   4: 'CANCELLED',
 };

@@ -16,6 +16,7 @@ import { LoginPage } from '../pages/auth';
 import {
   CountingAndLabelingPage,
   InventoryCheckMobilePage,
+  PickingPage,
   PutawayPage,
   Scan,
   TasksPage,
@@ -119,6 +120,10 @@ export const router = createBrowserRouter([
           {
             path: 'inventory-check-scanner-mobile',
             element: <InventoryCheckScannerMobileFeature />,
+          },
+          {
+            path: 'picking',
+            element: <PickingPage />,
           },
         ],
       },

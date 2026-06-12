@@ -89,10 +89,16 @@ export const useInventoryIssue = () => {
   };
 
   const handleApprove = async (id: number) => {
-    try {
-      await dispatch(approveInventoryIssue(id)).unwrap();
-    } catch (err: unknown) {
-      alert(err || 'Failed to approve inventory issue');
+    if (
+      window.confirm(
+        'Bạn có chắc chắn muốn duyệt phiếu này?\nHệ thống sẽ tự động tạo lệnh lấy hàng (Picking Tasks) và chuyển trạng thái phiếu sang PICKING.'
+      )
+    ) {
+      try {
+        await dispatch(approveInventoryIssue(id)).unwrap();
+      } catch (err: unknown) {
+        alert(err || 'Failed to approve inventory issue');
+      }
     }
   };
 

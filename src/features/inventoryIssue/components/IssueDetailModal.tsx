@@ -7,7 +7,7 @@ interface Props {
   issue: InventoryIssue | null;
   onClose: () => void;
   onApprove: (id: number) => void;
-  onConfirm: (id: number) => void;
+  onConfirm?: (id: number) => void; // Không còn dùng trong luồng mới (tự động hoàn thành qua Picking Tasks)
   onCancel: (id: number) => void;
   actionLoading?: boolean;
 }
@@ -17,7 +17,6 @@ const IssueDetailModal: React.FC<Props> = ({
   issue,
   onClose,
   onApprove,
-  onConfirm,
   onCancel,
   actionLoading = false,
 }) => {
@@ -32,6 +31,8 @@ const IssueDetailModal: React.FC<Props> = ({
         return 'bg-yellow-100 text-yellow-700';
       case 'APPROVED':
         return 'bg-blue-100 text-blue-700';
+      case 'PICKING':
+        return 'bg-orange-100 text-orange-700';
       case 'COMPLETED':
         return 'bg-green-100 text-green-700';
       case 'CANCELLED':
@@ -153,26 +154,18 @@ const IssueDetailModal: React.FC<Props> = ({
                 onClick={() => onApprove(issue.id)}
                 className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-blue-600 border border-solid border-blue-600 text-white hover:opacity-90 transition-all shadow-sm"
               >
-                Approve
+                Approve &amp; Start Picking
               </button>
             </>
           )}
 
-          {isAuthorized && !actionLoading && issue.status === 'APPROVED' && (
-            <>
-              <button
-                onClick={() => onCancel(issue.id)}
-                className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-red-500 border border-solid border-red-500 text-white hover:opacity-90 transition-all shadow-sm"
-              >
-                Cancel Issue
-              </button>
-              <button
-                onClick={() => onConfirm(issue.id)}
-                className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-green-600 border border-solid border-green-600 text-white hover:opacity-90 transition-all shadow-sm"
-              >
-                Confirm (Issue Out)
-              </button>
-            </>
+          {isAuthorized && !actionLoading && issue.status === 'PICKING' && (
+            <button
+              onClick={() => onCancel(issue.id)}
+              className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-red-500 border border-solid border-red-500 text-white hover:opacity-90 transition-all shadow-sm"
+            >
+              Cancel Issue
+            </button>
           )}
         </div>
       </div>
