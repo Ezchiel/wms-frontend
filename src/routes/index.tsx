@@ -20,6 +20,7 @@ import {
   PutawayPage,
   Scan,
   TasksPage,
+  ProfilePage,
 } from '../pages/mobile';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import PublicRoute from './PublicRoute.tsx';
@@ -124,6 +125,10 @@ export const router = createBrowserRouter([
           {
             path: 'picking',
             element: <PickingPage />,
+          },
+          {
+            path: 'profile',
+            element: <ProfilePage />,
           },
         ],
       },

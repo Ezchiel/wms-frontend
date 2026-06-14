@@ -6,12 +6,16 @@ import {
   confirmPickingTask,
 } from './pickingThunks';
 import { setSelectedTask, clearSelectedTask } from './pickingSlice';
+import { fetchAvailableIssues, claimInventoryIssue } from '../inventoryIssue/inventoryIssueThunks';
 import type { PickingTask, PickingTaskStatus } from './pickingTypes';
 
 export const usePicking = () => {
   const dispatch = useAppDispatch();
   const { tasks, selectedTask, loading, actionLoading, error, meta } =
     useAppSelector((state) => state.picking);
+  const { issues: availableIssues, loading: issuesLoading } = useAppSelector(
+    (state) => state.inventoryIssues
+  );
 
   const fetchTasks = useCallback(
     (status?: PickingTaskStatus) => {
@@ -45,6 +49,20 @@ export const usePicking = () => {
     dispatch(clearSelectedTask());
   }, [dispatch]);
 
+  const fetchAvailable = useCallback(
+    (params?: any) => {
+      dispatch(fetchAvailableIssues(params || {}));
+    },
+    [dispatch]
+  );
+
+  const claimIssue = useCallback(
+    async (issueId: number) => {
+      return dispatch(claimInventoryIssue(issueId)).unwrap();
+    },
+    [dispatch]
+  );
+
   return {
     tasks,
     selectedTask,
@@ -57,6 +75,10 @@ export const usePicking = () => {
     confirmTask,
     setSelected,
     clearSelected,
+    availableIssues,
+    issuesLoading,
+    fetchAvailable,
+    claimIssue,
   };
 };
 

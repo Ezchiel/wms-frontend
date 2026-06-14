@@ -120,3 +120,44 @@ export const cancelInventoryIssue = createAsyncThunk<
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
 });
+
+export const claimInventoryIssue = createAsyncThunk<
+  InventoryIssue,
+  number,
+  { rejectValue: string }
+>('inventoryIssues/claim', async (id, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.put<ApiResponse<InventoryIssue>>(
+      `/issues/${id}/claim`
+    );
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data?.message || 'Lỗi khi nhận phiếu xuất kho!');
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});
+
+export const fetchAvailableIssues = createAsyncThunk<
+  ApiResponse<InventoryIssue[]>,
+  FetchIssuesParams,
+  { rejectValue: string }
+>('inventoryIssues/fetchAvailable', async (params, { rejectWithValue }) => {
+  try {
+    const { keyword, page = 1, size = 10, sortBy = 'id', sortDir = 'desc' } = params;
+
+    const response = await axiosClient.get<ApiResponse<InventoryIssue[]>>('/issues/available', {
+      params: { keyword, page, size, sortBy, sortDir },
+    });
+
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Lỗi khi tải danh sách phiếu chờ nhận!'
+      );
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});

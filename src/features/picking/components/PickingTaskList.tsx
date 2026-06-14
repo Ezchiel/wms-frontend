@@ -9,6 +9,7 @@ interface Props {
   loading: boolean;
   onRefresh: () => void;
   onSelectTask: (task: PickingTask) => void;
+  onSelectNewIssue?: () => void;
 }
 
 type FilterTab = 'ALL' | PickingTaskStatus;
@@ -25,6 +26,7 @@ export const PickingTaskList: React.FC<Props> = ({
   loading,
   onRefresh,
   onSelectTask,
+  onSelectNewIssue,
 }) => {
   const [activeTab, setActiveTab] = useState<FilterTab>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,14 +53,24 @@ export const PickingTaskList: React.FC<Props> = ({
               Các nhiệm vụ được giao cho bạn
             </p>
           </div>
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all active:scale-90"
-            id="picking-refresh-btn"
-          >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-          </button>
+          <div className="flex items-center gap-2">
+            {!tasks.some((t) => t.status === 'PENDING' || t.status === 'IN_PROGRESS') && onSelectNewIssue && (
+              <button
+                onClick={onSelectNewIssue}
+                className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer"
+              >
+                Chọn phiếu mới
+              </button>
+            )}
+            <button
+              onClick={onRefresh}
+              disabled={loading}
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all active:scale-90"
+              id="picking-refresh-btn"
+            >
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            </button>
+          </div>
         </div>
       </header>
 

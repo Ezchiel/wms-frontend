@@ -62,3 +62,23 @@ export const confirmPickingTask = createAsyncThunk<
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
 });
+
+export const fetchAllPickingTasks = createAsyncThunk<
+  ApiResponse<PickingTask[]>,
+  { status?: string; page?: number; size?: number } | undefined,
+  { rejectValue: string }
+>('picking/fetchAllTasks', async (params, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.get<ApiResponse<PickingTask[]>>('/picking/tasks', {
+      params,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Lỗi khi tải danh sách tất cả nhiệm vụ lấy hàng!'
+      );
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});

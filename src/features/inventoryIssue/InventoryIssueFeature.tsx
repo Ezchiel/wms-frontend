@@ -31,7 +31,7 @@ export const InventoryIssueFeature: React.FC = () => {
       {/* --- WORK AREA --- */}
       <div className="bg-transparent flex flex-col overflow-x-auto">
         <TabNavigation
-          tabs={['All Issues', 'Draft', 'Picking', 'Completed', 'Cancelled']}
+          tabs={['All Issues', 'Draft', 'Approved', 'Picking', 'Completed', 'Cancelled']}
           activeTabIndex={state.tabIndex}
           onTabChange={actions.handleTabChange}
           getTabColor={getTabColor}
@@ -48,7 +48,7 @@ export const InventoryIssueFeature: React.FC = () => {
           ) : (
             <>
               <InventoryIssueTable
-                heads={['Issue Code', 'Customer', 'Issue Date', 'Lines', 'Status', 'Actions']}
+                heads={['Issue Code', 'Customer', 'Issue Date', 'Lines', 'Assigned To', 'Status', 'Actions']}
                 data={state.issues}
                 onViewDetail={actions.handleOpenDetail}
               />
@@ -78,7 +78,6 @@ export const InventoryIssueFeature: React.FC = () => {
           actions.setIsDetailModalOpen(false);
         }}
         onApprove={actions.handleApprove}
-        onConfirm={actions.handleConfirm}
         onCancel={actions.handleCancel}
       />
     </div>

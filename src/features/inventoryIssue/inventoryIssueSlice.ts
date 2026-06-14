@@ -2,8 +2,9 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import {
   approveInventoryIssue,
   cancelInventoryIssue,
-  confirmInventoryIssue,
+  claimInventoryIssue,
   createInventoryIssue,
+  fetchAvailableIssues,
   fetchInventoryIssues,
   fetchIssueById,
 } from './inventoryIssueThunks';
@@ -93,19 +94,33 @@ const inventoryIssueSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // ─── Confirm ─────────────────────────────────────────────────────────
-      .addCase(confirmInventoryIssue.pending, (state) => {
+      // ─── Claim ───────────────────────────────────────────────────────────
+      .addCase(claimInventoryIssue.pending, (state) => {
         state.actionLoading = true;
         state.error = null;
       })
-      .addCase(confirmInventoryIssue.fulfilled, (state, action) => {
+      .addCase(claimInventoryIssue.fulfilled, (state, action) => {
         state.actionLoading = false;
         state.selectedIssue = action.payload;
-        const idx = state.issues.findIndex((i) => i.id === action.payload.id);
-        if (idx !== -1) state.issues[idx] = action.payload;
+        state.issues = state.issues.filter((i) => i.id !== action.payload.id);
       })
-      .addCase(confirmInventoryIssue.rejected, (state, action) => {
+      .addCase(claimInventoryIssue.rejected, (state, action) => {
         state.actionLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // ─── Fetch Available ─────────────────────────────────────────────────
+      .addCase(fetchAvailableIssues.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAvailableIssues.fulfilled, (state, action) => {
+        state.loading = false;
+        state.issues = action.payload.data;
+        state.meta = action.payload.meta;
+      })
+      .addCase(fetchAvailableIssues.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
       })
 

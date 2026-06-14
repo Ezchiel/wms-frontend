@@ -88,6 +88,10 @@ const IssueDetailModal: React.FC<Props> = ({
                 </span>
               </p>
               <p>
+                <span className="font-medium text-wms-muted">Assigned To:</span>{' '}
+                {issue.assignedTo || 'Unassigned'}
+              </p>
+              <p>
                 <span className="font-medium text-wms-muted">Notes:</span> {issue.notes || 'N/A'}
               </p>
             </div>
@@ -154,12 +158,12 @@ const IssueDetailModal: React.FC<Props> = ({
                 onClick={() => onApprove(issue.id)}
                 className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-blue-600 border border-solid border-blue-600 text-white hover:opacity-90 transition-all shadow-sm"
               >
-                Approve &amp; Start Picking
+                Approve &amp; Open for Picking
               </button>
             </>
           )}
 
-          {isAuthorized && !actionLoading && issue.status === 'PICKING' && (
+          {isAuthorized && !actionLoading && (issue.status === 'APPROVED' || issue.status === 'PICKING') && (
             <button
               onClick={() => onCancel(issue.id)}
               className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-red-500 border border-solid border-red-500 text-white hover:opacity-90 transition-all shadow-sm"

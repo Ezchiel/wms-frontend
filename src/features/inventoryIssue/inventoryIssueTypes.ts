@@ -5,9 +5,10 @@ export type IssueStatus = 'DRAFT' | 'APPROVED' | 'PICKING' | 'COMPLETED' | 'CANC
 export const TAB_STATUS_MAP: Record<number, IssueStatus | ''> = {
   0: '',
   1: 'DRAFT',
-  2: 'PICKING',
-  3: 'COMPLETED',
-  4: 'CANCELLED',
+  2: 'APPROVED',
+  3: 'PICKING',
+  4: 'COMPLETED',
+  5: 'CANCELLED',
 };
 
 export interface IssueDetail {
@@ -32,6 +33,7 @@ export interface InventoryIssue {
   createdBy: string;
   createdAt: string;
   details: IssueDetail[];
+  assignedTo: string | null;
 }
 
 export interface CreateIssueDetailPayload {

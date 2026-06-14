@@ -6,7 +6,6 @@ import { fetchStorageLocations } from '../storageLocation/storageLocationThunks'
 import {
   approveInventoryIssue,
   cancelInventoryIssue,
-  confirmInventoryIssue,
   createInventoryIssue,
   fetchInventoryIssues,
 } from './inventoryIssueThunks';
@@ -91,27 +90,13 @@ export const useInventoryIssue = () => {
   const handleApprove = async (id: number) => {
     if (
       window.confirm(
-        'Bạn có chắc chắn muốn duyệt phiếu này?\nHệ thống sẽ tự động tạo lệnh lấy hàng (Picking Tasks) và chuyển trạng thái phiếu sang PICKING.'
+        'Bạn có chắc chắn muốn duyệt phiếu này?\nTrạng thái sẽ chuyển sang APPROVED và sẵn sàng cho nhân viên kho nhận phiếu.'
       )
     ) {
       try {
         await dispatch(approveInventoryIssue(id)).unwrap();
       } catch (err: unknown) {
         alert(err || 'Failed to approve inventory issue');
-      }
-    }
-  };
-
-  const handleConfirm = async (id: number) => {
-    if (
-      window.confirm(
-        'Bạn có chắc chắn muốn xác nhận xuất kho cho phiếu này? Hệ thống sẽ tự động giảm tồn kho tương ứng.'
-      )
-    ) {
-      try {
-        await dispatch(confirmInventoryIssue(id)).unwrap();
-      } catch (err: unknown) {
-        alert(err || 'Failed to confirm inventory issue');
       }
     }
   };
@@ -150,7 +135,6 @@ export const useInventoryIssue = () => {
       handleOpenDetail,
       handleCreate,
       handleApprove,
-      handleConfirm,
       handleCancel,
       setIsModalOpen,
       setIsDetailModalOpen,

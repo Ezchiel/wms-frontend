@@ -58,6 +58,9 @@ const InventoryIssueTable: React.FC<Props> = ({ heads, data, onViewDetail }) => 
               <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
                 {item.details?.length || 0}
               </td>
+              <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
+                {item.assignedTo || '—'}
+              </td>
               <td className="py-4.5 px-3.75 border-b border-b-wms-border-color">
                 <span
                   className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${getStatusStyle(item.status)}`}

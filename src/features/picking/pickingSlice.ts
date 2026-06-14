@@ -4,6 +4,7 @@ import {
   fetchMyPickingTasks,
   fetchPickingTaskById,
   confirmPickingTask,
+  fetchAllPickingTasks,
 } from './pickingThunks';
 
 const initialState: PickingState = {
@@ -42,6 +43,21 @@ const pickingSlice = createSlice({
         state.meta = action.payload.meta;
       })
       .addCase(fetchMyPickingTasks.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // fetchAllPickingTasks
+      .addCase(fetchAllPickingTasks.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllPickingTasks.fulfilled, (state, action) => {
+        state.loading = false;
+        state.tasks = action.payload.data;
+        state.meta = action.payload.meta;
+      })
+      .addCase(fetchAllPickingTasks.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
