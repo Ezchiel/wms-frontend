@@ -11,6 +11,8 @@ import {
   StorageLocationPage,
   UserPage,
   InventoryIssuePage,
+  DashboardPage,
+  ReportsPage,
 } from '../pages/admin/index.ts';
 import { LoginPage } from '../pages/auth';
 import {
@@ -48,7 +50,15 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Navigate to="/users" replace />,
+            element: <Navigate to="/dashboard" replace />,
+          },
+          {
+            path: 'dashboard',
+            element: <DashboardPage />,
+          },
+          {
+            path: 'reports',
+            element: <ReportsPage />,
           },
           {
             path: 'users',

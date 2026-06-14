@@ -11,6 +11,8 @@ import userReducer from '../features/users/userSlices.ts';
 import inventoryCheckReducer from '../features/inventoryCheck/inventoryCheckSlice.ts';
 import inventoryIssueReducer from '../features/inventoryIssue/inventoryIssueSlice.ts';
 import pickingReducer from '../features/picking/pickingSlice';
+import dashboardReducer from '../features/dashboard/dashboardSlice.ts';
+import reportsReducer from '../features/reports/reportsSlice.ts';
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +28,8 @@ export const store = configureStore({
     inventoryCheck: inventoryCheckReducer,
     inventoryIssues: inventoryIssueReducer,
     picking: pickingReducer,
+    dashboard: dashboardReducer,
+    reports: reportsReducer,
   },
 });
 

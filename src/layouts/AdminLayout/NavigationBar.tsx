@@ -39,7 +39,10 @@ const NavigationBar: React.FC = () => {
     {
       icon: 'fa-solid fa-chart-area',
       title: 'Reports & Analytics',
-      subItems: [{ title: 'Dashboard', path: '/dashboard' }],
+      subItems: [
+        { title: 'Dashboard', path: '/dashboard' },
+        { title: 'Reports', path: '/reports' },
+      ],
     },
   ];
 

@@ -7,4 +7,7 @@ export { default as StorageLocationPage } from './StorageLocationPage';
 export { default as UserPage } from './UserPage';
 export { default as InventoryCheckPage } from './InventoryCheckPage';
 export { default as InventoryIssuePage } from './InventoryIssuePage';
+export { default as DashboardPage } from './DashboardPage';
+export { default as ReportsPage } from './ReportsPage';
+
 
