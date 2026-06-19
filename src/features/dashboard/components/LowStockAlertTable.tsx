@@ -9,9 +9,9 @@ export const LowStockAlertTable: React.FC<LowStockAlertTableProps> = ({ alerts }
   return (
     <div className="bg-white rounded-3xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.03)]">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-gray-700 text-sm font-semibold">Cảnh báo tồn kho dưới mức tối thiểu</h3>
+        <h3 className="text-gray-700 text-sm font-semibold">Low stock alerts</h3>
         <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-semibold">
-          {alerts.length} cảnh báo
+          {alerts.length} alerts
         </span>
       </div>
 
@@ -19,11 +19,11 @@ export const LowStockAlertTable: React.FC<LowStockAlertTableProps> = ({ alerts }
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-150 text-gray-400 text-xs font-semibold uppercase tracking-wider">
-              <th className="py-3 px-4">Mã sản phẩm</th>
-              <th className="py-3 px-4">Tên sản phẩm</th>
-              <th className="py-3 px-4 text-center">Định mức tối thiểu</th>
-              <th className="py-3 px-4 text-center">Tồn kho hiện tại</th>
-              <th className="py-3 px-4 text-center">Trạng thái</th>
+              <th className="py-3 px-4">Product code</th>
+              <th className="py-3 px-4">Product name</th>
+              <th className="py-3 px-4 text-center">Minimum stock level</th>
+              <th className="py-3 px-4 text-center">Current stock</th>
+              <th className="py-3 px-4 text-center">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-sm">
@@ -38,7 +38,7 @@ export const LowStockAlertTable: React.FC<LowStockAlertTableProps> = ({ alerts }
                     <td className="py-3 px-4 text-center text-red-650 font-bold bg-red-50/30">{alert.currentTotalStock}</td>
                     <td className="py-3 px-4 text-center">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
-                        Thiếu {deficit} sản phẩm
+                        {deficit} product shortage
                       </span>
                     </td>
                   </tr>
@@ -47,7 +47,7 @@ export const LowStockAlertTable: React.FC<LowStockAlertTableProps> = ({ alerts }
             ) : (
               <tr>
                 <td colSpan={5} className="py-8 text-center text-gray-400 text-sm">
-                  Không có cảnh báo tồn kho thấp. Hệ thống vận hành tốt!
+                  No low stock alerts. System is operating well!
                 </td>
               </tr>
             )}

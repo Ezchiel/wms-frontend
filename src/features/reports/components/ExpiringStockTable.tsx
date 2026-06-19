@@ -19,20 +19,20 @@ export const ExpiringStockTable: React.FC<ExpiringStockTableProps> = ({
     if (days < 7) {
       return {
         bg: 'bg-red-50 text-red-700 border-red-200',
-        text: 'Cận hạn cực độ',
+        text: 'Extremely short expiry',
         icon: <AlertCircle className="w-3.5 h-3.5 text-red-500" />,
       };
     }
     if (days < 30) {
       return {
         bg: 'bg-amber-50 text-amber-700 border-amber-200',
-        text: 'Cảnh báo sắp hết hạn',
+        text: 'Warning',
         icon: <Clock className="w-3.5 h-3.5 text-amber-500" />,
       };
     }
     return {
       bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-      text: 'An toàn',
+      text: 'Safe',
       icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />,
     };
   };
@@ -43,7 +43,7 @@ export const ExpiringStockTable: React.FC<ExpiringStockTableProps> = ({
       <div className="bg-white p-5 rounded-3xl shadow-[0_4px_15px_rgba(0,0,0,0.02)] flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1.5 w-full md:w-96">
           <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
-            Thời gian cảnh báo hết hạn: <span className="text-wms-primary font-bold">{withinDays} ngày</span>
+            Expiry warning time: <span className="text-wms-primary font-bold">{withinDays} days</span>
           </label>
           <input
             type="range"
@@ -62,13 +62,12 @@ export const ExpiringStockTable: React.FC<ExpiringStockTableProps> = ({
               key={days}
               type="button"
               onClick={() => onWithinDaysChange(days)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                withinDays === days
-                  ? 'bg-wms-primary text-white shadow-xs'
-                  : 'bg-slate-50 text-gray-500 hover:bg-slate-100 hover:text-gray-800 border border-gray-200'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${withinDays === days
+                ? 'bg-wms-primary text-white shadow-xs'
+                : 'bg-slate-50 text-gray-500 hover:bg-slate-100 hover:text-gray-800 border border-gray-200'
+                }`}
             >
-              {days} ngày
+              {days} days
             </button>
           ))}
         </div>
@@ -76,7 +75,7 @@ export const ExpiringStockTable: React.FC<ExpiringStockTableProps> = ({
 
       {/* Grid Ledger Table */}
       <div className="bg-white rounded-3xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.03)] relative min-h-[300px]">
-        <h3 className="text-gray-755 text-sm font-bold mb-4">Cảnh báo hạn sử dụng các lô hàng</h3>
+        <h3 className="text-gray-755 text-sm font-bold mb-4">Expiry warning time</h3>
 
         {loading ? (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-3xl z-10">
@@ -88,14 +87,14 @@ export const ExpiringStockTable: React.FC<ExpiringStockTableProps> = ({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-150 text-gray-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="py-3 px-4">Mã SP</th>
-                <th className="py-3 px-4">Tên sản phẩm</th>
-                <th className="py-3 px-4">Số Lô (Batch No)</th>
-                <th className="py-3 px-4">Vị trí kệ</th>
-                <th className="py-3 px-4 text-center">Số lượng</th>
-                <th className="py-3 px-4">Ngày hết hạn</th>
-                <th className="py-3 px-4 text-center">Số ngày còn lại</th>
-                <th className="py-3 px-4 text-center">Mức độ cảnh báo</th>
+                <th className="py-3 px-4">Product code</th>
+                <th className="py-3 px-4">Product name</th>
+                <th className="py-3 px-4">Batch No</th>
+                <th className="py-3 px-4">Location</th>
+                <th className="py-3 px-4 text-center">Quantity</th>
+                <th className="py-3 px-4">Expiry date</th>
+                <th className="py-3 px-4 text-center">Days remaining</th>
+                <th className="py-3 px-4 text-center">Warning</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
@@ -120,7 +119,7 @@ export const ExpiringStockTable: React.FC<ExpiringStockTableProps> = ({
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         <span className={`font-bold ${row.daysRemaining < 7 ? 'text-red-650' : row.daysRemaining < 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                          {row.daysRemaining} ngày
+                          {row.daysRemaining} days
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-center">
@@ -135,7 +134,7 @@ export const ExpiringStockTable: React.FC<ExpiringStockTableProps> = ({
               ) : (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-gray-400">
-                    Không có lô hàng nào hết hạn trong vòng {withinDays} ngày tới.
+                    No batches are expiring within the next {withinDays} days.
                   </td>
                 </tr>
               )}

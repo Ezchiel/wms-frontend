@@ -3,7 +3,6 @@ import { DateRangePicker } from './DateRangePicker';
 import type { InventoryMovement } from '../reportsTypes';
 import type { Product } from '../../products/productTypes';
 import type { ProductGroup } from '../../productGroups/productGroupTypes';
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 interface InventoryMovementTableProps {
   data: InventoryMovement[];
@@ -50,7 +49,7 @@ export const InventoryMovementTable: React.FC<InventoryMovementTableProps> = ({
           {/* Product Selector */}
           <div className="w-56">
             <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">
-              Theo sản phẩm
+              By product
             </label>
             <select
               value={filters.productId || ''}
@@ -64,7 +63,7 @@ export const InventoryMovementTable: React.FC<InventoryMovementTableProps> = ({
               }}
               className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-2.5 text-xs font-medium text-gray-750 focus:outline-none focus:border-wms-primary transition-all cursor-pointer"
             >
-              <option value="">Tất cả sản phẩm</option>
+              <option value="">All products</option>
               {products.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.productName}
@@ -76,7 +75,7 @@ export const InventoryMovementTable: React.FC<InventoryMovementTableProps> = ({
           {/* Group Selector */}
           <div className="w-56">
             <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">
-              Hoặc Theo nhóm
+              Or by group
             </label>
             <select
               value={filters.groupId || ''}
@@ -90,7 +89,7 @@ export const InventoryMovementTable: React.FC<InventoryMovementTableProps> = ({
               }}
               className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-2.5 text-xs font-medium text-gray-750 focus:outline-none focus:border-wms-primary transition-all cursor-pointer"
             >
-              <option value="">Tất cả nhóm</option>
+              <option value="">All groups</option>
               {productGroups.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.groupName}
@@ -103,7 +102,7 @@ export const InventoryMovementTable: React.FC<InventoryMovementTableProps> = ({
 
       {/* Grid Ledger Table */}
       <div className="bg-white rounded-3xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.03)] relative min-h-[300px]">
-        <h3 className="text-gray-755 text-sm font-bold mb-4">Biến động Nhập - Xuất - Tồn (NXT)</h3>
+        <h3 className="text-gray-755 text-sm font-bold mb-4">Stock movement (Receipt - Issue - Balance)</h3>
 
         {loading ? (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-3xl z-10">
@@ -115,13 +114,13 @@ export const InventoryMovementTable: React.FC<InventoryMovementTableProps> = ({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-150 text-gray-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="py-3 px-4">Mã SP</th>
-                <th className="py-3 px-4">Tên sản phẩm</th>
-                <th className="py-3 px-4 text-center">Tồn đầu kỳ</th>
-                <th className="py-3 px-4 text-center">Tổng nhập (+)</th>
-                <th className="py-3 px-4 text-center">Tổng xuất (-)</th>
-                <th className="py-3 px-4 text-center">Điều chỉnh (+/-)</th>
-                <th className="py-3 px-4 text-center font-bold text-slate-800">Tồn cuối kỳ</th>
+                <th className="py-3 px-4">Product code</th>
+                <th className="py-3 px-4">Product name</th>
+                <th className="py-3 px-4 text-center">Opening stock</th>
+                <th className="py-3 px-4 text-center">Total receipt (+)</th>
+                <th className="py-3 px-4 text-center">Total issue (-)</th>
+                <th className="py-3 px-4 text-center">Adjustment (+/-)</th>
+                <th className="py-3 px-4 text-center font-bold text-slate-800">Closing stock</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
@@ -135,21 +134,19 @@ export const InventoryMovementTable: React.FC<InventoryMovementTableProps> = ({
                     </td>
                     <td className="py-3 px-4 text-center text-emerald-650 font-bold bg-emerald-50/20">
                       <span className="inline-flex items-center gap-0.5">
-                        {row.totalReceipt > 0 && <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />}
                         {row.totalReceipt.toLocaleString()}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center text-red-650 font-bold bg-red-50/20">
                       <span className="inline-flex items-center gap-0.5">
-                        {row.totalIssue > 0 && <ArrowDownRight className="w-3.5 h-3.5 text-red-550" />}
                         {row.totalIssue.toLocaleString()}
                       </span>
                     </td>
                     <td className={`py-3 px-4 text-center font-semibold ${row.totalAdjust > 0
-                        ? 'text-blue-600 bg-blue-50/10'
-                        : row.totalAdjust < 0
-                          ? 'text-amber-600 bg-amber-50/10'
-                          : 'text-gray-400'
+                      ? 'text-blue-600 bg-blue-50/10'
+                      : row.totalAdjust < 0
+                        ? 'text-amber-600 bg-amber-50/10'
+                        : 'text-gray-400'
                       }`}>
                       {row.totalAdjust > 0 ? `+${row.totalAdjust}` : row.totalAdjust}
                     </td>
@@ -161,7 +158,7 @@ export const InventoryMovementTable: React.FC<InventoryMovementTableProps> = ({
               ) : (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-gray-400">
-                    Không tìm thấy dữ liệu biến động kho trong khoảng thời gian này.
+                    No stock movement data found for this period.
                   </td>
                 </tr>
               )}

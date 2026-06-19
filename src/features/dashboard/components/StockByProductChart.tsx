@@ -14,7 +14,7 @@ export const StockByProductChart: React.FC<StockByProductChartProps> = ({ data }
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.03)] h-[320px] flex flex-col justify-between">
-      <h3 className="text-gray-700 text-sm font-semibold mb-2">Top 10 sản phẩm tồn kho nhiều nhất</h3>
+      <h3 className="text-gray-700 text-sm font-semibold mb-2">Top 10 products with the highest inventory stock</h3>
       <div className="flex-1 w-full min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart

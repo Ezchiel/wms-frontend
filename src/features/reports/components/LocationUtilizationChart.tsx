@@ -18,12 +18,12 @@ export const LocationUtilizationChart: React.FC<LocationUtilizationChartProps> =
         {data.map((zoneData, idx) => (
           <div key={idx} className="bg-white rounded-2xl p-5 shadow-[0_4px_15px_rgba(0,0,0,0.02)] border border-gray-100 flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Khu vực: {zoneData.zone}</p>
+              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Zone: {zoneData.zone}</p>
               <h4 className="text-lg font-bold text-gray-700 mt-1">
-                Tỷ lệ: {zoneData.utilizationRate.toFixed(1)}%
+                Rate: {zoneData.utilizationRate.toFixed(1)}%
               </h4>
               <p className="text-xs text-gray-500 mt-1">
-                Sử dụng {zoneData.fullLocations}/{zoneData.totalLocations} kệ
+                Utilization {zoneData.fullLocations}/{zoneData.totalLocations} shelves
               </p>
             </div>
             <div className="relative w-12 h-12 flex items-center justify-center">
@@ -58,7 +58,7 @@ export const LocationUtilizationChart: React.FC<LocationUtilizationChartProps> =
 
       {/* Main Chart */}
       <div className="bg-white rounded-3xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.03)] h-[380px] flex flex-col justify-between relative">
-        <h3 className="text-gray-750 text-sm font-bold mb-4">Thống kê chi tiết vị trí kệ theo khu vực</h3>
+        <h3 className="text-gray-750 text-sm font-bold mb-4">Zone shelf utilization statistics</h3>
 
         {loading ? (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-3xl z-10">
@@ -83,14 +83,14 @@ export const LocationUtilizationChart: React.FC<LocationUtilizationChartProps> =
               />
               <Legend verticalAlign="top" height={36} iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
               <Bar
-                name="Vị trí đã dùng"
+                name="Occupied locations"
                 dataKey="fullLocations"
                 fill="#3b82f6"
                 radius={[4, 4, 0, 0]}
                 barSize={16}
               />
               <Bar
-                name="Vị trí còn trống"
+                name="Empty locations"
                 dataKey="emptyLocations"
                 fill="#10b981"
                 radius={[4, 4, 0, 0]}

@@ -17,11 +17,11 @@ const COLORS = [
 ];
 
 export const StockByZoneChart: React.FC<StockByZoneChartProps> = ({ data }) => {
-  const chartData = data.length > 0 ? data : [{ label: 'Không có dữ liệu', value: 0 }];
+  const chartData = data.length > 0 ? data : [{ label: 'No data', value: 0 }];
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.03)] h-[320px] flex flex-col justify-between">
-      <h3 className="text-gray-700 text-sm font-semibold mb-2">Tồn kho theo khu vực (Zone)</h3>
+      <h3 className="text-gray-700 text-sm font-semibold mb-2">Inventory by zone</h3>
       <div className="flex-1 w-full min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

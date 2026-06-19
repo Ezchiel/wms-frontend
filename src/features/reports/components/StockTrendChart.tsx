@@ -50,13 +50,12 @@ export const StockTrendChart: React.FC<StockTrendChartProps> = ({
                 key={g}
                 type="button"
                 onClick={() => onFiltersChange({ ...filters, groupBy: g })}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
-                  filters.groupBy === g
-                    ? 'bg-wms-primary text-white shadow-xs'
-                    : 'text-gray-500 hover:text-gray-800'
-                }`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${filters.groupBy === g
+                  ? 'bg-wms-primary text-white shadow-xs'
+                  : 'text-gray-500 hover:text-gray-800'
+                  }`}
               >
-                {g === 'day' ? 'Ngày' : g === 'week' ? 'Tuần' : 'Tháng'}
+                {g === 'day' ? 'Day' : g === 'week' ? 'Week' : 'Month'}
               </button>
             ))}
           </div>
@@ -74,7 +73,7 @@ export const StockTrendChart: React.FC<StockTrendChartProps> = ({
             }
             className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-medium text-gray-750 focus:outline-none focus:border-wms-primary transition-all cursor-pointer"
           >
-            <option value="">Tất cả sản phẩm</option>
+            <option value="">All products</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.productName} ({p.productCode})
@@ -87,7 +86,7 @@ export const StockTrendChart: React.FC<StockTrendChartProps> = ({
       {/* Chart container */}
       <div className="bg-white rounded-3xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.03)] h-[400px] flex flex-col justify-between relative">
         <h3 className="text-gray-755 text-sm font-bold mb-4">Biểu đồ xu hướng tồn kho</h3>
-        
+
         {loading ? (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-3xl z-10">
             <div className="w-10 h-10 border-4 border-wms-primary border-t-transparent rounded-full animate-spin"></div>

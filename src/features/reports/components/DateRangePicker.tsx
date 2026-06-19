@@ -12,7 +12,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
     <div className="flex flex-wrap items-center gap-3 bg-slate-50 border border-gray-200 p-3 rounded-2xl">
       <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold uppercase tracking-wider">
         <Calendar className="w-4 h-4 text-wms-muted" />
-        Khoảng thời gian
+        Time period
       </div>
       <div className="flex items-center gap-2">
         <input
@@ -21,7 +21,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
           onChange={(e) => onChange(e.target.value, to)}
           className="bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-sm font-medium text-gray-750 focus:outline-none focus:border-wms-primary transition-all"
         />
-        <span className="text-gray-400 text-xs">đến</span>
+        <span className="text-gray-400 text-xs">to</span>
         <input
           type="date"
           value={to}

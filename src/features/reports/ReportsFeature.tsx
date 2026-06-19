@@ -12,11 +12,11 @@ export const ReportsFeature: React.FC = () => {
   const { state, actions } = useReports();
 
   const reportTabs = [
-    'Xu hướng tồn kho',
-    'Tồn theo nhóm',
-    'Tỷ lệ sử dụng kệ',
-    'Biến động tồn kho',
-    'Lô sắp hết hạn',
+    'Stock trends',
+    'Stock by group',
+    'Location utilization',
+    'Stock movement',
+    'Expiring stock',
   ];
 
   const getTabColor = (index: number) => {
@@ -36,13 +36,13 @@ export const ReportsFeature: React.FC = () => {
   };
 
   return (
-    <div className="w-full pl-75 pr-10 py-6 text-wms-text-main">
+    <div className="w-full pl-75 pr-10 text-wms-text-main">
       {/* --- PAGE TITLE --- */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-bold text-gray-800">Báo cáo & Thống kê</h1>
-          <p className="text-[13px] text-wms-muted mt-1">
-            Phân tích dữ liệu lịch sử tồn kho và hiệu suất kho hàng
+          <h1 className="text-[22px] font-semibold mb-1.25">Reports & Statistics</h1>
+          <p className="text-[13px] text-wms-muted mb-6.25">
+            Analyze historical inventory data and warehouse performance.
           </p>
         </div>
         <button
@@ -50,7 +50,7 @@ export const ReportsFeature: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-800 rounded-xl shadow-xs transition-all text-xs font-semibold cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${getActiveTabLoading() ? 'animate-spin' : ''}`} />
-          Làm mới tab
+          Refresh
         </button>
       </div>
 

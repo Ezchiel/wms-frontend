@@ -32,11 +32,11 @@ export const StockByGroupTable: React.FC<StockByGroupTableProps> = ({ data, load
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-150 text-gray-400 text-xs font-semibold uppercase tracking-wider">
-              <th className="py-3 px-4">Mã nhóm</th>
-              <th className="py-3 px-4">Tên nhóm sản phẩm</th>
-              <th className="py-3 px-4 text-center">Tổng số lượng</th>
-              <th className="py-3 px-4">Tỷ lệ phân phối số lượng</th>
-              <th className="py-3 px-4 text-right">Tổng giá trị ước tính</th>
+              <th className="py-3 px-4">Group code</th>
+              <th className="py-3 px-4">Group name</th>
+              <th className="py-3 px-4 text-center">Total quantity</th>
+              <th className="py-3 px-4">Quantity distribution ratio</th>
+              <th className="py-3 px-4 text-right">Estimated total value</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-sm">
@@ -72,7 +72,7 @@ export const StockByGroupTable: React.FC<StockByGroupTableProps> = ({ data, load
             ) : (
               <tr>
                 <td colSpan={5} className="py-12 text-center text-gray-400">
-                  Không có dữ liệu tồn kho theo nhóm sản phẩm.
+                  No stock data by group.
                 </td>
               </tr>
             )}

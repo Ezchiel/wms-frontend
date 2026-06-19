@@ -96,6 +96,10 @@ export const router = createBrowserRouter([
             path: 'inventory-checks',
             element: <InventoryCheckPage />,
           },
+          {
+            path: '*',
+            element: <Navigate to="/dashboard" replace />,
+          },
         ],
       },
 
@@ -139,6 +143,10 @@ export const router = createBrowserRouter([
           {
             path: 'profile',
             element: <ProfilePage />,
+          },
+          {
+            path: '*',
+            element: <Navigate to="/mobile/tasks" replace />,
           },
         ],
       },
