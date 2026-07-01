@@ -1,6 +1,6 @@
 import type { Meta } from '../../types/api.types';
 
-export type ReceiptStatus = 'EXPECTED' | 'RECEIVING' | 'PUTAWAY_PENDING';
+export type ReceiptStatus = 'EXPECTED' | 'RECEIVING' | 'PUTAWAY_PENDING' | 'COMPLETED' | 'CANCELLED';
 
 export const TAB_STATUS_MAP: Record<number, ReceiptStatus | undefined> = {
   0: undefined,
@@ -34,6 +34,7 @@ export interface InventoryReceipt {
   status: ReceiptStatus;
   createdAt: string;
   createdBy: string;
+  assignedTo: string | null;
   totalAmount: number;
   details: InventoryReceiptDetail[];
 }

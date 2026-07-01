@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { clearSuggestion } from './putawaySlice';
-import { confirmPutaway, fetchPutawaySuggestion } from './putawayThunks';
+import { clearActiveTask } from './putawaySlice';
+import { confirmPutawayTask, fetchPutawayTaskByLpn, claimPutawayTask } from './putawayThunks';
 
 type Step = 'scan_lpn' | 'show_guidance' | 'scan_shelf' | 'success';
 
 export const usePutaway = () => {
   const dispatch = useAppDispatch();
-  const { suggestion, loading, confirming, error } = useAppSelector((s) => s.putaway);
+  const { activeTask, loading, confirming, error } = useAppSelector((s) => s.putaway);
 
   const [step, setStep] = useState<Step>('scan_lpn');
   const [lpnInput, setLpnInput] = useState('');
@@ -34,9 +34,17 @@ export const usePutaway = () => {
 
       if (!codeToScan) return;
 
-      const result = await dispatch(fetchPutawaySuggestion(codeToScan));
+      const result = await dispatch(fetchPutawayTaskByLpn(codeToScan));
 
-      if (fetchPutawaySuggestion.fulfilled.match(result)) {
+      if (fetchPutawayTaskByLpn.fulfilled.match(result)) {
+        const task = result.payload;
+        // Nếu task chưa được phân công (assignedTo = null) và status = PENDING, tự động claim
+        if (!task.assignedTo && task.status === 'PENDING') {
+          const claimResult = await dispatch(claimPutawayTask(task.id));
+          if (claimPutawayTask.rejected.match(claimResult)) {
+            return; // Đã xảy ra lỗi khi claim
+          }
+        }
         setStep('show_guidance');
       }
     },
@@ -52,11 +60,11 @@ export const usePutaway = () => {
 
   const handleScanShelf = useCallback(async () => {
     // 1. Kiểm tra trạng thái
-    if (confirming || !suggestion) return;
+    if (confirming || !activeTask) return;
 
     // 2. Lấy giá trị input (trim để tránh lỗi khoảng trắng)
     const input = shelfInput.trim().toUpperCase();
-    const target = suggestion.suggestedLocationCode.toUpperCase();
+    const target = activeTask.suggestedLocationCode.toUpperCase();
 
     if (input !== target) {
       setShelfError(`Mã kệ không khớp! Yêu cầu: ${target}`);
@@ -65,22 +73,27 @@ export const usePutaway = () => {
 
     // 3. Gọi API xác nhận
     const result = await dispatch(
-      confirmPutaway({
-        lpnCode: suggestion.lpnCode,
-        locationId: suggestion.suggestedLocationId,
+      confirmPutawayTask({
+        taskId: activeTask.id,
+        locationId: activeTask.suggestedLocationId,
       })
     );
 
     // 4. Xử lý kết quả
-    if (confirmPutaway.fulfilled.match(result)) {
+    if (confirmPutawayTask.fulfilled.match(result)) {
       // Chuyển sang step thành công
+      setSuccessData({
+        lpnCode: activeTask.lpnCode,
+        productName: activeTask.productName,
+        locationCode: activeTask.suggestedLocationCode,
+      });
+      setCompletedCount((prev) => prev + 1);
       setStep('success');
-      // ... các logic setSuccessData khác
     }
-  }, [shelfInput, suggestion, confirming, dispatch]);
+  }, [shelfInput, activeTask, confirming, dispatch]);
 
   const handleReset = useCallback(() => {
-    dispatch(clearSuggestion());
+    dispatch(clearActiveTask());
     setStep('scan_lpn');
     setLpnInput('');
     setShelfInput('');
@@ -92,7 +105,7 @@ export const usePutaway = () => {
     if (step === 'show_guidance') {
       setStep('scan_lpn');
       setLpnInput('');
-      dispatch(clearSuggestion());
+      dispatch(clearActiveTask());
     } else if (step === 'scan_shelf') {
       setStep('show_guidance');
       setShelfInput('');
@@ -106,7 +119,7 @@ export const usePutaway = () => {
       lpnInput,
       shelfInput,
       shelfError,
-      suggestion,
+      activeTask,
       loading,
       confirming,
       error,
@@ -127,3 +140,4 @@ export const usePutaway = () => {
     shelfInputRef,
   };
 };
+

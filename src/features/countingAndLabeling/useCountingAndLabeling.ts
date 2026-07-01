@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { countAndLabel, fetchReceipts } from '../inventoryReceipt/inventoryReceiptThunks';
+import { countAndLabel, fetchReceipts, claimReceipt } from '../inventoryReceipt/inventoryReceiptThunks';
 import type { ItemState } from './countingAndLabelingTypes';
 
 export const useCountingAndLabeling = () => {
@@ -23,6 +23,13 @@ export const useCountingAndLabeling = () => {
   }, [dispatch, receipts.length]);
 
   const receipt = receipts.find((r) => r.id === Number(receiptId)) ?? null;
+
+  // Tự động nhận phiếu (claim) nếu phiếu chưa có người nhận và đang ở trạng thái RECEIVING
+  useEffect(() => {
+    if (receipt && receipt.status === 'RECEIVING' && !receipt.assignedTo) {
+      dispatch(claimReceipt(receipt.id));
+    }
+  }, [receipt, dispatch]);
 
   const generateInitialStates = (r: typeof receipt) => {
     if (!r || !r.details) return {};

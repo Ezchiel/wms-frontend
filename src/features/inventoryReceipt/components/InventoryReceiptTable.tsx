@@ -16,6 +16,8 @@ const InventoryReceiptTable: React.FC<Props> = ({ heads, data, onViewDetail }) =
         return 'bg-blue-100 text-blue-700';
       case 'PUTAWAY_PENDING':
         return 'bg-orange-100 text-orange-700';
+      case 'COMPLETED':
+        return 'bg-green-100 text-green-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }

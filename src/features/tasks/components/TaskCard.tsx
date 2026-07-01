@@ -1,11 +1,26 @@
 import { Link } from 'react-router-dom';
 import type { InventoryReceipt, ReceiptStatus } from '../../inventoryReceipt/inventoryReceiptTypes';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { claimReceipt } from '../../inventoryReceipt/inventoryReceiptThunks';
+import { toast } from 'react-toastify';
 
 interface TaskProps {
   receipt: InventoryReceipt;
 }
 
 const TaskCard = ({ receipt }: TaskProps) => {
+  const dispatch = useAppDispatch();
+  const currentUser = useAppSelector((state) => state.auth.user);
+
+  const handleClaim = async () => {
+    try {
+      await dispatch(claimReceipt(receipt.id)).unwrap();
+      toast.success('Nhận phiếu kiểm đếm thành công!');
+    } catch (err: any) {
+      toast.error(err || 'Không thể nhận phiếu!');
+    }
+  };
+
   const statusConfig: Record<ReceiptStatus, { label: string; styles: string }> = {
     EXPECTED: { label: 'EXPECTED', styles: 'bg-yellow-50 text-yellow-600 border-yellow-200' },
     RECEIVING: { label: 'RECEIVING', styles: 'bg-blue-50 text-blue-600 border-blue-200' },
@@ -13,6 +28,8 @@ const TaskCard = ({ receipt }: TaskProps) => {
       label: 'PUTAWAY',
       styles: 'bg-orange-50 text-orange-600 border-orange-200',
     },
+    COMPLETED: { label: 'COMPLETED', styles: 'bg-green-50 text-green-600 border-green-200' },
+    CANCELLED: { label: 'CANCELLED', styles: 'bg-gray-50 text-gray-600 border-gray-200' },
   };
 
   const currentStatus = statusConfig[receipt.status] ?? {
@@ -80,15 +97,29 @@ const TaskCard = ({ receipt }: TaskProps) => {
       )}
 
       {/* Action button — pass receiptId in URL */}
-      {receipt.status === 'RECEIVING' && (
-        <Link
-          to={`/mobile/count-and-label/${receipt.id}`}
-          className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1"
-        >
-          <i className="fa-solid fa-qrcode text-[18px]"></i>
-          Count and label now
-        </Link>
-      )}
+      {receipt.status === 'RECEIVING' &&
+        (receipt.assignedTo === currentUser?.username ? (
+          <Link
+            to={`/mobile/count-and-label/${receipt.id}`}
+            className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1"
+          >
+            <i className="fa-solid fa-qrcode text-[18px]"></i>
+            Count and label now
+          </Link>
+        ) : !receipt.assignedTo ? (
+          <button
+            onClick={handleClaim}
+            className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1 cursor-pointer"
+          >
+            <i className="fa-solid fa-clipboard-check text-[18px]"></i>
+            Claim receipt
+          </button>
+        ) : (
+          <div className="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 mt-1 border border-gray-200 text-[13px]">
+            <i className="fa-solid fa-lock text-[14px]"></i>
+            Assigned to: {receipt.assignedTo}
+          </div>
+        ))}
       {receipt.status === 'PUTAWAY_PENDING' && (
         <Link
           to="/mobile/put-away"

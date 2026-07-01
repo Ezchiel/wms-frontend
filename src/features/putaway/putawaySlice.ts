@@ -1,20 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { confirmPutaway, fetchPutawaySuggestion } from './putawayThunks';
+import { confirmPutawayTask, fetchPutawayTaskByLpn, claimPutawayTask, type PutawayTask } from './putawayThunks';
 
 export interface PutawayState {
-  suggestion: {
-    lpnCode: string;
-    productName: string;
-    suggestedLocationCode: string;
-    suggestedLocationId: number;
-  } | null;
+  activeTask: PutawayTask | null;
   loading: boolean;
   confirming: boolean;
   error: string | null;
 }
 
 const initialState: PutawayState = {
-  suggestion: null,
+  activeTask: null,
   loading: false,
   confirming: false,
   error: null,
@@ -24,8 +19,8 @@ const putawaySlice = createSlice({
   name: 'putaway',
   initialState,
   reducers: {
-    clearSuggestion: (state) => {
-      state.suggestion = null;
+    clearActiveTask: (state) => {
+      state.activeTask = null;
       state.error = null;
     },
     clearError: (state) => {
@@ -34,33 +29,51 @@ const putawaySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchPutawaySuggestion.pending, (state) => {
+      // Fetch task by LPN
+      .addCase(fetchPutawayTaskByLpn.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.suggestion = null;
+        state.activeTask = null;
       })
-      .addCase(fetchPutawaySuggestion.fulfilled, (state, action) => {
+      .addCase(fetchPutawayTaskByLpn.fulfilled, (state, action) => {
         state.loading = false;
-        state.suggestion = action.payload;
+        state.activeTask = action.payload;
       })
-      .addCase(fetchPutawaySuggestion.rejected, (state, action) => {
+      .addCase(fetchPutawayTaskByLpn.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      .addCase(confirmPutaway.pending, (state) => {
+
+      // Claim Putaway Task
+      .addCase(claimPutawayTask.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(claimPutawayTask.fulfilled, (state, action) => {
+        state.loading = false;
+        state.activeTask = action.payload;
+      })
+      .addCase(claimPutawayTask.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // Confirm Putaway Task
+      .addCase(confirmPutawayTask.pending, (state) => {
         state.confirming = true;
         state.error = null;
       })
-      .addCase(confirmPutaway.fulfilled, (state) => {
+      .addCase(confirmPutawayTask.fulfilled, (state) => {
         state.confirming = false;
-        state.suggestion = null;
+        state.activeTask = null;
       })
-      .addCase(confirmPutaway.rejected, (state, action) => {
+      .addCase(confirmPutawayTask.rejected, (state, action) => {
         state.confirming = false;
         state.error = action.payload as string;
       });
   },
 });
 
-export const { clearSuggestion, clearError } = putawaySlice.actions;
+export const { clearActiveTask, clearError } = putawaySlice.actions;
 export default putawaySlice.reducer;
+

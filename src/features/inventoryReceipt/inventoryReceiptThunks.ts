@@ -110,3 +110,19 @@ export const countAndLabel = createAsyncThunk<
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
 });
+
+export const claimReceipt = createAsyncThunk<
+  InventoryReceipt,
+  number,
+  { rejectValue: string }
+>('receipts/claim', async (id, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.put<ApiResponse<InventoryReceipt>>(`/receipts/${id}/claim`);
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data?.message || 'Nhận phiếu kiểm đếm thất bại!');
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});

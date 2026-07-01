@@ -202,13 +202,6 @@ const AddIssueModal: React.FC<Props> = ({
                     </td>
                   </tr>
                 ))}
-                {formData.details.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="text-center py-5 text-wms-muted">
-                      No products added yet. Click "Add product" below to start.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
 

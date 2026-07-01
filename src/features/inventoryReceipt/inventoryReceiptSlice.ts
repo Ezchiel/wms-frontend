@@ -5,6 +5,7 @@ import {
   createReceipt,
   fetchReceipts,
   fetchReceiptsMobile,
+  claimReceipt,
 } from './inventoryReceiptThunks';
 import type { ReceiptState } from './inventoryReceiptTypes';
 
@@ -114,6 +115,23 @@ const receiptSlice = createSlice({
         state.loading = false;
       })
       .addCase(countAndLabel.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      // Claim receipt
+      .addCase(claimReceipt.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(claimReceipt.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.receipts.findIndex((r) => r.id === action.payload.id);
+        if (index !== -1) {
+          state.receipts[index] = action.payload;
+        }
+      })
+      .addCase(claimReceipt.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

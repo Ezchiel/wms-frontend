@@ -39,15 +39,15 @@ export const PutawayFeature: React.FC = () => {
           />
         )}
 
-        {/* Step 2: Hiển thị gợi ý vị trí (Chỉ render khi có suggestion) */}
-        {state.step === 'show_guidance' && state.suggestion && (
-          <StepGuidance suggestion={state.suggestion} onProceed={actions.handleProceedToScan} />
+        {/* Step 2: Hiển thị gợi ý vị trí (Chỉ render khi có activeTask) */}
+        {state.step === 'show_guidance' && state.activeTask && (
+          <StepGuidance suggestion={state.activeTask} onProceed={actions.handleProceedToScan} />
         )}
 
         {/* Step 3: Quét xác nhận mã kệ */}
-        {state.step === 'scan_shelf' && state.suggestion && (
+        {state.step === 'scan_shelf' && state.activeTask && (
           <StepScanShelf
-            suggestedCode={state.suggestion.suggestedLocationCode}
+            suggestedCode={state.activeTask.suggestedLocationCode}
             shelfInput={state.shelfInput}
             shelfRef={shelfInputRef}
             shelfError={state.shelfError}
