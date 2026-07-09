@@ -20,6 +20,7 @@ export interface PutawayTask {
   note: string | null;
   putawayAt: string | null;
   createdAt: string;
+  unit?: string | null;  // Đơn vị tính của sản phẩm (thùng, chai, cái...)
 }
 
 export const fetchPutawayTaskByLpn = createAsyncThunk<

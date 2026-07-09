@@ -8,6 +8,7 @@ interface ExcelRow {
   Shelf?: string | number;
   Description?: string;
   'Path Sequence'?: string | number;
+  'Max Capacity'?: string | number;
 }
 
 interface FilterStorageLocationProps {
@@ -59,7 +60,7 @@ const FilterStorageLocation: React.FC<FilterStorageLocationProps> = ({
               barcode,
               description: row.Description ? String(row.Description) : '',
               pathSequence: row['Path Sequence'] ? Number(row['Path Sequence']) : 0,
-              isFull: false,
+              maxCapacity: row['Max Capacity'] ? Number(row['Max Capacity']) : null,
             };
           })
           .filter((item) => item.zone && item.rack && item.shelf);

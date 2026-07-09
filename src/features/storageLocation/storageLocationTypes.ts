@@ -16,8 +16,18 @@ export interface StorageLocation {
   shelf: string;
   barcode: string;
   description?: string;
-  full: boolean;
+  maxCapacity?: number | null;
+  currentQuantity: number;
+  availableCapacity?: number | null;
+  isFull: boolean;
+  full: boolean; // Keep for compatibility with existing code
+  fillRate: number;
   pathSequence?: number;
+  locationType?: string;
+  // Sản phẩm đang khóa vị trí (null nếu vị trí trống)
+  lockedProductId?: number | null;
+  lockedProductName?: string | null;
+  unit?: string | null;
 }
 
 export interface StorageLocationPayload {
@@ -26,7 +36,7 @@ export interface StorageLocationPayload {
   shelf: string;
   barcode: string;
   description?: string;
-  isFull?: boolean;
+  maxCapacity?: number | null;
   pathSequence?: number;
 }
 

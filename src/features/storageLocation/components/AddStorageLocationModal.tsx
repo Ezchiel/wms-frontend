@@ -15,7 +15,7 @@ const AddStorageLocationModal: React.FC<Props> = ({ isOpen, onClose, onSave, ini
     shelf: '',
     barcode: '',
     description: '',
-    isFull: false,
+    maxCapacity: null,
     pathSequence: 0,
   };
 
@@ -25,7 +25,7 @@ const AddStorageLocationModal: React.FC<Props> = ({ isOpen, onClose, onSave, ini
     shelf: initialData?.shelf || '',
     barcode: initialData?.barcode || '',
     description: initialData?.description || '',
-    isFull: initialData?.full || false,
+    maxCapacity: initialData?.maxCapacity !== undefined ? initialData.maxCapacity : null,
     pathSequence: initialData?.pathSequence || 0,
   });
 
@@ -137,8 +137,8 @@ const AddStorageLocationModal: React.FC<Props> = ({ isOpen, onClose, onSave, ini
             />
           </div>
 
-          {/* Path Sequence & IsFull */}
-          <div className="flex items-center gap-2 text-[13px]">
+          {/* Path Sequence & Max Capacity */}
+          <div className="grid grid-cols-2 gap-4">
             {/* Input Path Sequence */}
             <div className="flex flex-col gap-1.5 text-[13px]">
               <label className="font-medium text-wms-text-main">Path Sequence</label>
@@ -153,17 +153,20 @@ const AddStorageLocationModal: React.FC<Props> = ({ isOpen, onClose, onSave, ini
               />
             </div>
 
-            {/* Checkbox IsFull */}
-            <div className="flex items-center gap-2 text-[13px] mt-6">
+            {/* Input Max Capacity */}
+            <div className="flex flex-col gap-1.5 text-[13px]">
+              <label className="font-medium text-wms-text-main">Max Capacity</label>
               <input
-                type="checkbox"
-                id="isFull"
-                checked={formData.isFull}
-                onChange={(e) => setFormData({ ...formData, isFull: e.target.checked })}
+                type="number"
+                min={1}
+                className="py-2 px-3.5 border border-solid border-wms-border-color rounded-md outline-none text-wms-text-main placeholder:text-wms-muted focus:border-wms-primary transition-colors"
+                placeholder="Leave empty for unlimited"
+                value={formData.maxCapacity === null || formData.maxCapacity === undefined ? '' : formData.maxCapacity}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  handleInputChange('maxCapacity', val === '' ? null : parseInt(val) || null);
+                }}
               />
-              <label htmlFor="isFull" className="font-medium text-wms-text-main cursor-pointer">
-                Location is full
-              </label>
             </div>
           </div>
         </div>

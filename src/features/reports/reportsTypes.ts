@@ -16,6 +16,8 @@ export interface LocationUtilization {
   totalLocations: number;
   fullLocations: number;
   emptyLocations: number;
+  totalQuantity: number;
+  totalCapacity: number;
   utilizationRate: number;
 }
 

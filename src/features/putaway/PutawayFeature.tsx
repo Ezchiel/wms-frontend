@@ -52,6 +52,7 @@ export const PutawayFeature: React.FC = () => {
             shelfRef={shelfInputRef}
             shelfError={state.shelfError}
             apiError={state.error}
+            conflictError={state.conflictError}
             confirming={state.confirming}
             onConfirm={actions.handleScanShelf}
             onInputChange={actions.setShelfInput}

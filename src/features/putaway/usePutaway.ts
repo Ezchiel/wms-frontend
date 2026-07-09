@@ -13,6 +13,8 @@ export const usePutaway = () => {
   const [lpnInput, setLpnInput] = useState('');
   const [shelfInput, setShelfInput] = useState('');
   const [shelfError, setShelfError] = useState<string | null>(null);
+  // Lỗi 409: vị trí đang bị sản phẩm khác chiếm — hiển thị riêng biệt, không reset flow
+  const [conflictError, setConflictError] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<{
     lpnCode: string;
     productName: string;
@@ -54,22 +56,27 @@ export const usePutaway = () => {
   const handleProceedToScan = useCallback(() => {
     setShelfInput('');
     setShelfError(null);
+    setConflictError(null);
     setStep('scan_shelf');
     setTimeout(() => shelfInputRef.current?.focus(), 100);
   }, []);
 
-  const handleScanShelf = useCallback(async () => {
+  const handleScanShelf = useCallback(async (explicitShelfCode?: string) => {
     // 1. Kiểm tra trạng thái
     if (confirming || !activeTask) return;
 
     // 2. Lấy giá trị input (trim để tránh lỗi khoảng trắng)
-    const input = shelfInput.trim().toUpperCase();
+    const rawInput = typeof explicitShelfCode === 'string' ? explicitShelfCode : shelfInput;
+    const input = rawInput.trim().toUpperCase();
     const target = activeTask.suggestedLocationCode.toUpperCase();
 
     if (input !== target) {
       setShelfError(`Mã kệ không khớp! Yêu cầu: ${target}`);
       return;
     }
+
+    setShelfError(null);
+    setConflictError(null);
 
     // 3. Gọi API xác nhận
     const result = await dispatch(
@@ -89,6 +96,17 @@ export const usePutaway = () => {
       });
       setCompletedCount((prev) => prev + 1);
       setStep('success');
+    } else if (confirmPutawayTask.rejected.match(result)) {
+      // Kiểm tra xem có phải lỗi 409 (vị trí bị chiếm) không
+      // Backend trả message rõ ràng; phân biệt qua nội dung hoặc HTTP status
+      const errorMessage = result.payload as string;
+      if (isConflictError(errorMessage)) {
+        // Lỗi 409: không reset flow — cho phép nhân viên scan vị trí khác
+        setConflictError(errorMessage);
+        setShelfInput('');
+        setTimeout(() => shelfInputRef.current?.focus(), 100);
+      }
+      // Lỗi khác đã được Redux slice lưu vào state.error, hiển thị qua apiError
     }
   }, [shelfInput, activeTask, confirming, dispatch]);
 
@@ -98,6 +116,7 @@ export const usePutaway = () => {
     setLpnInput('');
     setShelfInput('');
     setShelfError(null);
+    setConflictError(null);
     setSuccessData(null);
   }, [dispatch]);
 
@@ -110,6 +129,7 @@ export const usePutaway = () => {
       setStep('show_guidance');
       setShelfInput('');
       setShelfError(null);
+      setConflictError(null);
     }
   }, [step, dispatch]);
 
@@ -119,6 +139,7 @@ export const usePutaway = () => {
       lpnInput,
       shelfInput,
       shelfError,
+      conflictError,
       activeTask,
       loading,
       confirming,
@@ -141,3 +162,11 @@ export const usePutaway = () => {
   };
 };
 
+/**
+ * Kiểm tra xem lỗi trả về có phải lỗi 409 (vị trí bị sản phẩm khác chiếm) không.
+ * Backend trả message dạng: "Vị trí "..." hiện đang chứa sản phẩm "..."."
+ */
+function isConflictError(message: string | undefined): boolean {
+  if (!message) return false;
+  return message.includes('hiện đang chứa sản phẩm') || message.includes('Không thể cất thêm sản phẩm');
+}

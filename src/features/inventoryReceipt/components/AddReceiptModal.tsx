@@ -12,13 +12,21 @@ interface Props {
 }
 
 const AddReceiptModal: React.FC<Props> = ({ isOpen, suppliers, products, onClose, onSave }) => {
-  const [formData, setFormData] = useState<InventoryReceiptPayload>({
+  const initialFormState: InventoryReceiptPayload = {
     supplierId: 0,
     notes: '',
     details: [],
-  });
+  };
+
+  const [formData, setFormData] = useState<InventoryReceiptPayload>(initialFormState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    setFormData(initialFormState);
+    onClose();
+  };
 
   const addDetailRow = () => {
     const newDetail: ReceiptDetailPayload = {
@@ -43,12 +51,20 @@ const AddReceiptModal: React.FC<Props> = ({ isOpen, suppliers, products, onClose
     setFormData({ ...formData, details: newDetails });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (formData.supplierId === 0 || formData.details.length === 0) {
       alert('Vui lòng chọn nhà cung cấp và ít nhất một sản phẩm!');
       return;
     }
-    onSave(formData);
+    try {
+      setIsSubmitting(true);
+      await onSave(formData);
+      setFormData(initialFormState);
+    } catch (error) {
+      console.error('Failed to save receipt:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -58,8 +74,9 @@ const AddReceiptModal: React.FC<Props> = ({ isOpen, suppliers, products, onClose
         <div className="flex justify-between items-center px-6 py-4 border-b border-solid border-wms-border-color sticky top-0 bg-white z-10">
           <h2 className="text-[16px] font-semibold text-wms-text-main">Create Inventory Receipt</h2>
           <button
-            onClick={onClose}
-            className="text-wms-muted hover:text-red-500 transition-colors cursor-pointer"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="text-wms-muted hover:text-red-500 transition-colors cursor-pointer disabled:opacity-50"
           >
             <i className="fa-solid fa-xmark text-xl"></i>
           </button>
@@ -232,15 +249,18 @@ const AddReceiptModal: React.FC<Props> = ({ isOpen, suppliers, products, onClose
         {/* Footer */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-solid border-wms-border-color bg-gray-50/50 sticky bottom-0 z-10">
           <button
-            onClick={onClose}
-            className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-white border border-solid border-wms-border-color text-wms-text-main hover:bg-gray-50 transition-colors"
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-white border border-solid border-wms-border-color text-wms-text-main hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-wms-primary border border-solid border-wms-primary text-white hover:opacity-90 transition-all shadow-sm"
+            disabled={isSubmitting}
+            className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-wms-primary border border-solid border-wms-primary text-white hover:opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center gap-2"
           >
+            {isSubmitting ? <i className="fa-solid fa-circle-notch fa-spin"></i> : null}
             Save Receipt
           </button>
         </div>

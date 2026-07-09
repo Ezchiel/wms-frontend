@@ -55,7 +55,7 @@ export const StorageLocationManagementFeature: React.FC = () => {
                   'Barcode',
                   'Path Seq',
                   'Description',
-                  'Status',
+                  'Capacity',
                   'Actions',
                 ]}
                 data={state.storageLocations}

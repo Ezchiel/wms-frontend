@@ -7,9 +7,10 @@ interface Props {
   shelfRef: React.RefObject<HTMLInputElement | null>;
   shelfError: string | null;
   apiError: string | null;
+  conflictError: string | null;
   confirming: boolean;
   onInputChange: (val: string) => void;
-  onConfirm: () => void;
+  onConfirm: (scannedCode?: string) => void;
 }
 
 export const StepScanShelf: React.FC<Props> = ({
@@ -18,6 +19,7 @@ export const StepScanShelf: React.FC<Props> = ({
   shelfRef,
   shelfError,
   apiError,
+  conflictError,
   onInputChange,
   onConfirm,
 }) => {
@@ -27,12 +29,7 @@ export const StepScanShelf: React.FC<Props> = ({
     const cleanCode = decodedText.toUpperCase().trim();
     setShowScanner(false);
     onInputChange(cleanCode);
-
-    // Auto-confirm if code matches
-    if (cleanCode === suggestedCode.toUpperCase()) {
-      // Use a short timeout to allow state to settle before confirming
-      setTimeout(() => onConfirm(), 50);
-    }
+    onConfirm(cleanCode);
   };
 
   return (
@@ -73,7 +70,7 @@ export const StepScanShelf: React.FC<Props> = ({
           />
           {shelfInput && (
             <button
-              onClick={onConfirm}
+              onClick={() => onConfirm()}
               className="mt-3 w-full py-2.5 bg-wms-primary text-white font-bold rounded-xl text-[13px] hover:bg-wms-primary-hover active:scale-95 transition-all"
             >
               Xác nhận
@@ -82,10 +79,30 @@ export const StepScanShelf: React.FC<Props> = ({
         </div>
       </div>
 
-      {(shelfError || apiError) && (
+      {(shelfError || apiError) && !conflictError && (
         <p className="text-center text-[13px] text-red-600 font-bold px-4">
           {shelfError || apiError}
         </p>
+      )}
+
+      {/* Lỗi 409: vị trí đang bị sản phẩm khác chiếm — hiển thị nổi bật dạng cảnh báo */}
+      {conflictError && (
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-300 rounded-2xl">
+          <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+            <i className="fa-solid fa-triangle-exclamation text-amber-600 text-[16px]" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[12px] font-extrabold text-amber-800 uppercase tracking-wide mb-1">
+              Vị trí không phù hợp
+            </p>
+            <p className="text-[13px] text-amber-700 font-medium leading-snug">
+              {conflictError}
+            </p>
+            <p className="text-[11px] text-amber-600 mt-1.5 font-semibold">
+              Vui lòng quét mã kệ khác.
+            </p>
+          </div>
+        </div>
       )}
 
       {/* QrCameraScanner overlay */}
