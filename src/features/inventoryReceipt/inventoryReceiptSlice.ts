@@ -6,6 +6,7 @@ import {
   fetchReceipts,
   fetchReceiptsMobile,
   claimReceipt,
+  scanReceiptImage,
 } from './inventoryReceiptThunks';
 import type { ReceiptState } from './inventoryReceiptTypes';
 
@@ -18,6 +19,11 @@ const initialState: ReceiptState = {
   mobilePage: 1,
   mobileHasMore: true,
   mobileLoading: false,
+
+  // OCR state
+  ocrLoading: false,
+  ocrResult: null,
+  ocrError: null,
 };
 
 const receiptSlice = createSlice({
@@ -28,6 +34,11 @@ const receiptSlice = createSlice({
       state.receipts = [];
       state.mobilePage = 1;
       state.mobileHasMore = true;
+    },
+    clearOcrResult: (state) => {
+      state.ocrLoading = false;
+      state.ocrResult = null;
+      state.ocrError = null;
     },
   },
   extraReducers: (builder) => {
@@ -134,9 +145,24 @@ const receiptSlice = createSlice({
       .addCase(claimReceipt.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+
+      // OCR scan receipt image
+      .addCase(scanReceiptImage.pending, (state) => {
+        state.ocrLoading = true;
+        state.ocrResult = null;
+        state.ocrError = null;
+      })
+      .addCase(scanReceiptImage.fulfilled, (state, action) => {
+        state.ocrLoading = false;
+        state.ocrResult = action.payload;
+      })
+      .addCase(scanReceiptImage.rejected, (state, action) => {
+        state.ocrLoading = false;
+        state.ocrError = action.payload as string;
       });
   },
 });
 
 export default receiptSlice.reducer;
-export const { resetMobileList } = receiptSlice.actions;
+export const { resetMobileList, clearOcrResult } = receiptSlice.actions;

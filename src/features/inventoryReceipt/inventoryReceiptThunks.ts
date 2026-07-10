@@ -8,6 +8,8 @@ import type {
   FetchReceiptsParams,
   InventoryReceipt,
   InventoryReceiptPayload,
+  OcrReceiptResult,
+  OcrScanRequest,
 } from './inventoryReceiptTypes';
 
 export const fetchReceipts = createAsyncThunk<
@@ -122,6 +124,27 @@ export const claimReceipt = createAsyncThunk<
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
       return rejectWithValue(error.response.data?.message || 'Nhận phiếu kiểm đếm thất bại!');
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});
+
+export const scanReceiptImage = createAsyncThunk<
+  OcrReceiptResult,
+  OcrScanRequest,
+  { rejectValue: string }
+>('receipts/ocrScan', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.post<ApiResponse<OcrReceiptResult>>(
+      '/receipts/ocr-scan',
+      payload
+    );
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(
+        error.response.data?.message || 'Lỗi khi phân tích ảnh phiếu nhập kho!'
+      );
     }
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }

@@ -78,6 +78,11 @@ export interface ReceiptState {
   mobilePage: number;
   mobileHasMore: boolean;
   mobileLoading: boolean;
+
+  // OCR state
+  ocrLoading: boolean;
+  ocrResult: OcrReceiptResult | null;
+  ocrError: string | null;
 }
 
 export interface CountAndLabelPayload {
@@ -94,4 +99,36 @@ export interface CountAndLabelResponse {
   productName: string;
   quantity: number;
   zplCommand: string;
+}
+
+// --- OCR Types ---
+export interface OcrReceiptItemResult {
+  productNameRaw: string;
+  productCodeRaw: string | null;
+  quantity: number | null;
+  unitPrice: number | null;
+  batchNo: string | null;
+  expiryDate: string | null;
+  serialNumber: string | null;
+  matchedProductId: number | null;
+  matchedProductName: string | null;
+  matchedProductCode: string | null;
+  productMatchConfidence: number; // 0.0 – 1.0
+}
+
+export interface OcrReceiptResult {
+  supplierNameRaw: string | null;
+  matchedPartnerId: number | null;
+  matchedPartnerName: string | null;
+  partnerMatchConfidence: number;
+  notes: string | null;
+  items: OcrReceiptItemResult[];
+  overallConfidence: number;
+  warningMessage: string | null;
+  rawModelText: string | null;
+}
+
+export interface OcrScanRequest {
+  imageBase64: string;
+  mimeType: string;
 }

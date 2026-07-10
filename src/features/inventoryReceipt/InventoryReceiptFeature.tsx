@@ -73,8 +73,13 @@ export const InventoryReceiptFeature: React.FC = () => {
         isOpen={state.isModalOpen}
         suppliers={state.partners.filter((p: Partner) => p.type === 'SUPPLIER')}
         products={state.products}
-        onClose={() => actions.setIsModalOpen(false)}
+        onClose={actions.handleCloseModal}
         onSave={actions.handleCreateReceipt}
+        ocrLoading={state.ocrLoading}
+        ocrResult={state.ocrResult}
+        ocrError={state.ocrError}
+        onScanImage={actions.handleScanImage}
+        onClearOcr={actions.handleClearOcr}
       />
       <ReceiptDetailModal
         isOpen={state.isDetailModalOpen}
