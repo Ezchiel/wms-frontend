@@ -31,6 +31,7 @@ const NavigationBar: React.FC = () => {
       subItems: [
         { title: 'Inventory stocks', path: '/inventory-stocks' },
         { title: 'Inventory receipts', path: '/inventory-receipts' },
+        { title: 'Pending receipts', path: '/inventory-receipts-pending' },
         { title: 'Inventory issues', path: '/inventory-issues' },
         { title: 'Inventory checks', path: '/inventory-checks' },
       ],

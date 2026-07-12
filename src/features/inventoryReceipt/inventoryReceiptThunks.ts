@@ -149,3 +149,38 @@ export const scanReceiptImage = createAsyncThunk<
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
 });
+
+export const createDraftReceipt = createAsyncThunk<
+  InventoryReceipt,
+  InventoryReceiptPayload,
+  { rejectValue: string }
+>('receipts/createDraft', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.post<ApiResponse<InventoryReceipt>>('/receipts/draft', payload);
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data?.message || 'Lỗi khi tạo phiếu nháp!');
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});
+
+export const approveDraftReceipt = createAsyncThunk<
+  InventoryReceipt,
+  { id: number; payload: InventoryReceiptPayload },
+  { rejectValue: string }
+>('receipts/approveDraft', async ({ id, payload }, { rejectWithValue }) => {
+  try {
+    const response = await axiosClient.put<ApiResponse<InventoryReceipt>>(
+      `/receipts/draft/${id}/approve`,
+      payload
+    );
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data?.message || 'Lỗi khi duyệt phiếu nháp!');
+    }
+    return rejectWithValue('Đã xảy ra lỗi kết nối!');
+  }
+});

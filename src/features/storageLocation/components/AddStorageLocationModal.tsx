@@ -33,7 +33,7 @@ const AddStorageLocationModal: React.FC<Props> = ({ isOpen, onClose, onSave, ini
 
   const handleInputChange = (
     field: keyof StorageLocationPayload,
-    value: string | number | boolean | undefined
+    value: string | number | boolean | null | undefined
   ) => {
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };

@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TaskCard from './components/TaskCard';
 import type { TabKey } from './tasksTypes';
 import { useTasks } from './useTasks';
 
 export const TasksFeature: React.FC = () => {
   const { state, actions } = useTasks();
+  const navigate = useNavigate();
   const tabs: TabKey[] = ['receiving', 'putaway'];
 
   // Scroll down to the bottom of the page detection logic
@@ -23,6 +25,23 @@ export const TasksFeature: React.FC = () => {
   return (
     <>
       <main className="px-5 py-6">
+        {/* Banner Quét Phiếu Nhập */}
+        <div 
+          onClick={() => navigate('/mobile/receipt-scan')}
+          className="mb-5 p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-between gap-3 border border-blue-400/20"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
+              <i className="fa-solid fa-camera text-[20px]"></i>
+            </div>
+            <div>
+              <h3 className="font-bold text-[14px] leading-tight">Chụp ảnh phiếu nhập kho</h3>
+              <p className="text-[11px] text-blue-100 font-medium mt-0.5">Tạo nhanh phiếu nháp bằng AI (OCR)</p>
+            </div>
+          </div>
+          <i className="fa-solid fa-chevron-right text-[14px] opacity-75"></i>
+        </div>
+
         {/* Search & Filter Area */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2.5">

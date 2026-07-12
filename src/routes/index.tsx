@@ -13,6 +13,7 @@ import {
   InventoryIssuePage,
   DashboardPage,
   ReportsPage,
+  PendingReceiptsPage,
 } from '../pages/admin/index.ts';
 import { LoginPage } from '../pages/auth';
 import {
@@ -23,6 +24,7 @@ import {
   Scan,
   TasksPage,
   ProfilePage,
+  ReceiptScanPage,
 } from '../pages/mobile';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import PublicRoute from './PublicRoute.tsx';
@@ -89,6 +91,10 @@ export const router = createBrowserRouter([
             element: <InventoryReceiptPage />,
           },
           {
+            path: 'inventory-receipts-pending',
+            element: <PendingReceiptsPage />,
+          },
+          {
             path: 'inventory-issues',
             element: <InventoryIssuePage />,
           },
@@ -119,6 +125,10 @@ export const router = createBrowserRouter([
           {
             path: 'count-and-label/:receiptId',
             element: <CountingAndLabelingPage />,
+          },
+          {
+            path: 'receipt-scan',
+            element: <ReceiptScanPage />,
           },
           {
             path: 'scan',

@@ -67,7 +67,14 @@ export const useInventoryReceipt = () => {
   // Create receipt handler
   const handleCreateReceipt = async (data: InventoryReceiptPayload) => {
     try {
-      await dispatch(createReceipt(data)).unwrap();
+      const cleanedData = {
+        ...data,
+        details: data.details.map((d) => ({
+          ...d,
+          expiryDate: d.expiryDate && d.expiryDate.trim() !== '' ? d.expiryDate : null,
+        })),
+      };
+      await dispatch(createReceipt(cleanedData)).unwrap();
       setIsModalOpen(false);
       // Xóa OCR result sau khi tạo phiếu thành công
       dispatch(clearOcrResult());

@@ -22,6 +22,7 @@ const TaskCard = ({ receipt }: TaskProps) => {
   };
 
   const statusConfig: Record<ReceiptStatus, { label: string; styles: string }> = {
+    DRAFT: { label: 'DRAFT', styles: 'bg-gray-100 text-gray-500 border-gray-200' },
     EXPECTED: { label: 'EXPECTED', styles: 'bg-yellow-50 text-yellow-600 border-yellow-200' },
     RECEIVING: { label: 'RECEIVING', styles: 'bg-blue-50 text-blue-600 border-blue-200' },
     PUTAWAY_PENDING: {

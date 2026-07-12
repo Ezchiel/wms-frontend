@@ -1,6 +1,6 @@
 import type { Meta } from '../../types/api.types';
 
-export type ReceiptStatus = 'EXPECTED' | 'RECEIVING' | 'PUTAWAY_PENDING' | 'COMPLETED' | 'CANCELLED';
+export type ReceiptStatus = 'DRAFT' | 'EXPECTED' | 'RECEIVING' | 'PUTAWAY_PENDING' | 'COMPLETED' | 'CANCELLED';
 
 export const TAB_STATUS_MAP: Record<number, ReceiptStatus | undefined> = {
   0: undefined,
@@ -12,9 +12,10 @@ export const TAB_STATUS_MAP: Record<number, ReceiptStatus | undefined> = {
 // --- Receipt detail data ---
 export interface InventoryReceiptDetail {
   id: number;
-  productId: number;
-  productName: string;
-  productCode: string;
+  productId: number | null;
+  productName: string | null;
+  productCode: string | null;
+  productNameRaw: string | null; // Tên OCR thô khi product chưa được khớp (DRAFT)
   quantity: number;
   unitPrice: number;
   locationName: string;
@@ -37,16 +38,19 @@ export interface InventoryReceipt {
   assignedTo: string | null;
   totalAmount: number;
   details: InventoryReceiptDetail[];
+  scannedBy?: string;
+  scannedAt?: string;
 }
 
 // --- Receipt detail payload ---
 export interface ReceiptDetailPayload {
   productId: number;
+  productNameRaw?: string; // Tên OCR thô – gửi lên khi productId = 0 (chưa khớp)
   locationId?: number;
   quantity: number;
   unitPrice: number;
   batchNo?: string;
-  expiryDate?: string;
+  expiryDate?: string | null;
   serialNumber?: string;
 }
 

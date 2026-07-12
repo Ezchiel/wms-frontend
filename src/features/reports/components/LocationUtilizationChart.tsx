@@ -80,8 +80,8 @@ export const LocationUtilizationChart: React.FC<LocationUtilizationChartProps> =
                   color: '#fff',
                   fontSize: '12px',
                 }}
-                formatter={(value: number, name: string) => [
-                  value?.toLocaleString(),
+                formatter={(value: any, name: any) => [
+                  value?.toLocaleString() ?? '',
                   name,
                 ]}
               />

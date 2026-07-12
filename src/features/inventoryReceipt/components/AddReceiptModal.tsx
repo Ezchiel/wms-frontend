@@ -401,7 +401,7 @@ const AddReceiptModal: React.FC<Props> = ({
                         <input
                           type="date"
                           className="w-full py-1.5 px-2 border border-wms-border-color rounded outline-none"
-                          value={item.expiryDate}
+                          value={item.expiryDate || ''}
                           onChange={(e) => updateDetail(index, 'expiryDate', e.target.value)}
                         />
                       </td>
