@@ -64,3 +64,68 @@ export const unlockUser = createAsyncThunk(
     }
   }
 );
+
+export const updateUser = createAsyncThunk(
+  'users/updateUser',
+  async ({ id, userData }: { id: number; userData: CreateUserPayload }, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.put(`/users/${id}`, userData);
+      return { id, data: response.data.data, message: response.data.message };
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data?.message || 'Lỗi khi cập nhật tài khoản!');
+      }
+      return rejectWithValue('Đã xảy ra lỗi không xác định!');
+    }
+  }
+);
+
+export const deleteUser = createAsyncThunk(
+  'users/deleteUser',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.delete(`/users/${id}`);
+      return { id, message: response.data.message };
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data?.message || 'Lỗi khi xoá tài khoản!');
+      }
+      return rejectWithValue('Đã xảy ra lỗi không xác định!');
+    }
+  }
+);
+
+export const restoreUser = createAsyncThunk(
+  'users/restoreUser',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.put(`/users/${id}/restore`);
+      return { id, message: response.data.message };
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data?.message || 'Lỗi khi khôi phục tài khoản!');
+      }
+      return rejectWithValue('Đã xảy ra lỗi không xác định!');
+    }
+  }
+);
+
+export const fetchDeletedUsers = createAsyncThunk(
+  'users/fetchDeletedUsers',
+  async (params: FetchUsersParams, { rejectWithValue }) => {
+    try {
+      const response = await axiosClient.get('/users', {
+        params: { ...params, status: 'INACTIVE' },
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(
+          error.response?.data?.message || 'Lỗi khi lấy danh sách tài khoản đã xoá!'
+        );
+      }
+      return rejectWithValue('Đã xảy ra lỗi không xác định!');
+    }
+  }
+);
+

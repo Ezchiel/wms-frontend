@@ -2,6 +2,7 @@ import React from 'react';
 import Pagination from '../../components/Pagination';
 import TabNavigation from '../../components/TabNavigation';
 import AddUserModal from './components/AddUserModal';
+import EditUserModal from './components/EditUserModal';
 import DataTable from './components/DataTable';
 import FilterTable from './components/FilterTable';
 import { useUserManagement } from './useUser';
@@ -46,11 +47,12 @@ export const UserManagementFeature: React.FC = () => {
               />
 
               {state.loading ? (
-                <div className="py-10 text-center">Đang tải dữ liệu...</div>
+                <div className="py-10 text-center text-wms-muted">Đang tải dữ liệu...</div>
               ) : (
                 <DataTable
                   tableHeads={['User name', 'Full name', 'Role', 'Email', 'Status', 'Action']}
                   users={state.users}
+                  onEdit={actions.handleOpenEditModal}
                 />
               )}
 
@@ -61,14 +63,18 @@ export const UserManagementFeature: React.FC = () => {
             <>
               <FilterTable
                 onSearch={actions.handleSearch}
-                actionButtonText="Restore user"
-                actionButtonIcon="fa-solid fa-trash-can-arrow-up"
-                onActionClick={() => console.log('Mở modal restore')}
               />
 
-              <div className="py-10 text-center">Đang tải dữ liệu...</div>
+              {state.loading ? (
+                <div className="py-10 text-center text-wms-muted">Đang tải dữ liệu...</div>
+              ) : (
+                <DataTable
+                  tableHeads={['User name', 'Full name', 'Role', 'Email', 'Status', 'Action']}
+                  users={state.deletedUsers}
+                />
+              )}
 
-              <Pagination meta={state.meta} onPageChange={actions.handlePageChange} />
+              <Pagination meta={state.deletedMeta} onPageChange={actions.handlePageChange} />
             </>
           )}
         </div>
@@ -78,6 +84,13 @@ export const UserManagementFeature: React.FC = () => {
         isOpen={state.isAddModalOpen}
         onClose={() => actions.setIsAddModalOpen(false)}
         onSave={actions.handleSaveNewUser}
+      />
+
+      <EditUserModal
+        isOpen={state.isEditModalOpen}
+        onClose={() => actions.setIsEditModalOpen(false)}
+        user={state.selectedUser}
+        onSave={actions.handleSaveEditUser}
       />
     </div>
   );

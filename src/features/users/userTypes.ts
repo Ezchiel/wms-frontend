@@ -8,6 +8,7 @@ export interface User {
   email: string;
   createdAt?: string;
   status: string;
+  phone?: string;
 }
 
 export interface CreateUserPayload {
@@ -23,6 +24,8 @@ export interface CreateUserPayload {
 export interface UserState {
   users: User[];
   meta: Meta | null;
+  deletedUsers: User[];
+  deletedMeta: Meta | null;
   loading: boolean;
   error: string | null;
 }

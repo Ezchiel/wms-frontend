@@ -1,10 +1,12 @@
 import type React from 'react';
 import { useState } from 'react';
-import { useAppDispatch } from '../../app/hooks';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { logout } from '../../features/auth/authSlice';
+import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
@@ -24,12 +26,18 @@ const Header: React.FC = () => {
           className="flex items-center gap-2.5 text-[14px] font-medium cursor-pointer"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <img
-            className="w-8.75 h-8.75 rounded-[50%] object-cover"
-            src="https://i.pinimg.com/736x/d4/68/b9/d468b96d92d70507f0b9b4b8e56e8b05.jpg"
-            alt="Frieren"
-          />
-          <span>Frieren</span>
+          {user?.username?.toLowerCase() === 'frieren' ? (
+            <img
+              className="w-8.75 h-8.75 rounded-[50%] object-cover"
+              src="https://i.pinimg.com/736x/d4/68/b9/d468b96d92d70507f0b9b4b8e56e8b05.jpg"
+              alt="Avatar"
+            />
+          ) : (
+            <div className="w-8.75 h-8.75 rounded-[50%] bg-blue-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow-inner">
+              {user?.username ? user.username.substring(0, 2) : 'W'}
+            </div>
+          )}
+          <span>{user?.username || 'Guest'}</span>
           <i
             className={`fa-solid fa-chevron-down text-[10px] transition-transform ${isOpen ? 'rotate-180' : ''}`}
           ></i>
@@ -38,13 +46,14 @@ const Header: React.FC = () => {
         {/* --- POPUP MENU --- */}
         {isOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-lg py-2 z-50">
-            <a
-              href="#profile"
+            <Link
+              to="/profile"
               className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsOpen(false)}
             >
               <i className="fa-regular fa-user w-4"></i>
               <span>Profile</span>
-            </a>
+            </Link>
             <a
               href="#settings"
               className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"

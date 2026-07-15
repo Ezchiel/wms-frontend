@@ -3,8 +3,8 @@ import { useState } from 'react';
 
 interface FilterTableProps {
   onSearch: (filters: { keyword?: string; role?: string }) => void;
-  actionButtonText: string;
-  actionButtonIcon: string;
+  actionButtonText?: string;
+  actionButtonIcon?: string;
   onActionClick?: () => void;
 }
 
@@ -59,13 +59,15 @@ const FilterTable: React.FC<FilterTableProps> = ({
         </button>
       </div>
 
-      <button
-        onClick={onActionClick}
-        className="py-2.25 px-5 rounded-md text-[13px] font-medium cursor-pointer transition-all duration-300 bg-wms-primary border border-solid border-wms-primary text-white flex items-center gap-2"
-      >
-        <i className={actionButtonIcon}></i>
-        {actionButtonText}
-      </button>
+      {actionButtonText && (
+        <button
+          onClick={onActionClick}
+          className="py-2.25 px-5 rounded-md text-[13px] font-medium cursor-pointer transition-all duration-300 bg-wms-primary border border-solid border-wms-primary text-white flex items-center gap-2"
+        >
+          {actionButtonIcon && <i className={actionButtonIcon}></i>}
+          {actionButtonText}
+        </button>
+      )}
     </div>
   );
 };

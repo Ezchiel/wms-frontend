@@ -64,7 +64,6 @@ export const InventoryIssueFeature: React.FC = () => {
         isOpen={state.isModalOpen}
         customers={customers}
         products={state.products}
-        storageLocations={state.storageLocations}
         onClose={() => actions.setIsModalOpen(false)}
         onSave={actions.handleCreate}
       />

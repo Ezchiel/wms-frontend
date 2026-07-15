@@ -10,5 +10,6 @@ export { default as InventoryIssuePage } from './InventoryIssuePage';
 export { default as DashboardPage } from './DashboardPage';
 export { default as ReportsPage } from './ReportsPage';
 export { default as PendingReceiptsPage } from './PendingReceiptsPage';
+export { default as ProfilePage } from './ProfilePage';
 
 
