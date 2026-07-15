@@ -105,8 +105,8 @@ const IssueDetailModal: React.FC<Props> = ({
                 <tr>
                   <th className="p-3 text-left">Product Code</th>
                   <th className="p-3 text-left">Product Name</th>
-                  <th className="p-3 text-left">Location Barcode</th>
-                  <th className="p-3 text-left">Location Description</th>
+                  <th className="p-3 text-left">Location</th>
+                  <th className="p-3 text-left">Batch No</th>
                   <th className="p-3 text-right w-24">Quantity</th>
                 </tr>
               </thead>
@@ -119,8 +119,20 @@ const IssueDetailModal: React.FC<Props> = ({
                     >
                       <td className="p-3">{item.productCode}</td>
                       <td className="p-3 font-medium">{item.productName}</td>
-                      <td className="p-3 font-mono">{item.locationBarcode}</td>
-                      <td className="p-3 text-wms-muted">{item.locationDescription || 'N/A'}</td>
+                      <td className="p-3 font-mono">
+                        {item.locationBarcode ? (
+                          <span>{item.locationBarcode}</span>
+                        ) : (
+                          <span className="text-blue-500 text-[11px] font-semibold italic">Auto-allocated</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-wms-muted">
+                        {item.batchNo ? (
+                          <span className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-[11px] font-mono">{item.batchNo}</span>
+                        ) : (
+                          <span className="text-wms-muted italic text-[11px]">Auto</span>
+                        )}
+                      </td>
                       <td className="p-3 text-right font-medium">{item.quantity}</td>
                     </tr>
                   ))

@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import type { Partner } from '../../partners/partnerTypes';
 import type { Product } from '../../products/productTypes';
-import type { StorageLocation } from '../../storageLocation/storageLocationTypes';
 import type { CreateIssuePayload, CreateIssueDetailPayload } from '../inventoryIssueTypes';
 
 interface Props {
   isOpen: boolean;
   customers: Partner[];
   products: Product[];
-  storageLocations: StorageLocation[];
   onClose: () => void;
   onSave: (data: CreateIssuePayload) => Promise<void>;
 }
@@ -17,7 +15,6 @@ const AddIssueModal: React.FC<Props> = ({
   isOpen,
   customers,
   products,
-  storageLocations,
   onClose,
   onSave,
 }) => {
@@ -34,8 +31,8 @@ const AddIssueModal: React.FC<Props> = ({
   const addDetailRow = () => {
     const newDetail: CreateIssueDetailPayload = {
       productId: 0,
-      locationId: 0,
       quantity: 1,
+      batchNo: '',
     };
     setFormData({ ...formData, details: [...formData.details, newDetail] });
   };
@@ -45,7 +42,7 @@ const AddIssueModal: React.FC<Props> = ({
     setFormData({ ...formData, details: newDetails });
   };
 
-  const updateDetail = (index: number, field: keyof CreateIssueDetailPayload, value: number) => {
+  const updateDetail = (index: number, field: keyof CreateIssueDetailPayload, value: number | string) => {
     const newDetails = [...formData.details];
     newDetails[index] = { ...newDetails[index], [field]: value };
     setFormData({ ...formData, details: newDetails });
@@ -61,9 +58,9 @@ const AddIssueModal: React.FC<Props> = ({
       return;
     }
 
-    const invalidDetail = formData.details.find((d) => d.productId === 0 || d.locationId === 0 || d.quantity <= 0);
+    const invalidDetail = formData.details.find((d) => d.productId === 0 || d.quantity <= 0);
     if (invalidDetail) {
-      alert('Vui lòng chọn đầy đủ sản phẩm, vị trí và số lượng lớn hơn 0!');
+      alert('Vui lòng chọn đầy đủ sản phẩm và số lượng lớn hơn 0!');
       return;
     }
 
@@ -136,8 +133,8 @@ const AddIssueModal: React.FC<Props> = ({
             <table className="w-full text-[13px]">
               <thead className="bg-gray-50 border-b border-wms-border-color">
                 <tr>
-                  <th className="p-3 text-left w-1/3">Product</th>
-                  <th className="p-3 text-left w-1/3">Location</th>
+                  <th className="p-3 text-left w-5/12">Product</th>
+                  <th className="p-3 text-left w-3/12">Batch No (Optional)</th>
                   <th className="p-3 text-left w-24">Qty</th>
                   <th className="p-3 text-center w-12"></th>
                 </tr>
@@ -164,20 +161,15 @@ const AddIssueModal: React.FC<Props> = ({
                       </select>
                     </td>
 
-                    {/* Location */}
+                    {/* Batch No (Optional) */}
                     <td className="p-3">
-                      <select
-                        className="w-full py-1.5 px-2 border border-wms-border-color rounded outline-none focus:border-wms-primary bg-white"
-                        value={item.locationId}
-                        onChange={(e) => updateDetail(index, 'locationId', Number(e.target.value))}
-                      >
-                        <option value={0}>Select location</option>
-                        {storageLocations.map((loc) => (
-                          <option key={loc.id} value={loc.id}>
-                            {loc.barcode} ({loc.zone}-{loc.rack}-{loc.shelf})
-                          </option>
-                        ))}
-                      </select>
+                      <input
+                        type="text"
+                        className="w-full py-1.5 px-2 border border-wms-border-color rounded outline-none focus:border-wms-primary"
+                        placeholder="Để trống = tự động"
+                        value={item.batchNo || ''}
+                        onChange={(e) => updateDetail(index, 'batchNo', e.target.value)}
+                      />
                     </td>
 
                     {/* Quantity */}

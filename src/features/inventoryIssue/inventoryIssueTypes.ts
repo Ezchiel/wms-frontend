@@ -16,10 +16,11 @@ export interface IssueDetail {
   productId: number;
   productName: string;
   productCode: string;
-  locationId: number;
-  locationBarcode: string;
-  locationDescription: string;
+  locationId: number | null;
+  locationBarcode: string | null;
+  locationDescription: string | null;
   quantity: number;
+  batchNo: string | null;
 }
 
 export interface InventoryIssue {
@@ -38,8 +39,9 @@ export interface InventoryIssue {
 
 export interface CreateIssueDetailPayload {
   productId: number;
-  locationId: number;
+  locationId?: number; // optional: nullable — hệ thống tự phân bổ nếu không chỉ định
   quantity: number;
+  batchNo?: string;    // optional: chỉ điền khi khách yêu cầu xuất đúng lô này
 }
 
 export interface CreateIssuePayload {

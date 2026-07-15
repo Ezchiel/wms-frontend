@@ -121,6 +121,14 @@ export const PickingTaskDetail: React.FC<Props> = ({
               <span className="text-slate-400 font-medium">Số lượng yêu cầu:</span>
               <span className="text-blue-600 font-black text-sm">{task.requiredQuantity}</span>
             </div>
+            {task.batchNo && (
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400 font-medium">Số lô cần lấy:</span>
+                <span className="bg-amber-100 text-amber-800 font-mono font-black text-xs px-2.5 py-1 rounded-lg border border-amber-200">
+                  {task.batchNo}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

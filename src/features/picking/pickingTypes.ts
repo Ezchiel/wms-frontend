@@ -12,6 +12,7 @@ export interface PickingTask {
   locationId: number;
   locationBarcode: string;
   locationDescription: string;
+  batchNo: string | null;
   requiredQuantity: number;
   pickedQuantity: number;
   status: PickingTaskStatus;
