@@ -37,31 +37,26 @@ export const ReportsFeature: React.FC = () => {
 
   return (
     <div className="w-full pl-75 pr-10 text-wms-text-main">
-      {/* --- PAGE TITLE --- */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[22px] font-semibold mb-1.25">Reports & Statistics</h1>
-          <p className="text-[13px] text-wms-muted mb-6.25">
-            Analyze historical inventory data and warehouse performance.
-          </p>
-        </div>
-        <button
-          onClick={actions.refreshActiveTab}
-          className="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-800 rounded-xl shadow-xs transition-all text-xs font-semibold cursor-pointer"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${getActiveTabLoading() ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
-
       {/* --- Tab Navigation --- */}
       <div className="bg-transparent flex flex-col">
-        <TabNavigation
-          tabs={reportTabs}
-          activeTabIndex={state.activeTab}
-          onTabChange={actions.setActiveTab}
-          getTabColor={getTabColor}
-        />
+        <div className='flex justify-between'>
+          <TabNavigation
+            tabs={reportTabs}
+            activeTabIndex={state.activeTab}
+            onTabChange={actions.setActiveTab}
+            getTabColor={getTabColor}
+          />
+
+          <div className='flex items-center'>
+            <button
+              onClick={actions.refreshActiveTab}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-800 rounded-xl shadow-xs transition-all text-xs font-semibold cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${getActiveTabLoading() ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
+        </div>
 
         {/* Tab Body wrapper */}
         <div className="w-full bg-white rounded-r-3xl rounded-bl-3xl p-6.5 shadow-[0_4px_15px_rgba(0,0,0,0.03)] min-h-[450px]">

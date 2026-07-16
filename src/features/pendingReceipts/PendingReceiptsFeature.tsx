@@ -201,15 +201,7 @@ export const PendingReceiptsFeature: React.FC = () => {
   };
 
   return (
-    <div className="w-full pl-75 pr-10 min-h-screen py-6 font-sans">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-[22px] font-semibold mb-1 text-slate-800">Pending Receipts</h1>
-        <p className="text-[13px] text-wms-muted">
-          Review, edit, and approve draft receipts created by mobile camera scans in real-time.
-        </p>
-      </div>
-
+    <div className="w-full pl-75 pr-10 min-h-screen pb-6 font-sans">
       {/* Main Work Area */}
       <div className="w-full bg-white rounded-2xl p-6 shadow-sm border border-slate-100 overflow-x-auto">
 

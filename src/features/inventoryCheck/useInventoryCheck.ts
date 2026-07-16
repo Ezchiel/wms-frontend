@@ -45,6 +45,19 @@ export const useInventoryCheck = () => {
     setSearchKeyword(keyword);
   };
 
+  const handleRefresh = () => {
+    dispatch(
+      fetchInventoryChecks({
+        keyword: searchKeyword,
+        status: TAB_STATUS_MAP[tabIndex],
+        page: currentPage,
+        size: pageSize,
+        sortBy: 'id',
+        sortDir: 'desc',
+      })
+    );
+  };
+
   const handleOpenDetailModal = (check: InventoryCheck) => {
     setSelectedCheck(check);
     setIsDetailModalOpen(true);
@@ -89,6 +102,7 @@ export const useInventoryCheck = () => {
       handleTabChange,
       setCurrentPage,
       handleSearch,
+      handleRefresh,
       handleOpenDetailModal,
       setIsDetailModalOpen,
       setSelectedCheck,

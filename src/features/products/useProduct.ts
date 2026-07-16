@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchAllProductGroups } from '../productGroups/productGroupThunks';
 import { createProduct, deleteProduct, fetchProducts, updateProduct } from './productThunks';
+import { fetchLowStockAlerts } from '../dashboard/dashboardThunks';
 import type { Product, ProductPayload } from './productTypes';
 
 export const useProductManagement = () => {
   const dispatch = useAppDispatch();
   const { products, loading, meta } = useAppSelector((state) => state.products);
   const { productGroups } = useAppSelector((state) => state.productGroups);
+  const { lowStockAlerts } = useAppSelector((state) => state.dashboard);
 
   // State for search and pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,11 +24,18 @@ export const useProductManagement = () => {
   useEffect(() => {
     dispatch(fetchProducts({ keyword: searchKeyword, page: currentPage, size: pageSize }));
     dispatch(fetchAllProductGroups());
+    dispatch(fetchLowStockAlerts());
   }, [dispatch, currentPage, pageSize, searchKeyword]);
 
   const handleSearch = (keyword: string) => {
     setCurrentPage(1);
     setSearchKeyword(keyword);
+  };
+
+  const handleRefresh = () => {
+    dispatch(fetchProducts({ keyword: searchKeyword, page: currentPage, size: pageSize }));
+    dispatch(fetchAllProductGroups());
+    dispatch(fetchLowStockAlerts());
   };
 
   const handleOpenAddModal = () => {
@@ -82,11 +91,13 @@ export const useProductManagement = () => {
       tabIndex,
       isModalOpen,
       editingProduct,
+      lowStockAlerts,
     },
     actions: {
       setTabIndex,
       setCurrentPage,
       handleSearch,
+      handleRefresh,
       handleOpenAddModal,
       handleOpenEditModal,
       handleSave,

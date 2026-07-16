@@ -5,6 +5,8 @@ import AddPartnerModal from './components/AddPartnerModal';
 import FilterPartner from './components/FilterPartner';
 import PartnerTable from './components/PartnerTable';
 import { usePartnerManagement } from './usePartner';
+import { StatCard } from '../../components/StatCard';
+import { Handshake, Truck, Users, RefreshCw } from 'lucide-react';
 
 export const PartnerManagementFeature: React.FC = () => {
   const { state, actions } = usePartnerManagement();
@@ -17,20 +19,55 @@ export const PartnerManagementFeature: React.FC = () => {
 
   return (
     <div className="w-full pl-75 pr-10">
-      {/* --- PAGE TITLE --- */}
-      <div>
-        <h1 className="text-[22px] font-semibold mb-1.25">Partner management</h1>
-        <p className="text-[13px] text-wms-muted mb-6.25">Manage your suppliers and customers</p>
+
+      {/* --- KPI CARDS --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <StatCard
+          label="Tổng đối tác"
+          value={state.meta?.totalElements || state.partners.length}
+          icon={Handshake}
+          iconBg="bg-blue-50"
+          iconColor="text-blue-500"
+          hint="Nhà cung cấp & Khách hàng"
+        />
+        <StatCard
+          label="Nhà cung cấp"
+          value={state.partners.filter((p) => p.type === 'SUPPLIER').length}
+          icon={Truck}
+          iconBg="bg-emerald-50"
+          iconColor="text-emerald-500"
+          hint="Đơn vị cung cấp hàng hóa ở trang này"
+        />
+        <StatCard
+          label="Khách hàng"
+          value={state.partners.filter((p) => p.type === 'CUSTOMER').length}
+          icon={Users}
+          iconBg="bg-amber-50"
+          iconColor="text-amber-500"
+          hint="Đơn vị nhận/mua hàng ở trang này"
+        />
       </div>
 
       {/* --- WORK AREA --- */}
       <div className="bg-transparent flex flex-col overflow-x-auto">
-        <TabNavigation
-          tabs={['All partners', 'Suppliers', 'Customers']}
-          activeTabIndex={state.tabIndex}
-          onTabChange={actions.handleTabChange}
-          getTabColor={getTabColor}
-        />
+        <div className='flex justify-between'>
+          <TabNavigation
+            tabs={['All partners', 'Suppliers', 'Customers']}
+            activeTabIndex={state.tabIndex}
+            onTabChange={actions.handleTabChange}
+            getTabColor={getTabColor}
+          />
+
+          <div className='flex items-center'>
+            <button
+              onClick={actions.handleRefresh}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-800 rounded-xl shadow-xs transition-all text-xs font-semibold cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${state.loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
+        </div>
 
         {/* Table section */}
         <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)] overflow-x-auto">

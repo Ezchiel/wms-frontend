@@ -53,6 +53,17 @@ export const useStorageLocationManagement = () => {
     setSearchKeyword(keyword);
   };
 
+  const handleRefresh = () => {
+    dispatch(
+      fetchStorageLocations({
+        keyword: searchKeyword,
+        page: currentPage,
+        size: pageSize,
+        isAvailableOnly: tabIndex === 1,
+      })
+    );
+  };
+
   const handleOpenAddModal = () => {
     setEditingLocation(null);
     setIsModalOpen(true);
@@ -156,6 +167,7 @@ export const useStorageLocationManagement = () => {
       setCurrentPage,
       handleTabChange,
       handleSearch,
+      handleRefresh,
       handleOpenAddModal,
       handleOpenEditModal,
       handleOpenPrintModal,

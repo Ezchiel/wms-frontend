@@ -6,6 +6,8 @@ import EditUserModal from './components/EditUserModal';
 import DataTable from './components/DataTable';
 import FilterTable from './components/FilterTable';
 import { useUserManagement } from './useUser';
+import { StatCard } from '../../components/StatCard';
+import { Users, UserCheck, ShieldAlert, RefreshCw } from 'lucide-react';
 
 export const UserManagementFeature: React.FC = () => {
   const { state, actions } = useUserManagement();
@@ -18,22 +20,58 @@ export const UserManagementFeature: React.FC = () => {
 
   return (
     <div className="w-full pl-75 pr-10">
-      {/* --- PAGE TITLE --- */}
-      <div>
-        <h1 className="text-[22px] font-semibold mb-1.25">User management</h1>
-        <p className="text-[13px] text-wms-muted mb-6.25">
-          User management for administrator and manager
-        </p>
+
+      {/* --- KPI CARDS --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <StatCard
+          label="Tổng số người dùng"
+          value={state.meta?.totalElements || state.users.length}
+          icon={Users}
+          iconBg="bg-blue-50"
+          iconColor="text-blue-500"
+          hint="Tài khoản trong hệ thống"
+        />
+        <StatCard
+          label="Đang hoạt động"
+          value={state.users.filter((u) => u.status === 'ACTIVE').length}
+          icon={UserCheck}
+          iconBg="bg-emerald-50"
+          iconColor="text-emerald-500"
+          hint="Tài khoản Active ở trang này"
+        />
+        <StatCard
+          label="Quản trị & Quản lý"
+          value={state.users.filter((u) => {
+            const role = u.roleName?.toUpperCase();
+            return role === 'ADMIN' || role === 'MANAGER';
+          }).length}
+          icon={ShieldAlert}
+          iconBg="bg-amber-50"
+          iconColor="text-amber-500"
+          hint="Admin & Manager ở trang này"
+        />
       </div>
 
       {/* --- WORK AREA --- */}
       <div className="bg-transparent flex flex-col overflow-x-auto">
-        <TabNavigation
-          tabs={['All users', 'Deleted']}
-          getTabColor={getTabColor}
-          onTabChange={actions.setTabIndex}
-          activeTabIndex={state.tabIndex}
-        />
+        <div className='flex justify-between'>
+          <TabNavigation
+            tabs={['All users', 'Deleted']}
+            getTabColor={getTabColor}
+            onTabChange={actions.setTabIndex}
+            activeTabIndex={state.tabIndex}
+          />
+
+          <div className='flex items-center'>
+            <button
+              onClick={actions.handleRefresh}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-800 rounded-xl shadow-xs transition-all text-xs font-semibold cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${state.loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
+        </div>
 
         {/* Table section */}
         <div className="w-full bg-white rounded-r-2xl rounded-bl-2xl p-6.25 shadow-[0_4px_15px_rgba(0,0,0,0.03)] overflow-x-auto">

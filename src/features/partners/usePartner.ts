@@ -44,6 +44,17 @@ export const usePartnerManagement = () => {
     setSearchKeyword(keyword);
   };
 
+  const handleRefresh = () => {
+    dispatch(
+      fetchPartners({
+        keyword: searchKeyword,
+        page: currentPage,
+        size: pageSize,
+        type: TAB_TYPE_MAP[tabIndex],
+      })
+    );
+  };
+
   const handleOpenAddModal = () => {
     setEditingPartner(null);
     setIsModalOpen(true);
@@ -100,6 +111,7 @@ export const usePartnerManagement = () => {
       setCurrentPage,
       handleTabChange,
       handleSearch,
+      handleRefresh,
       handleOpenAddModal,
       handleOpenEditModal,
       handleSave,

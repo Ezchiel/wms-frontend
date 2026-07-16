@@ -30,6 +30,10 @@ export const useProductGroupManagement = () => {
     setSearchKeyword(keyword);
   };
 
+  const handleRefresh = () => {
+    dispatch(fetchProductGroups({ keyword: searchKeyword, page: currentPage, size: pageSize }));
+  };
+
   const handleOpenAddModal = () => {
     setEditingGroup(null);
     setIsAddModalOpen(true);
@@ -87,6 +91,7 @@ export const useProductGroupManagement = () => {
       setTabIndex,
       setCurrentPage,
       handleSearch,
+      handleRefresh,
       handleOpenAddModal,
       handleOpenEditModal,
       handleSave,

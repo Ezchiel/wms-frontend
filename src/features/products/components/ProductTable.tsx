@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Product } from '../productTypes';
+import { StatusBadge } from '../../../components/StatusBadge';
 
 interface ProductTableProps {
   heads: string[];
@@ -33,7 +34,10 @@ const ProductTable: React.FC<ProductTableProps> = ({ heads, data, onDelete, onEd
               {product.unit}
             </td>
             <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
-              {product.productGroup?.groupName || 'Chưa phân nhóm'}
+              <StatusBadge
+                text={product.productGroup?.groupName || 'Chưa phân nhóm'}
+                variant="neutral"
+              />
             </td>
             <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
               {product.minStockLevel}

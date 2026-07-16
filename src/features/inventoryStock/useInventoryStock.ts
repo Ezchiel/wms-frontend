@@ -22,6 +22,11 @@ export const useInventoryStock = () => {
     dispatch(fetchStorageLocations({ size: 1000 }));
   }, [dispatch]);
 
+  const handleRefresh = () => {
+    dispatch(fetchInventoryStocks());
+    dispatch(fetchStorageLocations({ size: 1000 }));
+  };
+
   // Derived Data
   const isLoading = isStockLoading || isLocLoading;
 
@@ -34,6 +39,7 @@ export const useInventoryStock = () => {
     },
     actions: {
       setTabIndex,
+      handleRefresh,
     },
   };
 };

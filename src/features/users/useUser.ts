@@ -55,6 +55,14 @@ export const useUserManagement = () => {
     }));
   };
 
+  const handleRefresh = () => {
+    if (tabIndex === 0) {
+      dispatch(fetchUsers(queryParams));
+    } else {
+      dispatch(fetchDeletedUsers(queryParams));
+    }
+  };
+
   const handleSaveNewUser = async (userData: CreateUserPayload) => {
     try {
       await dispatch(createUser(userData)).unwrap();
@@ -117,6 +125,7 @@ export const useUserManagement = () => {
       setSelectedUser,
       handleSearch,
       handlePageChange,
+      handleRefresh,
       handleSaveNewUser,
       handleOpenEditModal,
       handleSaveEditUser,

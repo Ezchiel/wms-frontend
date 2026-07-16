@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Partner } from '../partnerTypes';
+import { StatusBadge } from '../../../components/StatusBadge';
 
 interface PartnerTableProps {
   heads: string[];
@@ -27,7 +28,10 @@ const PartnerTable: React.FC<PartnerTableProps> = ({ heads, data, onDelete, onEd
               {partner.name}
             </td>
             <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
-              {partner.type}
+              <StatusBadge
+                text={partner.type}
+                variant={partner.type === 'SUPPLIER' ? 'info' : 'warning'}
+              />
             </td>
             <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
               {partner.phone}

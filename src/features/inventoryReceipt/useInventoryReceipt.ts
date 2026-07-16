@@ -64,6 +64,17 @@ export const useInventoryReceipt = () => {
     setSearchKeyword(keyword);
   };
 
+  const handleRefresh = () => {
+    dispatch(
+      fetchReceipts({
+        keyword: searchKeyword,
+        page: currentPage,
+        size: pageSize,
+        status: TAB_STATUS_MAP[tabIndex],
+      })
+    );
+  };
+
   // Create receipt handler
   const handleCreateReceipt = async (data: InventoryReceiptPayload) => {
     try {
@@ -148,6 +159,7 @@ export const useInventoryReceipt = () => {
     actions: {
       setCurrentPage,
       handleSearch,
+      handleRefresh,
       handleTabChange,
       setIsModalOpen,
       setSelectedReceipt,

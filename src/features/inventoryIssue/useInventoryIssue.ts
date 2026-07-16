@@ -63,6 +63,17 @@ export const useInventoryIssue = () => {
     setSearchKeyword(keyword);
   };
 
+  const handleRefresh = () => {
+    dispatch(
+      fetchInventoryIssues({
+        keyword: searchKeyword,
+        page: currentPage,
+        size: pageSize,
+        status: TAB_STATUS_MAP[tabIndex],
+      })
+    );
+  };
+
   const handleOpenDetail = (issue: InventoryIssue) => {
     dispatch(setSelectedIssue(issue));
     setIsDetailModalOpen(true);
@@ -132,6 +143,7 @@ export const useInventoryIssue = () => {
       setCurrentPage,
       handleTabChange,
       handleSearch,
+      handleRefresh,
       handleOpenDetail,
       handleCreate,
       handleApprove,

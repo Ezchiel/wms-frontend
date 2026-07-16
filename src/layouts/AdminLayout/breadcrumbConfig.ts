@@ -1,0 +1,15 @@
+export const breadcrumbConfig: Record<string, string[]> = {
+  '/users': ['Management', 'Users'],
+  '/product-groups': ['Management', 'Product groups'],
+  '/products': ['Management', 'Products'],
+  '/partners': ['Management', 'Partners'],
+  '/storage-locations': ['Management', 'Storage locations'],
+  '/inventory-stocks': ['Operation', 'Stock'],
+  '/inventory-receipts': ['Operation', 'Receipts'],
+  '/inventory-receipts-pending': ['Operation', 'Pending receipts'],
+  '/inventory-issues': ['Operation', 'Issues'],
+  '/inventory-checks': ['Operation', 'Checks'],
+  '/dashboard': ['Reports', 'Dashboard'],
+  '/reports': ['Reports', 'Reports'],
+  '/profile': ['Account', 'Profile'],
+};
