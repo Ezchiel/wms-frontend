@@ -3,12 +3,16 @@ import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { logout } from '../../features/auth/authSlice';
 import { Link, useLocation } from 'react-router-dom';
 import { breadcrumbConfig } from './breadcrumbConfig';
+import { useNotifications } from '../../features/notifications/useNotifications';
+import NotificationDropdown from '../../features/notifications/NotificationDropdown';
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const location = useLocation();
+  const { items } = useNotifications();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -39,12 +43,25 @@ const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Bell button — bg-wms-bg for contrast against white bar */}
-          <button className="relative bg-wms-bg w-9 h-9 rounded-xl flex items-center justify-center text-wms-muted cursor-pointer hover:bg-gray-100 transition-colors">
-            <i className="fa-regular fa-bell text-[15px]"></i>
-            {/* Red notification dot */}
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
+          {/* Bell button container */}
+          <div className="relative">
+            <button
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              className="relative bg-wms-bg w-9 h-9 rounded-xl flex items-center justify-center text-wms-muted cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <i className="fa-regular fa-bell text-[15px]"></i>
+              {/* Dynamic notification count badge */}
+              {items.length > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full border-2 border-white text-white text-[9px] font-bold flex items-center justify-center px-1">
+                  {items.length}
+                </span>
+              )}
+            </button>
+
+            {isNotifOpen && (
+              <NotificationDropdown onClose={() => setIsNotifOpen(false)} />
+            )}
+          </div>
 
           {/* --- AVATAR --- */}
           <div className="relative">
@@ -103,6 +120,7 @@ const Header: React.FC = () => {
 
       {/* Overlay để đóng menu khi click ra ngoài */}
       {isOpen && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>}
+      {isNotifOpen && <div className="fixed inset-0 z-40" onClick={() => setIsNotifOpen(false)}></div>}
     </header>
   );
 };
