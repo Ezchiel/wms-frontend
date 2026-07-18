@@ -1,13 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Camera, Search as SearchIcon, SlidersHorizontal, Loader2 } from 'lucide-react';
 import TaskCard from './components/TaskCard';
-import type { TabKey } from './tasksTypes';
 import { useTasks } from './useTasks';
+import PageHeader from '../../layouts/MobileLayout/PageHeader';
+import SortFilterSheet from '../../components/mobile/SortFilterSheet';
 
 export const TasksFeature: React.FC = () => {
   const { state, actions } = useTasks();
   const navigate = useNavigate();
-  const tabs: TabKey[] = ['receiving', 'putaway'];
+
+  const [searchTerm, setSearchTerm] = useState(state.keyword || '');
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      actions.handleSearch(searchTerm);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Sync state.keyword back to input if reset
+  useEffect(() => {
+    setSearchTerm(state.keyword);
+  }, [state.keyword]);
 
   // Scroll down to the bottom of the page detection logic
   useEffect(() => {
@@ -22,57 +39,77 @@ export const TasksFeature: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [actions, state.loading, state.mobileHasMore]);
 
+  const sortOptions = [
+    { value: 'createdAt_desc', label: 'Newest' },
+    { value: 'createdAt_asc', label: 'Oldest' },
+    { value: 'receiptCode_asc', label: 'Receipt Code A-Z' },
+    { value: 'receiptCode_desc', label: 'Receipt Code Z-A' },
+  ];
+
+  const filterGroups = [
+    {
+      key: 'taskType',
+      label: 'Type',
+      type: 'chip' as const,
+      options: [
+        { value: 'receiving', label: 'Receive' },
+        { value: 'putaway', label: 'Putaway' },
+      ],
+    },
+    {
+      key: 'assignedFilter',
+      label: 'User',
+      type: 'chip' as const,
+      options: [
+        { value: 'ALL', label: 'All' },
+        { value: 'UNASSIGNED', label: 'Unassigned' },
+        { value: 'ME', label: 'Me' },
+      ],
+    },
+    {
+      key: 'createdAt',
+      label: 'Date',
+      type: 'dateRange' as const,
+    },
+  ];
+
   return (
     <>
-      <main className="px-5 py-6">
-        {/* Banner Quét Phiếu Nhập */}
-        <div 
-          onClick={() => navigate('/mobile/receipt-scan')}
-          className="mb-5 p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-md cursor-pointer active:scale-95 transition-all flex items-center justify-between gap-3 border border-blue-400/20"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
-              <i className="fa-solid fa-camera text-[20px]"></i>
-            </div>
-            <div>
-              <h3 className="font-bold text-[14px] leading-tight">Chụp ảnh phiếu nhập kho</h3>
-              <p className="text-[11px] text-blue-100 font-medium mt-0.5">Tạo nhanh phiếu nháp bằng AI (OCR)</p>
-            </div>
-          </div>
-          <i className="fa-solid fa-chevron-right text-[14px] opacity-75"></i>
-        </div>
+      <PageHeader
+        title="Putaway"
+        subtitle="Manage putaway tasks"
+        rightSlot={
+          <button
+            onClick={() => navigate('/mobile/receipt-scan')}
+            className="flex items-center gap-1 px-3 py-2 rounded-xl bg-wms-primary text-white text-xs font-extrabold shadow-md shadow-amber-200/50 active:scale-95 transition-all cursor-pointer"
+            id="camera-scan-receipt-btn"
+          >
+            <Camera size={13} />
+            <span>Scan putaway</span>
+          </button>
+        }
+      />
 
+      <main className="max-w-md mx-auto px-5 py-6">
         {/* Search & Filter Area */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 mb-6">
           <div className="flex items-center gap-2.5">
             <div className="relative flex-1">
-              <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-wms-muted text-[16px]"></i>
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-wms-muted w-4 h-4" />
               <input
                 className="w-full pl-11 pr-4 py-3 bg-white border border-wms-border-color rounded-xl focus:outline-none focus:ring-2 focus:ring-wms-primary/20 focus:border-wms-primary text-[14px] text-wms-text-main placeholder:text-wms-muted transition-all shadow-sm"
                 placeholder="Search receipt code..."
                 type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="w-12 h-12 bg-white border border-wms-border-color text-wms-text-main rounded-xl active:scale-95 transition-transform shadow-sm flex items-center justify-center">
-              <i className="fa-solid fa-sliders text-[18px]"></i>
+            <button
+              onClick={() => setSheetOpen(true)}
+              className="w-12 h-12 bg-white border border-wms-border-color text-wms-text-main rounded-xl active:scale-95 transition-transform shadow-sm flex items-center justify-center cursor-pointer"
+            >
+              <SlidersHorizontal className="w-[18px] h-[18px]" />
             </button>
-          </div>
-
-          {/* Tab Navigation */}
-          <div className="flex gap-2.5 mb-7 overflow-x-auto no-scrollbar">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                className={`px-6 py-2 rounded-full text-[13px] font-semibold capitalize transition-all ${
-                  state.activeTab === tab
-                    ? 'bg-wms-primary text-white'
-                    : 'bg-white border border-wms-border-color text-wms-text-main'
-                }`}
-                onClick={() => actions.handleTabChange(tab)}
-              >
-                {tab}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -80,7 +117,7 @@ export const TasksFeature: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[15px] font-bold text-wms-text-main">Receipts in processing</h2>
           <span className="text-[13px] font-medium text-wms-primary bg-wms-primary/10 px-2.5 py-0.5 rounded-full">
-            {state.meta?.totalElements} tasks
+            {state.meta?.totalElements || 0} tasks
           </span>
         </div>
 
@@ -93,8 +130,8 @@ export const TasksFeature: React.FC = () => {
 
         {/* Loading Indicator */}
         {state.loading && (
-          <div className="py-4 text-center text-wms-muted text-[13px]">
-            <i className="fa-solid fa-spinner animate-spin mr-2"></i>
+          <div className="py-4 flex items-center justify-center text-wms-muted text-[13px]">
+            <Loader2 className="animate-spin mr-2 w-4 h-4" />
             Loading more...
           </div>
         )}
@@ -106,10 +143,17 @@ export const TasksFeature: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Action Button */}
-      {/* <button className="fixed bottom-28 right-5 w-14 h-14 bg-wms-primary text-white rounded-full shadow-[0_4px_15px_rgba(59,130,246,0.4)] flex items-center justify-center active:scale-90 transition-transform z-40">
-        <i className="fa-solid fa-qrcode text-[24px]"></i>
-      </button> */}
+      <SortFilterSheet
+        open={sheetOpen}
+        sortOptions={sortOptions}
+        filterGroups={filterGroups}
+        value={state.sortFilter}
+        onApply={(val) => {
+          actions.handleSortFilter(val);
+          setSheetOpen(false);
+        }}
+        onClose={() => setSheetOpen(false)}
+      />
     </>
   );
 };

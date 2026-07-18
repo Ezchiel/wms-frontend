@@ -240,7 +240,7 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
 
       {/* Header */}
       <div className="flex w-full max-w-md items-center justify-between py-2">
-        <h2 className="text-base font-extrabold tracking-wide text-zinc-200">Quét mã QR / Barcode</h2>
+        <h2 className="text-base font-extrabold tracking-wide text-zinc-200">Scan QR / Barcode</h2>
         <div className="flex gap-2">
           {permissionStatus === 'granted' && !isInitializing && (
             <button
@@ -267,7 +267,7 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
         {permissionStatus === 'pending' ? (
           <div className="flex flex-col items-center justify-center space-y-3 p-8 text-center">
             <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
-            <p className="text-sm font-medium text-zinc-400">Đang xin quyền camera...</p>
+            <p className="text-sm font-medium text-zinc-400">Requesting camera permission...</p>
           </div>
         ) : permissionStatus === 'granted' ? (
           <div className="relative w-[285px] h-[285px] rounded-3xl overflow-hidden border-2 border-zinc-800 bg-zinc-900 shadow-2xl">
@@ -278,7 +278,7 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
             {isInitializing && (
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-zinc-900/90 rounded-3xl gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                <p className="text-xs font-semibold text-zinc-400">Đang khởi động camera...</p>
+                <p className="text-xs font-semibold text-zinc-400">Starting camera...</p>
               </div>
             )}
 
@@ -287,7 +287,7 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
               <>
                 <div className="scanner-laser absolute left-4 right-4 h-0.5 bg-red-500 shadow-[0_0_8px_#ef4444] z-10 pointer-events-none" />
                 <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300 font-bold bg-black/60 px-3 py-1 rounded-full z-10 pointer-events-none tracking-wide">
-                  Đang quét...
+                  Scanning...
                 </p>
               </>
             )}
@@ -298,9 +298,9 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
               <CameraOff size={24} />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-zinc-200">Không có quyền camera</h3>
+              <h3 className="font-extrabold text-sm text-zinc-200">No camera permission</h3>
               <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                Vui lòng cấp quyền truy cập camera trong cài đặt trình duyệt (hoặc ấn vào ổ khóa trên thanh địa chỉ) để thực hiện quét mã.
+                Please grant camera access permission in the browser settings (or click the lock icon in the address bar) to scan.
               </p>
             </div>
           </div>
@@ -310,9 +310,9 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
               <CameraOff size={24} />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-zinc-200">Không tìm thấy Camera hoặc lỗi SSL</h3>
+              <h3 className="font-extrabold text-sm text-zinc-200">Camera not found or SSL error</h3>
               <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                Trình duyệt không hỗ trợ hoặc kết nối hiện tại không phải HTTPS (Camera yêu cầu môi trường bảo mật).
+                Browser does not support or current connection is not HTTPS (Camera requires a secure environment).
               </p>
             </div>
           </div>
@@ -324,14 +324,14 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
         <form onSubmit={handleManualSubmit} className="space-y-3">
           <div className="flex items-center gap-2 text-zinc-300">
             <Keyboard size={16} className="text-blue-400" />
-            <span className="text-xs font-bold uppercase tracking-wider">Nhập mã thủ công</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Manual input</span>
           </div>
           <div className="flex gap-2">
             <input
               type="text"
               value={manualValue}
               onChange={(e) => setManualValue(e.target.value)}
-              placeholder="Nhập barcode..."
+              placeholder="Enter barcode..."
               className="w-50 bg-zinc-950/80 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white font-medium placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
               id="manual-scanner-input"
             />
@@ -341,7 +341,7 @@ export default function QrCameraScanner({ onScan, onClose }: QrCameraScannerProp
               className="bg-blue-600 disabled:bg-zinc-800 hover:bg-blue-700 disabled:text-zinc-500 text-white font-extrabold text-xs px-5 rounded-xl transition-colors active:scale-95"
               id="manual-scanner-submit-btn"
             >
-              Xác nhận
+              Confirm
             </button>
           </div>
         </form>

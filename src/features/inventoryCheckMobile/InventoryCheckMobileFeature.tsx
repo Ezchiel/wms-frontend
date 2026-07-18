@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { toast } from 'react-toastify';
 
@@ -18,44 +19,34 @@ import CreateStockTake, { type CreateCheckSetup } from './components/CreateStock
 import ActiveStockTake, { type CountingItem } from './components/ActiveStockTake';
 import ReportModal from './components/ReportModal';
 
-// ─── View states ──────────────────────────────────────────────────────────────
 type View = 'list' | 'create' | 'counting';
 
 export default function InventoryCheckMobileFeature() {
   const dispatch = useAppDispatch();
 
-  // ── Redux state ────────────────────────────────────────────────────────────
   const { products } = useAppSelector((s) => s.products);
   const { storageLocations } = useAppSelector((s) => s.storageLocations);
   const { checks, loading: checksLoading } = useAppSelector((s) => s.inventoryCheck);
   const { stocks, loading: stocksLoading } = useAppSelector((s) => s.inventoryStocks);
 
-  // ── Local UI state ─────────────────────────────────────────────────────────
   const [view, setView] = useState<View>('list');
-  /** The location the employee chose while on the "create" screen */
   const [pendingSetup, setPendingSetup] = useState<{
     location: StorageLocation;
     notes: string;
   } | null>(null);
-  /** Check opened in the report modal */
   const [reportCheck, setReportCheck] = useState<InventoryCheck | null>(null);
-  /** Submission in progress */
   const [submitting, setSubmitting] = useState(false);
 
-  // ── Load master data on mount ──────────────────────────────────────────────
+  const handleFetchChecks = useCallback((params: any) => {
+    dispatch(fetchInventoryChecks({ page: 1, size: 50, sortBy: 'id', sortDir: 'desc', ...params }));
+  }, [dispatch]);
+
   useEffect(() => {
     dispatch(fetchAllProducts());
     dispatch(fetchStorageLocations({ size: 1000 }));
-    dispatch(fetchInventoryChecks({ page: 1, size: 50, sortBy: 'id', sortDir: 'desc' }));
-  }, [dispatch]);
+    handleFetchChecks({});
+  }, [dispatch, handleFetchChecks]);
 
-  // ─── Handlers ─────────────────────────────────────────────────────────────
-
-  /**
-   * Called by CreateStockTake when the operator picks a location and taps
-   * "Start checking". We load the stocks at that location and then transition
-   * to the counting view.
-   */
   const handleSetupComplete = async (setup: CreateCheckSetup) => {
     const location = storageLocations.find((l) => l.id === setup.locationId);
     if (!location) {
@@ -75,10 +66,6 @@ export default function InventoryCheckMobileFeature() {
     setView('counting');
   };
 
-  /**
-   * Called by ActiveStockTake when the operator finalises the count.
-   * Builds the CreateCheckPayload and dispatches createInventoryCheck.
-   */
   const handleFinalize = async (items: CountingItem[], notes: string) => {
     // Filter out items with null actualQuantity (treat as uncounted = skip)
     const details = items
@@ -118,30 +105,26 @@ export default function InventoryCheckMobileFeature() {
     }
   };
 
-  // ─── Global loading state ─────────────────────────────────────────────────
   // Only block the whole UI if we're in "counting" view and still loading stocks
   const isTransitioning = view === 'counting' && stocksLoading;
 
   if (isTransitioning) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 gap-4">
-        <div className="w-10 h-10 border-4 border-blue-600 rounded-full border-t-transparent animate-spin" />
-        <p className="text-sm text-slate-500 font-semibold">Đang tải dữ liệu kho...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-wms-bg gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-amber-600" />
+        <p className="text-sm text-slate-500 font-semibold">Loading data...</p>
       </div>
     );
   }
 
-  // ─── Submission overlay ───────────────────────────────────────────────────
   if (submitting) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 gap-4">
-        <div className="w-10 h-10 border-4 border-blue-600 rounded-full border-t-transparent animate-spin" />
-        <p className="text-sm text-slate-500 font-semibold">Đang nộp phiếu kiểm kê...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-wms-bg gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-amber-600" />
+        <p className="text-sm text-slate-500 font-semibold">Submitting...</p>
       </div>
     );
   }
-
-  // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -152,6 +135,7 @@ export default function InventoryCheckMobileFeature() {
           loading={checksLoading}
           onCreateNewClick={() => setView('create')}
           onViewCheck={(check) => setReportCheck(check)}
+          onFetchChecks={handleFetchChecks}
         />
       )}
 

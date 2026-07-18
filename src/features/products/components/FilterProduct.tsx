@@ -18,7 +18,7 @@ const FilterProduct: React.FC<FilterProductProps> = ({ onSearch, onActionClick }
     <div className="flex justify-between items-center mb-6.25">
       <div className="flex items-center gap-3.75">
         <div className="flex items-center gap-2.5 text-[13px] font-medium">
-          <label>Search product</label>
+          <label>Product code</label>
           <input
             className="py-2 px-3.75 border border-solid border-wms-border-color rounded-md outline-none text-[13px] text-wms-muted"
             type="text"

@@ -118,7 +118,7 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Overlay để đóng menu khi click ra ngoài */}
+      {/* Backdrop */}
       {isOpen && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>}
       {isNotifOpen && <div className="fixed inset-0 z-40" onClick={() => setIsNotifOpen(false)}></div>}
     </header>

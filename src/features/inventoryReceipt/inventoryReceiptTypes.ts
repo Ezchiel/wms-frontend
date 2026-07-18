@@ -61,7 +61,6 @@ export interface InventoryReceiptPayload {
   details: ReceiptDetailPayload[];
 }
 
-// --- Pagination params ---
 export interface FetchReceiptsParams {
   keyword?: string;
   status?: string;
@@ -69,6 +68,9 @@ export interface FetchReceiptsParams {
   size?: number;
   sortBy?: string;
   sortDir?: string;
+  assignedFilter?: 'ME' | 'UNASSIGNED';
+  fromDate?: string;
+  toDate?: string;
 }
 
 // --- Receipt state ---

@@ -29,19 +29,19 @@ interface ProfileData {
 
 const ProfilePage: React.FC = () => {
   const reduxUser = useAppSelector((state) => state.auth.user);
-  
+
   // Local state
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
-  
+
   // Form fields
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   // Form view states
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -165,30 +165,22 @@ const ProfilePage: React.FC = () => {
   ];
 
   return (
-    <div className="w-full pl-75 pr-10 py-6 text-wms-text-main font-sans">
-      {/* --- PAGE TITLE --- */}
-      <div className="mb-6">
-        <h1 className="text-[22px] font-semibold mb-1.25">Hồ sơ cá nhân</h1>
-        <p className="text-[13px] text-wms-muted">
-          Quản lý thông tin cá nhân và thiết lập bảo mật tài khoản của bạn
-        </p>
-      </div>
-
+    <div className="w-full pl-75 pr-10 pb-6 text-wms-text-main font-sans">
       {loading ? (
         <div className="py-20 text-center flex flex-col items-center justify-center gap-3 bg-white rounded-2xl shadow-xs border border-gray-100">
           <div className="w-10 h-10 border-4 border-wms-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-gray-500 font-medium">Đang tải thông tin hồ sơ...</p>
+          <p className="text-sm text-gray-500 font-medium">Loading profile...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
+
           {/* --- LEFT CARD: USER CARD (4 COLS) --- */}
           <div className="lg:col-span-4 space-y-6">
-            
+
             {/* Avatar & Roles Card */}
             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-xs text-center relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
-              
+
               <div className="relative mt-8 mb-4 inline-block">
                 {profile?.username.toLowerCase() === 'frieren' ? (
                   <img
@@ -219,22 +211,22 @@ const ProfilePage: React.FC = () => {
 
               <div className="space-y-3.5 text-left text-xs">
                 <div className="flex items-center justify-between text-slate-600">
-                  <span className="font-medium text-slate-400">Trạng thái:</span>
+                  <span className="font-medium text-slate-400">Status:</span>
                   <span className="flex items-center gap-1 font-bold text-emerald-600">
                     <UserCheck className="w-3.5 h-3.5" />
-                    Đang hoạt động
+                    Active
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-slate-600">
-                  <span className="font-medium text-slate-400">Thiết bị đăng nhập:</span>
+                  <span className="font-medium text-slate-400">Login Device:</span>
                   <span className="flex items-center gap-1 font-bold text-slate-700">
                     <Smartphone className="w-3.5 h-3.5" />
                     Web Desktop
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-slate-600">
-                  <span className="font-medium text-slate-400">Khu vực phân quyền:</span>
-                  <span className="font-bold text-slate-700">Toàn quyền hệ thống</span>
+                  <span className="font-medium text-slate-400">Privilege Area:</span>
+                  <span className="font-bold text-slate-700">Full System Access</span>
                 </div>
               </div>
             </div>
@@ -243,15 +235,15 @@ const ProfilePage: React.FC = () => {
             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-xs space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-blue-500" />
-                Hiệu suất hệ thống
+                System Performance
               </h3>
               <div className="grid grid-cols-2 gap-3 text-center">
                 <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
-                  <span className="text-[10px] text-blue-600 font-bold block mb-1">phiên làm việc</span>
+                  <span className="text-[10px] text-blue-600 font-bold block mb-1">Sessions</span>
                   <span className="text-lg font-black text-blue-700">128</span>
                 </div>
                 <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/50">
-                  <span className="text-[10px] text-indigo-600 font-bold block mb-1">thao tác tháng</span>
+                  <span className="text-[10px] text-indigo-600 font-bold block mb-1">Monthly Operations</span>
                   <span className="text-lg font-black text-indigo-700">1.4K</span>
                 </div>
               </div>
@@ -261,22 +253,22 @@ const ProfilePage: React.FC = () => {
 
           {/* --- RIGHT CARD: FORMS (8 COLS) --- */}
           <div className="lg:col-span-8 space-y-6">
-            
+
             {/* Main Form Card */}
             <form onSubmit={handleUpdateProfile} className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
               <div className="border-b border-gray-100 p-5 bg-slate-50/50">
                 <h3 className="text-[14px] font-bold text-slate-800 flex items-center gap-2">
                   <UserIcon className="w-4 h-4 text-blue-600" />
-                  Cấu hình thông tin cá nhân
+                  Profile Configuration
                 </h3>
               </div>
 
               <div className="p-6 space-y-6">
-                
+
                 {/* Inputs Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Tên đăng nhập (Read-only)</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Username (Read-only)</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <UserIcon className="w-4 h-4" />
@@ -291,7 +283,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Họ và tên</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Full Name</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-blue-500">
                         <UserIcon className="w-4 h-4" />
@@ -308,7 +300,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Địa chỉ Email</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Email Address</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-blue-500">
                         <Mail className="w-4 h-4" />
@@ -325,7 +317,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Số điện thoại</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Phone Number</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-blue-500">
                         <Phone className="w-4 h-4" />
@@ -347,19 +339,19 @@ const ProfilePage: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Key className="w-4 h-4 text-amber-500" />
-                    <h4 className="text-[13px] font-bold text-slate-800">Đổi mật khẩu tài khoản (Để trống nếu không đổi)</h4>
+                    <h4 className="text-[13px] font-bold text-slate-800">Change Password (Leave empty if not changing)</h4>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Mật khẩu mới</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">New Password</label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                           <Lock className="w-4 h-4" />
                         </div>
                         <input
                           type={showPassword ? 'text' : 'password'}
-                          placeholder="Mật khẩu từ 6 ký tự"
+                          placeholder="Password from 6 characters"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           className="w-full pl-10 pr-10 py-2.5 text-xs text-slate-700 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all font-medium"
@@ -375,14 +367,14 @@ const ProfilePage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Xác nhận mật khẩu mới</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase">Confirm new password</label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                           <Lock className="w-4 h-4" />
                         </div>
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
-                          placeholder="Nhập lại mật khẩu mới"
+                          placeholder="Confirm new password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           className="w-full pl-10 pr-10 py-2.5 text-xs text-slate-700 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all font-medium"
@@ -409,7 +401,7 @@ const ProfilePage: React.FC = () => {
                   disabled={saving}
                   className="px-4 py-2 border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -419,12 +411,12 @@ const ProfilePage: React.FC = () => {
                   {saving ? (
                     <>
                       <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Đang lưu...
+                      Saving...
                     </>
                   ) : (
                     <>
                       <Save className="w-3.5 h-3.5" />
-                      Lưu thay đổi
+                      Save changes
                     </>
                   )}
                 </button>
@@ -436,18 +428,18 @@ const ProfilePage: React.FC = () => {
               <div className="border-b border-gray-100 p-5 flex justify-between items-center">
                 <h3 className="text-[14px] font-bold text-slate-800 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-blue-600" />
-                  Nhật ký hoạt động gần đây
+                  Recent Activity History
                 </h3>
-                <span className="text-[10px] text-wms-muted font-semibold">Tự động làm mới</span>
+                <span className="text-[10px] text-wms-muted font-semibold">Auto-refresh</span>
               </div>
               <div className="p-0 overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-extrabold uppercase">
-                      <th className="py-3 px-5 font-bold">Hoạt động</th>
-                      <th className="py-3 px-5 font-bold">Thời gian</th>
-                      <th className="py-3 px-5 font-bold">Địa chỉ IP</th>
-                      <th className="py-3 px-5 font-bold">Trạng thái</th>
+                      <th className="py-3 px-5 font-bold">Activity</th>
+                      <th className="py-3 px-5 font-bold">Time</th>
+                      <th className="py-3 px-5 font-bold">IP Address</th>
+                      <th className="py-3 px-5 font-bold">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">

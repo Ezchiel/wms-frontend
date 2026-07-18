@@ -83,7 +83,7 @@ const FilterStorageLocation: React.FC<FilterStorageLocationProps> = ({
       {/* Search box */}
       <div className="flex items-center gap-3.75">
         <div className="flex items-center gap-2.5 text-[13px] font-medium">
-          <label>Search location</label>
+          <label>Location code</label>
           <input
             className="py-2 px-3.75 border border-solid border-wms-border-color rounded-md outline-none text-[13px] text-wms-muted"
             type="text"

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { InventoryIssue } from '../../inventoryIssue/inventoryIssueTypes';
-import { ClipboardList, Calendar, RefreshCw, Layers, ArrowLeft } from 'lucide-react';
+import { ClipboardList, Calendar, RefreshCw, Layers, Search as SearchIcon, SlidersHorizontal } from 'lucide-react';
+import PageHeader from '../../../layouts/MobileLayout/PageHeader';
+import SortFilterSheet from '../../../components/mobile/SortFilterSheet';
 
 interface Props {
   issues: InventoryIssue[];
@@ -9,6 +11,7 @@ interface Props {
   onClaim: (issueId: number) => void;
   onBackToMyTasks?: () => void;
   actionLoading?: boolean;
+  onFetchIssues: (params: any) => void;
 }
 
 export const AvailableIssueList: React.FC<Props> = ({
@@ -18,54 +21,120 @@ export const AvailableIssueList: React.FC<Props> = ({
   onClaim,
   onBackToMyTasks,
   actionLoading = false,
+  onFetchIssues,
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sortFilter, setSortFilter] = useState({
+    sort: 'issueDate_desc',
+    filters: {
+      issueDateFrom: '',
+      issueDateTo: '',
+    },
+  });
+
+  // Debounced search & filter dispatch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const fromDate = sortFilter.filters.issueDateFrom || undefined;
+      const toDate = sortFilter.filters.issueDateTo || undefined;
+      const [sortBy, sortDir] = sortFilter.sort.split('_');
+
+      onFetchIssues({
+        keyword: searchTerm || undefined,
+        fromDate,
+        toDate,
+        sortBy,
+        sortDir,
+      });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, sortFilter, onFetchIssues]);
+
+  const sortOptions = [
+    { value: 'issueDate_desc', label: 'Mới nhất' },
+    { value: 'issueDate_asc', label: 'Cũ nhất' },
+    { value: 'issueCode_asc', label: 'Mã phiếu A-Z' },
+    { value: 'issueCode_desc', label: 'Mã phiếu Z-A' },
+  ];
+
+  const filterGroups = [
+    {
+      key: 'issueDate',
+      label: 'Khoảng ngày tạo',
+      type: 'dateRange' as const,
+    },
+  ];
+
+  const isFiltered = searchTerm || sortFilter.filters.issueDateFrom || sortFilter.filters.issueDateTo;
+
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col font-sans">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
-        <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            {onBackToMyTasks && (
-              <button
-                type="button"
-                onClick={onBackToMyTasks}
-                className="transition-colors active:opacity-75 p-1.5 -ml-1 text-slate-600"
-              >
-                <ArrowLeft size={20} />
-              </button>
-            )}
-            <div>
-              <h1 className="font-black text-base text-slate-800 leading-tight">Phiếu xuất kho sẵn sàng</h1>
-              <p className="text-[10px] text-slate-400 font-medium mt-0.5">
-                Chọn phiếu để bắt đầu lấy hàng
-              </p>
-            </div>
-          </div>
+      {/* Page Header */}
+      <PageHeader
+        title="Picking"
+        subtitle="Choose an issue to start picking"
+        backTo={onBackToMyTasks}
+        rightSlot={
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all active:scale-90"
+            className="flex items-center gap-1 px-3 py-2 rounded-xl bg-wms-primary text-white text-xs font-extrabold shadow-md shadow-amber-200/50 active:scale-95 transition-all cursor-pointer"
             id="available-refresh-btn"
           >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={13} />
+            <span>Refresh</span>
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {/* Main content */}
-      <main className="flex-1 max-w-md mx-auto w-full px-4 py-4 space-y-4 pb-28">
+      <main className="flex-1 max-w-md mx-auto w-full px-5 py-4 space-y-4 pb-28">
+        {/* Search & Filter Bar */}
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <div className='relative flex-1'>
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <input
+                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-wms-primary/20 focus:border-wms-primary text-[14px] text-slate-800 placeholder:text-slate-400 transition-all shadow-xs"
+                placeholder="Search issue code..."
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <button
+              onClick={() => setSheetOpen(true)}
+              className="w-12 h-12 bg-white border border-slate-200 text-slate-700 rounded-xl active:scale-95 transition-transform shadow-xs flex items-center justify-center cursor-pointer"
+            >
+              <SlidersHorizontal className="w-[18px] h-[18px]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[15px] font-bold text-wms-text-main">Available for picking</h2>
+          <span className="text-[13px] font-medium text-wms-primary bg-wms-primary/10 px-2.5 py-0.5 rounded-full">
+            {issues.length} available
+          </span>
+        </div>
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-slate-400 font-semibold">Đang tải phiếu xuất...</p>
+            <p className="text-xs text-slate-400 font-semibold">Loading data...</p>
           </div>
         ) : issues.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white border border-slate-100 rounded-2xl">
             <ClipboardList size={32} className="text-slate-300" />
             <div className="text-center">
-              <p className="text-xs font-extrabold text-slate-500">Không có phiếu sẵn sàng</p>
+              <p className="text-xs font-extrabold text-slate-500">
+                {isFiltered ? 'No results found' : 'No available issues'}
+              </p>
               <p className="text-[10px] text-slate-400 mt-1">
-                Hiện tại không có phiếu APPROVED nào chờ nhận.
+                {isFiltered ? 'Try changing the filters or search keyword' : 'There are no available issues at the moment.'}
               </p>
             </div>
           </div>
@@ -113,6 +182,18 @@ export const AvailableIssueList: React.FC<Props> = ({
           </div>
         )}
       </main>
+
+      <SortFilterSheet
+        open={sheetOpen}
+        sortOptions={sortOptions}
+        filterGroups={filterGroups}
+        value={sortFilter}
+        onApply={(val) => {
+          setSortFilter(val);
+          setSheetOpen(false);
+        }}
+        onClose={() => setSheetOpen(false)}
+      />
     </div>
   );
 };

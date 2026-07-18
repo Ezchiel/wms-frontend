@@ -54,5 +54,8 @@ export interface InventoryCheckFilters {
   size: number;
   sortBy: string;
   sortDir: string;
+  createdByMe?: boolean;
+  fromDate?: string;
+  toDate?: string;
 }
 

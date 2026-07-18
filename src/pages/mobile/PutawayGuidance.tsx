@@ -1,4 +1,6 @@
 import React from 'react';
+import { AlertTriangle, QrCode, Boxes, CheckCircle } from 'lucide-react';
+import PageHeader from '../../layouts/MobileLayout/PageHeader';
 
 interface ProductInfo {
   name: string;
@@ -45,15 +47,15 @@ const PutawayGuidance: React.FC = () => {
       `}</style>
 
       {/* TopAppBar */}
-      <header className="flex items-center justify-between px-5 py-4 w-full sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-wms-border-color shadow-sm">
-        <button className="text-wms-text-main w-9 h-9 active:opacity-70 bg-wms-bg rounded-full flex items-center justify-center transition-colors">
-          <i className="fa-solid fa-arrow-left text-[16px]"></i>
-        </button>
-        <h1 className="font-bold text-wms-text-main text-[17px]">Cất hàng (Putaway)</h1>
-        <button className="text-red-500 w-9 h-9 active:opacity-70 bg-red-50 rounded-full flex items-center justify-center transition-colors">
-          <i className="fa-solid fa-circle-exclamation text-[18px]"></i>
-        </button>
-      </header>
+      <PageHeader
+        title="Cất hàng (Putaway)"
+        backTo="/mobile/tasks"
+        rightSlot={
+          <button className="text-red-500 w-9 h-9 active:opacity-70 bg-red-50 rounded-full flex items-center justify-center transition-colors cursor-pointer">
+            <AlertTriangle className="w-[18px] h-[18px]" />
+          </button>
+        }
+      />
 
       <main className="flex-1 flex flex-col px-5 pt-6 pb-8 max-w-md mx-auto w-full">
         {/* Target Location Card (Highlight Box) */}
@@ -77,7 +79,7 @@ const PutawayGuidance: React.FC = () => {
         <section className="flex-1 flex flex-col items-center justify-center py-8">
           <div className="w-56 h-56 scanner-frame rounded-2xl relative flex items-center justify-center bg-white shadow-sm border border-wms-border-color/50">
             <div className="w-48 h-48 bg-wms-bg/50 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-wms-border-color">
-              <i className="fa-solid fa-qrcode text-[48px] text-wms-muted mb-3 opacity-50"></i>
+              <QrCode className="w-[48px] h-[48px] text-wms-muted mb-3 opacity-50" />
               <span className="text-[12px] font-bold text-wms-muted w-2/3 text-center opacity-80">
                 Quét mã kệ để xác nhận
               </span>
@@ -89,7 +91,7 @@ const PutawayGuidance: React.FC = () => {
         <section className="bg-white rounded-2xl p-4 shadow-sm border border-wms-border-color mb-5">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-wms-bg border border-wms-border-color flex items-center justify-center">
-              <i className="fa-solid fa-boxes-stacked text-wms-muted text-[20px]"></i>
+              <Boxes className="text-wms-muted w-5 h-5" />
             </div>
             <div className="flex-1">
               <h3 className="text-[14px] font-bold text-wms-text-main leading-tight">
@@ -109,12 +111,12 @@ const PutawayGuidance: React.FC = () => {
             className="w-full h-14 bg-gray-100 text-gray-400 font-bold rounded-xl flex items-center justify-center gap-2 cursor-not-allowed border border-gray-200 transition-all"
             disabled
           >
-            <i className="fa-solid fa-circle-check text-[20px]"></i>
+            <CheckCircle className="w-5 h-5" />
             Xác nhận Vị trí
           </button>
 
-          <button className="w-full h-14 border-2 border-wms-primary text-wms-primary bg-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-wms-primary/5 active:scale-[0.98] transition-all">
-            <i className="fa-solid fa-qrcode text-[18px]"></i>
+          <button className="w-full h-14 border-2 border-wms-primary text-wms-primary bg-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-wms-primary/5 active:scale-[0.98] transition-all cursor-pointer">
+            <QrCode className="w-[18px] h-[18px]" />
             Quét lại mã LPN
           </button>
         </div>

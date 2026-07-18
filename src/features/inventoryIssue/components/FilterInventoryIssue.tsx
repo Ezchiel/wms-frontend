@@ -19,11 +19,11 @@ const FilterInventoryIssue: React.FC<Props> = ({ onSearch, onActionClick }) => {
     <div className="flex justify-between items-center mb-6.25">
       <div className="flex items-center gap-3.75">
         <div className="flex items-center gap-2.5 text-[13px] font-medium">
-          <label className="text-wms-text-main">Search Issue</label>
+          <label className="text-wms-text-main">Issue code</label>
           <input
             className="py-2 px-3.75 border border-solid border-wms-border-color rounded-md outline-none text-[13px] text-wms-text-main placeholder:text-wms-muted focus:border-wms-primary transition-colors"
             type="text"
-            placeholder="Mã phiếu, tên KH..."
+            placeholder="Please enter here..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}

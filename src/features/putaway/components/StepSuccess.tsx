@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { CheckCircle, CheckCheck, QrCode } from 'lucide-react';
 
 interface SuccessData {
   lpnCode: string;
@@ -20,7 +21,7 @@ export const StepSuccess: React.FC<Props> = ({ data, completedCount, onReset }) 
     <div className="flex flex-col items-center gap-6 pt-4 animate-in fade-in zoom-in duration-300">
       {/* Icon Success */}
       <div className="w-24 h-24 rounded-3xl bg-green-100 border-2 border-green-300 flex items-center justify-center shadow-sm shadow-green-200">
-        <i className="fa-solid fa-circle-check text-green-600 text-[44px]" />
+        <CheckCircle className="text-green-600 w-11 h-11" />
       </div>
 
       <div className="text-center">
@@ -57,7 +58,7 @@ export const StepSuccess: React.FC<Props> = ({ data, completedCount, onReset }) 
       {/* Thông báo tiến độ phiên làm việc */}
       {completedCount > 0 && (
         <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-full">
-          <i className="fa-solid fa-check-double text-blue-600 text-[13px]" />
+          <CheckCheck className="text-blue-600 w-4 h-4" />
           <span className="text-[13px] font-bold text-blue-700">
             {completedCount} kiện đã cất trong phiên này
           </span>
@@ -68,9 +69,9 @@ export const StepSuccess: React.FC<Props> = ({ data, completedCount, onReset }) 
       <div className="w-full grid grid-cols-1 gap-3 mt-2">
         <button
           onClick={onReset}
-          className="w-full h-14 bg-wms-primary text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-wms-primary-hover active:scale-[0.98] transition-all shadow-lg shadow-blue-200"
+          className="w-full h-14 bg-wms-primary text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-wms-primary-hover active:scale-[0.98] transition-all shadow-lg shadow-blue-200 cursor-pointer"
         >
-          <i className="fa-solid fa-qrcode text-[20px]" />
+          <QrCode className="w-5 h-5" />
           Cất kiện hàng tiếp theo
         </button>
 

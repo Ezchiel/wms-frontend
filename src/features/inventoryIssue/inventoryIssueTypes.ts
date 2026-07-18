@@ -66,4 +66,6 @@ export interface FetchIssuesParams {
   size?: number;
   sortBy?: string;
   sortDir?: string;
+  fromDate?: string;
+  toDate?: string;
 }

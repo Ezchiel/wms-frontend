@@ -14,7 +14,7 @@ export const fetchInventoryChecks = createAsyncThunk<
   { rejectValue: string }
 >('inventoryCheck/fetchAll', async (filters, { rejectWithValue }) => {
   try {
-    const params: Record<string, string | number> = {
+    const params: Record<string, any> = {
       page: filters.page ?? 1,
       size: filters.size ?? 10,
       sortBy: filters.sortBy ?? 'id',
@@ -22,6 +22,9 @@ export const fetchInventoryChecks = createAsyncThunk<
     };
     if (filters.keyword) params.keyword = filters.keyword;
     if (filters.status) params.status = filters.status;
+    if (filters.createdByMe !== undefined) params.createdByMe = filters.createdByMe;
+    if (filters.fromDate) params.fromDate = filters.fromDate;
+    if (filters.toDate) params.toDate = filters.toDate;
 
     const response = await axiosClient.get<ApiResponse<InventoryCheck[]>>('/checks', { params });
     return response.data;

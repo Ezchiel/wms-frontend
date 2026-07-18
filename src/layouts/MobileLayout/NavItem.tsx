@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
+import type { LucideIcon } from 'lucide-react';
 
 interface NavItemProps {
-  icon: string;
+  icon: LucideIcon;
   label: string;
   path: string;
   active?: boolean;
 }
 
-function NavItem({ icon, label, path, active = false }: NavItemProps) {
+function NavItem({ icon: Icon, label, path, active = false }: NavItemProps) {
   return (
     <Link
       to={path}
@@ -15,7 +16,7 @@ function NavItem({ icon, label, path, active = false }: NavItemProps) {
         active ? 'bg-wms-primary/10 text-wms-primary' : 'text-wms-muted hover:text-wms-primary'
       }`}
     >
-      <i className={`${icon} text-[20px] mb-1.5`}></i>
+      <Icon className="w-5 h-5 mb-1.5" />
       <span className="text-[11px] font-semibold tracking-wide">{label}</span>
     </Link>
   );

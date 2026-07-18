@@ -12,8 +12,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onClose }) 
   const { items, loading, error, refetch } = useNotifications();
 
   const handleItemClick = (item: NotificationSummary) => {
-    // Giai đoạn 1: Điều hướng đến trang quản lý tồn kho
-    // Truyền query parameter để trang inventory stocks biết cần xem thông tin gì
     if (item.type === 'LOW_STOCK') {
       navigate(`/inventory-stocks?productId=${item.referenceId}`);
     } else {
@@ -60,7 +58,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onClose }) 
       {/* --- HEADER --- */}
       <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-[15px] text-gray-800">Thông báo & Cảnh báo</span>
+          <span className="font-bold text-[15px] text-gray-800">Notifications</span>
           {items.length > 0 && (
             <span className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full font-bold">
               {items.length}
@@ -73,10 +71,10 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onClose }) 
             refetch();
           }}
           className="text-gray-400 hover:text-wms-primary transition-colors cursor-pointer text-xs flex items-center gap-1"
-          title="Làm mới"
+          title="Refresh"
         >
           <i className="fa-solid fa-rotate-right"></i>
-          <span>Làm mới</span>
+          <span>Refresh</span>
         </button>
       </div>
 
@@ -104,8 +102,8 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onClose }) 
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
               <i className="fa-regular fa-bell-slash text-lg"></i>
             </div>
-            <p className="font-semibold text-gray-700 text-sm">Không có cảnh báo nào</p>
-            <p className="text-[12px] text-gray-400 mt-0.5">Tồn kho và hạn sử dụng đang ở trạng thái an toàn.</p>
+            <p className="font-semibold text-gray-700 text-sm">No notifications</p>
+            <p className="text-[12px] text-gray-400 mt-0.5">Inventory and expiration dates are in a safe state.</p>
           </div>
         ) : (
           items.map((item, idx) => {
@@ -133,7 +131,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onClose }) 
                   </p>
                   {item.daysRemaining !== null && item.daysRemaining !== undefined && (
                     <span className="inline-block text-[11px] text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-md mt-1 border border-amber-100">
-                      Còn {item.daysRemaining} ngày
+                      {item.daysRemaining} days remaining
                     </span>
                   )}
                 </div>
@@ -147,7 +145,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onClose }) 
       <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/30 text-center">
         <span className="text-[11px] text-gray-400 font-medium">
           <i className="fa-solid fa-shield-halved mr-1"></i>
-          Hệ thống giám sát tồn kho tự động
+          Automatic Inventory Monitoring System
         </span>
       </div>
     </div>

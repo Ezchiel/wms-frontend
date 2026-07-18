@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Truck, Clock, Package, QrCode, ClipboardCheck, Lock } from 'lucide-react';
 import type { InventoryReceipt, ReceiptStatus } from '../../inventoryReceipt/inventoryReceiptTypes';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { claimReceipt } from '../../inventoryReceipt/inventoryReceiptThunks';
@@ -61,7 +62,7 @@ const TaskCard = ({ receipt }: TaskProps) => {
 
       {/* Supplier */}
       <div className="flex items-center gap-2.5 text-[13px] text-wms-text-main font-medium -mt-1.25">
-        <i className="fa-solid fa-truck-field text-wms-muted w-4 text-center"></i>
+        <Truck className="text-wms-muted w-4 h-4 text-center shrink-0" />
         <span className="truncate">{receipt.supplierName ?? 'Supplier unknown'}</span>
       </div>
 
@@ -69,7 +70,7 @@ const TaskCard = ({ receipt }: TaskProps) => {
       <div className="grid grid-cols-2 gap-y-3 py-3 border-y border-wms-border-color">
         <div className="flex items-center gap-3">
           <div className="min-w-8 w-8 h-8 rounded-full bg-wms-bg flex items-center justify-center text-wms-muted">
-            <i className="fa-regular fa-clock text-[15px]"></i>
+            <Clock className="w-4 h-4" />
           </div>
           <div className="flex flex-col min-w-0">
             <span className="text-[11px] text-wms-muted font-medium mb-0.5">Ngày tạo</span>
@@ -81,7 +82,7 @@ const TaskCard = ({ receipt }: TaskProps) => {
 
         <div className="flex items-center gap-3">
           <div className="min-w-8 w-8 h-8 rounded-full bg-wms-bg flex items-center justify-center text-wms-muted">
-            <i className="fa-solid fa-box-open text-[14px]"></i>
+            <Package className="w-4 h-4" />
           </div>
           <div className="flex flex-col min-w-0">
             <span className="text-[11px] text-wms-muted font-medium mb-0.5">SKU</span>
@@ -104,7 +105,7 @@ const TaskCard = ({ receipt }: TaskProps) => {
             to={`/mobile/count-and-label/${receipt.id}`}
             className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1"
           >
-            <i className="fa-solid fa-qrcode text-[18px]"></i>
+            <QrCode className="w-[18px] h-[18px]" />
             Count and label now
           </Link>
         ) : !receipt.assignedTo ? (
@@ -112,12 +113,12 @@ const TaskCard = ({ receipt }: TaskProps) => {
             onClick={handleClaim}
             className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1 cursor-pointer"
           >
-            <i className="fa-solid fa-clipboard-check text-[18px]"></i>
+            <ClipboardCheck className="w-[18px] h-[18px]" />
             Claim receipt
           </button>
         ) : (
           <div className="w-full bg-gray-100 text-gray-500 py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 mt-1 border border-gray-200 text-[13px]">
-            <i className="fa-solid fa-lock text-[14px]"></i>
+            <Lock className="w-[14px] h-[14px]" />
             Assigned to: {receipt.assignedTo}
           </div>
         ))}
@@ -126,7 +127,7 @@ const TaskCard = ({ receipt }: TaskProps) => {
           to="/mobile/put-away"
           className="w-full bg-wms-primary hover:bg-wms-primary-hover text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-sm mt-1"
         >
-          <i className="fa-solid fa-qrcode text-[18px]"></i>
+          <QrCode className="w-[18px] h-[18px]" />
           Start putaway
         </Link>
       )}

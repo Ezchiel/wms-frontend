@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { InventoryCheck, CheckStatus } from '../../inventoryCheck/inventoryCheckTypes';
-import { ChartArea, FileSearchCorner, Inbox, Plus, ReceiptText } from 'lucide-react';
+import { ChartArea, Inbox, Plus, ReceiptText, AlertTriangle, SearchIcon, SlidersHorizontal } from 'lucide-react';
+import PageHeader from '../../../layouts/MobileLayout/PageHeader';
+import SortFilterSheet from '../../../components/mobile/SortFilterSheet';
 
 interface StockTakeDashboardProps {
   checks: InventoryCheck[];
   loading: boolean;
   onCreateNewClick: () => void;
   onViewCheck: (check: InventoryCheck) => void;
+  onFetchChecks: (params: any) => void;
 }
 
 const STATUS_CONFIG: Record<CheckStatus, { label: string; bg: string; text: string; dot: string }> =
@@ -50,158 +53,178 @@ export default function StockTakeDashboard({
   loading,
   onCreateNewClick,
   onViewCheck,
+  onFetchChecks,
 }: StockTakeDashboardProps) {
-  const [filterStatus, setFilterStatus] = useState<CheckStatus | 'ALL'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
-
-  const totalChecks = checks.length;
-  const pendingChecks = checks.filter((c) => c.status === 'PENDING').length;
-  const completedChecks = checks.filter((c) => c.status === 'COMPLETED').length;
-
-  const filteredChecks = checks.filter((c) => {
-    const matchesStatus = filterStatus === 'ALL' || c.status === filterStatus;
-    const matchesSearch =
-      !searchTerm ||
-      c.checkCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.createdBy?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesStatus && matchesSearch;
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sortFilter, setSortFilter] = useState({
+    sort: 'id_desc',
+    filters: {
+      status: 'ALL',
+      createdByMe: 'ALL',
+      checkDateFrom: '',
+      checkDateTo: '',
+    },
   });
 
+  const totalChecks = checks.length;
+
+  // Debounced search & filter dispatch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const statusVal = sortFilter.filters.status === 'ALL' ? undefined : sortFilter.filters.status;
+      const createdByMeVal = sortFilter.filters.createdByMe === 'ME' ? true : undefined;
+      const fromDate = sortFilter.filters.checkDateFrom || undefined;
+      const toDate = sortFilter.filters.checkDateTo || undefined;
+      const [sortBy, sortDir] = sortFilter.sort.split('_');
+
+      onFetchChecks({
+        keyword: searchTerm || undefined,
+        status: statusVal,
+        createdByMe: createdByMeVal,
+        fromDate,
+        toDate,
+        sortBy,
+        sortDir,
+      });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, sortFilter, onFetchChecks]);
+
+  const sortOptions = [
+    { value: 'id_desc', label: 'Newest' },
+    { value: 'id_asc', label: 'Oldest' },
+    { value: 'checkCode_asc', label: 'Check Code A-Z' },
+    { value: 'checkCode_desc', label: 'Check Code Z-A' },
+  ];
+
+  const filterGroups = [
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'chip' as const,
+      options: [
+        { value: 'ALL', label: 'All' },
+        { value: 'PENDING', label: 'Pending' },
+        { value: 'COMPLETED', label: 'Completed' },
+        { value: 'CANCELLED', label: 'Cancelled' },
+      ],
+    },
+    {
+      key: 'createdByMe',
+      label: 'User',
+      type: 'chip' as const,
+      options: [
+        { value: 'ALL', label: 'All' },
+        { value: 'ME', label: 'Me' },
+      ],
+    },
+    {
+      key: 'checkDate',
+      label: 'Date',
+      type: 'dateRange' as const,
+    },
+  ];
+
+  const isFiltered =
+    searchTerm ||
+    sortFilter.filters.status !== 'ALL' ||
+    sortFilter.filters.createdByMe !== 'ALL' ||
+    sortFilter.filters.checkDateFrom ||
+    sortFilter.filters.checkDateTo;
+
   return (
-    <div className="bg-slate-50 min-h-screen font-sans">
-      {/* ── Sticky Header ── */}
-      <div className="bg-white border-b border-slate-100 px-4 py-4 sticky top-0 z-20 shadow-xs">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-base font-black text-slate-800 leading-none">Kiểm kê kho</h1>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mt-1 block">
-              Quản lý phiếu kiểm kê
-            </span>
-          </div>
+    <div className="bg-wms-bg min-h-screen font-sans">
+      {/* ── Shared Page Header ── */}
+      <PageHeader
+        title="Stock take"
+        subtitle="Manage stock take orders"
+        rightSlot={
           <button
             onClick={onCreateNewClick}
-            className="flex items-center gap-1 px-3 py-2 rounded-xl bg-blue-600 text-white text-xs font-extrabold shadow-md shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all"
+            className="flex items-center gap-1 px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold shadow-md shadow-amber-200/50 active:scale-95 transition-all cursor-pointer"
             id="create-new-check-btn"
           >
             <Plus size={13} />
-            Tạo phiếu mới
+            <span>Create new check</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
-      <main className="max-w-md mx-auto px-4 py-5 space-y-5 pb-32">
-        {/* ── KPI Cards ── */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="relative h-24 p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs text-center">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tổng</p>
-            <p className="absolute bottom-4 left-[50%] translate-x-[-50%] text-2xl font-black text-slate-800 font-mono mt-0.5">{totalChecks}</p>
-          </div>
-          <div className="relative h-24 p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs text-center">
-            <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">
-              Chờ xác nhận
-            </p>
-            <p className="absolute bottom-4 left-[50%] translate-x-[-50%] text-2xl font-black text-amber-600 font-mono mt-0.5">{pendingChecks}</p>
-          </div>
-          <div className="relative h-24 p-3.5 bg-white border border-slate-100 rounded-2xl shadow-xs text-center">
-            <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
-              Hoàn thành
-            </p>
-            <p className="absolute bottom-4 left-[50%] translate-x-[-50%] text-2xl font-black text-emerald-600 font-mono mt-0.5">{completedChecks}
-            </p>
-          </div>
-        </div>
-
-        {/* ── Search ── */}
-        <div className="relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-            <FileSearchCorner size={15} />
-          </div>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Tìm theo mã, ghi chú, người tạo..."
-            className="w-full bg-white border border-slate-100 rounded-xl pl-8 pr-4 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-100 shadow-xs placeholder-slate-400"
-            id="check-search-input"
-          />
-          {searchTerm && (
+      <main className="max-w-md mx-auto px-5 py-5 space-y-5 pb-32">
+        {/* Search & Filter Area */}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-wms-muted w-4 h-4" />
+              <input
+                className="w-full pl-11 pr-4 py-3 bg-white border border-wms-border-color rounded-xl focus:outline-none focus:ring-2 focus:ring-wms-primary/20 focus:border-wms-primary text-[14px] text-wms-text-main placeholder:text-wms-muted transition-all shadow-sm"
+                placeholder="Search check code..."
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+              onClick={() => setSheetOpen(true)}
+              className="w-12 h-12 bg-white border border-wms-border-color text-wms-text-main rounded-xl active:scale-95 transition-transform shadow-sm flex items-center justify-center cursor-pointer"
             >
-              <span className="material-symbols-outlined text-xs">close</span>
+              <SlidersHorizontal className="w-[18px] h-[18px]" />
             </button>
-          )}
+          </div>
         </div>
 
-        {/* ── Status Filter Tabs ── */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
-          {(['ALL', 'PENDING', 'COMPLETED', 'CANCELLED'] as const).map((status) => {
-            const isActive = filterStatus === status;
-            const cfg = status !== 'ALL' ? STATUS_CONFIG[status] : null;
-            return (
-              <button
-                key={status}
-                onClick={() => setFilterStatus(status)}
-                className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-extrabold transition-all ${isActive
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:border-blue-200'
-                  }`}
-                id={`filter-${status}`}
-              >
-                {status === 'ALL'
-                  ? `Tất cả (${totalChecks})`
-                  : cfg
-                    ? cfg.label
-                    : status}
-              </button>
-            );
-          })}
+        {/* Title */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[15px] font-bold text-wms-text-main">Checks in processing</h2>
+          <span className="text-[13px] font-medium text-wms-primary bg-wms-primary/10 px-2.5 py-0.5 rounded-full">
+            {totalChecks} tasks
+          </span>
         </div>
 
         {/* ── Check List ── */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-8 h-8 border-4 border-blue-600 rounded-full border-t-transparent animate-spin" />
-            <p className="text-xs text-slate-400 font-semibold">Đang tải danh sách phiếu...</p>
+            <div className="w-8 h-8 border-4 border-amber-600 rounded-full border-t-transparent animate-spin" />
+            <p className="text-xs text-slate-400 font-semibold">Loading data...</p>
           </div>
-        ) : filteredChecks.length === 0 ? (
-          <div className="py-16 flex flex-col items-center text-slate-400 gap-3">
-            <Inbox size={48} />
-            <p className="text-sm font-bold">Không có phiếu nào</p>
-            <p className="text-xs text-center max-w-48">
-              {searchTerm || filterStatus !== 'ALL'
-                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
-                : 'Tạo phiếu kiểm kê đầu tiên của bạn'}
+        ) : checks.length === 0 ? (
+          <div className="py-16 flex flex-col items-center text-slate-400 gap-3 bg-white border border-wms-border-color rounded-2xl">
+            <Inbox size={48} className="text-slate-300" />
+            <p className="text-sm font-bold text-slate-500">No data</p>
+            <p className="text-xs text-center text-slate-400 max-w-48 leading-relaxed">
+              {isFiltered
+                ? 'Try changing the filters or search keyword'
+                : 'Create your first stock take'}
             </p>
-            {!searchTerm && filterStatus === 'ALL' && (
+            {!isFiltered && (
               <button
                 onClick={onCreateNewClick}
-                className="mt-2 px-5 py-2.5 flex items-center gap-1 bg-blue-600 text-white text-xs font-extrabold rounded-xl shadow-md shadow-blue-200 active:scale-95 transition-all"
+                className="mt-2 px-5 py-2.5 flex items-center gap-1 bg-amber-600 text-white text-xs font-extrabold rounded-xl shadow-md shadow-amber-200/50 hover:bg-amber-700 active:scale-95 transition-all cursor-pointer"
               >
                 <Plus size={13} />
-                Tạo phiếu mới
+                Create new check
               </button>
             )}
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredChecks.map((check) => {
-              const cfg = STATUS_CONFIG[check.status];
-              const discrepantCount = check.details.filter((d) => d.variance !== 0).length;
-              const totalLines = check.details.length;
+            {checks.map((check) => {
+              const cfg = STATUS_CONFIG[check.status] || { label: check.status, bg: 'bg-slate-100', text: 'text-slate-700', dot: 'bg-slate-400' };
+              const discrepantCount = check.details ? check.details.filter((d) => d.variance !== 0).length : 0;
+              const totalLines = check.details ? check.details.length : 0;
 
               return (
                 <div
                   key={check.id}
-                  className="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs hover:shadow-sm transition-shadow"
+                  className="bg-white border border-wms-border-color rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
                 >
                   {/* Top row */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-sm font-extrabold text-slate-800 truncate">
+                        <h3 className="text-sm font-extrabold text-slate-800 truncate font-mono">
                           {check.checkCode}
                         </h3>
                         <span
@@ -238,7 +261,7 @@ export default function StockTakeDashboard({
                   {/* Discrepancy warning */}
                   {check.status === 'PENDING' && discrepantCount > 0 && (
                     <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-1.5">
-                      <span className="material-symbols-outlined text-xs">warning</span>
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
                       <span className="font-semibold">{discrepantCount} dòng có sai lệch</span>
                     </div>
                   )}
@@ -247,8 +270,8 @@ export default function StockTakeDashboard({
                   <div className="mt-3.5">
                     <button
                       onClick={() => onViewCheck(check)}
-                      className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${check.status === 'PENDING'
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100'
+                      className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${check.status === 'PENDING'
+                        ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-100'
                         : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                         }`}
                       id={`view-check-btn-${check.id}`}
@@ -263,6 +286,18 @@ export default function StockTakeDashboard({
           </div>
         )}
       </main>
+
+      <SortFilterSheet
+        open={sheetOpen}
+        sortOptions={sortOptions}
+        filterGroups={filterGroups}
+        value={sortFilter}
+        onApply={(val) => {
+          setSortFilter(val);
+          setSheetOpen(false);
+        }}
+        onClose={() => setSheetOpen(false)}
+      />
     </div>
   );
 }

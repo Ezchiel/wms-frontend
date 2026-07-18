@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, PackageOpen, ChevronDown, Minus, Plus, Tag, AlertTriangle, Loader2, RotateCw, QrCode } from 'lucide-react';
 import type { InventoryReceiptDetail } from '../../inventoryReceipt/inventoryReceiptTypes';
 import type { ItemState } from '../countingAndLabelingTypes';
 import ProgressBar from './ProgressBar';
@@ -37,7 +38,7 @@ function ItemCard({
       {/* ── Card Header ── */}
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="w-full flex items-start gap-3 p-4 text-left active:bg-gray-50 transition-colors"
+        className="w-full flex items-start gap-3 p-4 text-left active:bg-gray-50 transition-colors cursor-pointer"
       >
         {/* Status dot */}
         <div
@@ -49,11 +50,13 @@ function ItemCard({
                 : 'bg-wms-bg text-wms-muted'
           }`}
         >
-          <i
-            className={`text-[14px] fa-solid ${
-              state.isPrinted ? 'fa-check' : isComplete ? 'fa-check' : 'fa-box-open'
-            }`}
-          />
+          {state.isPrinted ? (
+            <Check className="w-[14px] h-[14px]" />
+          ) : isComplete ? (
+            <Check className="w-[14px] h-[14px]" />
+          ) : (
+            <PackageOpen className="w-[14px] h-[14px]" />
+          )}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -67,8 +70,8 @@ function ItemCard({
                   Đã in
                 </span>
               )}
-              <i
-                className={`fa-solid fa-chevron-down text-[11px] text-wms-muted transition-transform duration-300 ${
+              <ChevronDown
+                className={`w-[11px] h-[11px] text-wms-muted transition-transform duration-300 ${
                   expanded ? 'rotate-180' : ''
                 }`}
               />
@@ -102,9 +105,9 @@ function ItemCard({
               <button
                 onClick={() => onQtyChange(-1)}
                 disabled={isLocked || state.countedQty <= 0}
-                className="w-9 h-9 rounded-xl bg-white border border-wms-border-color flex items-center justify-center active:scale-90 disabled:opacity-40 transition-all shadow-sm"
+                className="w-9 h-9 rounded-xl bg-white border border-wms-border-color flex items-center justify-center active:scale-90 disabled:opacity-40 transition-all shadow-sm cursor-pointer"
               >
-                <i className="fa-solid fa-minus text-[12px] text-wms-text-main" />
+                <Minus className="w-[12px] h-[12px] text-wms-text-main" />
               </button>
 
               <div className="w-16">
@@ -140,9 +143,9 @@ function ItemCard({
               <button
                 onClick={() => onQtyChange(1)}
                 disabled={isLocked || state.countedQty >= detail.quantity}
-                className="w-9 h-9 rounded-xl bg-white border border-wms-border-color flex items-center justify-center active:scale-90 disabled:opacity-40 transition-all shadow-sm"
+                className="w-9 h-9 rounded-xl bg-white border border-wms-border-color flex items-center justify-center active:scale-90 disabled:opacity-40 transition-all shadow-sm cursor-pointer"
               >
-                <i className="fa-solid fa-plus text-[12px] text-wms-text-main" />
+                <Plus className="w-[12px] h-[12px] text-wms-text-main" />
               </button>
             </div>
           </div>
@@ -195,7 +198,7 @@ function ItemCard({
           {/* LPN success badge */}
           {state.lpnCode && (
             <div className="flex items-center gap-2 p-2.5 bg-green-50 border border-green-200 rounded-xl">
-              <i className="fa-solid fa-tag text-green-600 text-[14px]" />
+              <Tag className="text-green-600 w-[14px] h-[14px]" />
               <div className="flex-1">
                 <p className="text-[11px] text-green-600 font-bold">LPN đã tạo</p>
                 <p className="text-[12px] font-black text-green-700">{state.lpnCode}</p>
@@ -206,7 +209,7 @@ function ItemCard({
           {/* Error */}
           {state.error && (
             <div className="flex items-start gap-2 p-2.5 bg-red-50 border border-red-200 rounded-xl">
-              <i className="fa-solid fa-triangle-exclamation text-red-500 text-[13px] mt-0.5" />
+              <AlertTriangle className="text-red-500 w-[13px] h-[13px] mt-0.5" />
               <p className="text-[12px] text-red-600">{state.error}</p>
             </div>
           )}
@@ -216,7 +219,7 @@ function ItemCard({
             <button
               onClick={onPrint}
               disabled={state.isSubmitting || state.countedQty <= 0}
-              className={`w-full py-3 rounded-xl font-bold text-[13px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm disabled:opacity-50 ${
+              className={`w-full py-3 rounded-xl font-bold text-[13px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm disabled:opacity-50 cursor-pointer ${
                 state.isPrinted
                   ? 'bg-white border border-wms-border-color text-wms-text-main'
                   : 'bg-wms-primary text-white shadow-[0_4px_12px_rgba(59,130,246,0.3)]'
@@ -224,17 +227,17 @@ function ItemCard({
             >
               {state.isSubmitting ? (
                 <>
-                  <i className="fa-solid fa-circle-notch fa-spin text-[16px]" />
+                  <Loader2 className="animate-spin w-[16px] h-[16px]" />
                   Đang tạo tem...
                 </>
               ) : state.isPrinted ? (
                 <>
-                  <i className="fa-solid fa-rotate-right text-[15px]" />
+                  <RotateCw className="w-[15px] h-[15px]" />
                   In lại tem
                 </>
               ) : (
                 <>
-                  <i className="fa-solid fa-qrcode text-[16px]" />
+                  <QrCode className="w-[16px] h-[16px]" />
                   Tạo mã LPN & In tem
                 </>
               )}

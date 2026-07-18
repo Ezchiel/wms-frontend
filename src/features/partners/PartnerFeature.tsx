@@ -23,28 +23,28 @@ export const PartnerManagementFeature: React.FC = () => {
       {/* --- KPI CARDS --- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <StatCard
-          label="Tổng đối tác"
+          label="Total partners"
           value={state.meta?.totalElements || state.partners.length}
           icon={Handshake}
           iconBg="bg-blue-50"
           iconColor="text-blue-500"
-          hint="Nhà cung cấp & Khách hàng"
+          hint="Suppliers & Customers"
         />
         <StatCard
-          label="Nhà cung cấp"
+          label="Suppliers"
           value={state.partners.filter((p) => p.type === 'SUPPLIER').length}
           icon={Truck}
           iconBg="bg-emerald-50"
           iconColor="text-emerald-500"
-          hint="Đơn vị cung cấp hàng hóa ở trang này"
+          hint="Suppliers in this page"
         />
         <StatCard
-          label="Khách hàng"
+          label="Customers"
           value={state.partners.filter((p) => p.type === 'CUSTOMER').length}
           icon={Users}
           iconBg="bg-amber-50"
           iconColor="text-amber-500"
-          hint="Đơn vị nhận/mua hàng ở trang này"
+          hint="Customers in this page"
         />
       </div>
 

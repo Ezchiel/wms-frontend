@@ -24,28 +24,28 @@ export const ProductManagementFeature: React.FC = () => {
       {/* --- KPI CARDS --- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <StatCard
-          label="Tổng số sản phẩm"
+          label="Total products"
           value={state.meta?.totalElements || state.products.length}
           icon={Package}
           iconBg="bg-blue-50"
           iconColor="text-blue-500"
-          hint="Sản phẩm lưu trong hệ thống"
+          hint="Total products in system"
         />
         <StatCard
-          label="Dưới tồn tối thiểu"
+          label="Below min stock level"
           value={state.lowStockAlerts.length}
           icon={AlertTriangle}
           iconBg="bg-amber-50"
           iconColor="text-amber-500"
-          hint="Cần nhập thêm hàng"
+          hint="Products need to restock"
         />
         <StatCard
-          label="Nhóm sản phẩm"
+          label="Product groups"
           value={state.productGroups.length}
           icon={Layers}
           iconBg="bg-emerald-50"
           iconColor="text-emerald-500"
-          hint="Các nhóm phân loại hàng"
+          hint="Product groups in system"
         />
       </div>
 

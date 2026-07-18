@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import type { PickingTask, PickingTaskStatus } from '../pickingTypes';
+import type { PickingTask } from '../pickingTypes';
 import PickingTaskCard from './PickingTaskCard';
-import PickingStatsBar from './PickingStatsBar';
-import { RefreshCw, Search, X, PackageSearch } from 'lucide-react';
+import { RefreshCw, Search, X, PackageSearch, SlidersHorizontal } from 'lucide-react';
+import PageHeader from '../../../layouts/MobileLayout/PageHeader';
+import StatCard from '../../../layouts/MobileLayout/StatCard';
+import SortFilterSheet from '../../../components/mobile/SortFilterSheet';
 
 interface Props {
   tasks: PickingTask[];
@@ -12,15 +14,6 @@ interface Props {
   onSelectNewIssue?: () => void;
 }
 
-type FilterTab = 'ALL' | PickingTaskStatus;
-
-const TABS: { key: FilterTab; label: string }[] = [
-  { key: 'ALL', label: 'Tất cả' },
-  { key: 'PENDING', label: 'Chờ lấy' },
-  { key: 'IN_PROGRESS', label: 'Đang làm' },
-  { key: 'DONE', label: 'Hoàn thành' },
-];
-
 export const PickingTaskList: React.FC<Props> = ({
   tasks,
   loading,
@@ -28,11 +21,39 @@ export const PickingTaskList: React.FC<Props> = ({
   onSelectTask,
   onSelectNewIssue,
 }) => {
-  const [activeTab, setActiveTab] = useState<FilterTab>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sortFilter, setSortFilter] = useState({
+    sort: 'id_desc',
+    filters: {
+      status: 'ALL',
+    },
+  });
+
+  const sortOptions = [
+    { value: 'id_desc', label: 'Nhiệm vụ mới nhất' },
+    { value: 'id_asc', label: 'Nhiệm vụ cũ nhất' },
+    { value: 'productName_asc', label: 'Tên sản phẩm A-Z' },
+    { value: 'productName_desc', label: 'Tên sản phẩm Z-A' },
+  ];
+
+  const filterGroups = [
+    {
+      key: 'status',
+      label: 'Trạng thái',
+      type: 'chip' as const,
+      options: [
+        { value: 'ALL', label: 'Tất cả' },
+        { value: 'PENDING', label: 'Chờ lấy' },
+        { value: 'IN_PROGRESS', label: 'Đang làm' },
+        { value: 'DONE', label: 'Hoàn thành' },
+      ],
+    },
+  ];
 
   const filteredTasks = tasks.filter((task) => {
-    const tabOk = activeTab === 'ALL' || task.status === activeTab;
+    const statusVal = sortFilter.filters.status;
+    const tabOk = statusVal === 'ALL' || task.status === statusVal;
     const searchOk =
       !searchTerm ||
       task.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,22 +63,32 @@ export const PickingTaskList: React.FC<Props> = ({
     return tabOk && searchOk;
   });
 
+  // Client-side sort
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    const [sortBy, sortDir] = sortFilter.sort.split('_');
+    let comparison = 0;
+    if (sortBy === 'id') {
+      comparison = a.id - b.id;
+    } else if (sortBy === 'productName') {
+      comparison = a.productName.localeCompare(b.productName);
+    }
+    return sortDir === 'desc' ? -comparison : comparison;
+  });
+
+  const isFiltered = searchTerm || sortFilter.filters.status !== 'ALL';
+
   return (
-    <div className="bg-slate-50 min-h-screen flex flex-col font-sans">
-      {/* Sticky Header */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
-        <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-          <div>
-            <h1 className="font-black text-base text-slate-800 leading-tight">Lấy hàng</h1>
-            <p className="text-[10px] text-slate-400 font-medium mt-0.5">
-              Các nhiệm vụ được giao cho bạn
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+    <div className="bg-wms-bg min-h-screen flex flex-col font-sans">
+      {/* Shared Page Header */}
+      <PageHeader
+        title="Lấy hàng"
+        subtitle="Các nhiệm vụ được giao cho bạn"
+        rightSlot={
+          <>
             {!tasks.some((t) => t.status === 'PENDING' || t.status === 'IN_PROGRESS') && onSelectNewIssue && (
               <button
                 onClick={onSelectNewIssue}
-                className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer"
+                className="py-1.5 px-3 bg-wms-primary hover:bg-wms-primary-hover text-white font-extrabold text-[10px] rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
               >
                 Chọn phiếu mới
               </button>
@@ -65,88 +96,87 @@ export const PickingTaskList: React.FC<Props> = ({
             <button
               onClick={onRefresh}
               disabled={loading}
-              className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all active:scale-90"
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-wms-border-color text-wms-text-main hover:bg-slate-50 transition-all active:scale-90 cursor-pointer shrink-0"
               id="picking-refresh-btn"
             >
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             </button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      <main className="flex-1 max-w-md mx-auto w-full px-4 py-4 space-y-4 pb-28">
-        {/* Stats Bar */}
-        <PickingStatsBar tasks={tasks} />
-
-        {/* Search Bar */}
-        <div className="relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-            <Search size={14} />
-          </div>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Tìm sản phẩm, mã phiếu, mã kệ..."
-            className="w-full bg-white border border-slate-100 rounded-xl pl-8 pr-8 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-100 placeholder-slate-400"
-            id="picking-search-input"
+      <main className="flex-1 max-w-md mx-auto w-full px-5 py-4 space-y-4 pb-28">
+        {/* Lưới 3 KPI Card dùng chung */}
+        <div className="grid grid-cols-3 gap-3">
+          <StatCard
+            label="Chờ lấy"
+            value={tasks.filter((t) => t.status === 'PENDING').length}
+            tone="warning"
           />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            >
-              <X size={14} />
-            </button>
-          )}
+          <StatCard
+            label="Đang làm"
+            value={tasks.filter((t) => t.status === 'IN_PROGRESS').length}
+            tone="default"
+          />
+          <StatCard
+            label="Hoàn thành"
+            value={tasks.filter((t) => t.status === 'DONE').length}
+            tone="success"
+          />
         </div>
 
-        {/* Tab Filter */}
-        <div className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl">
-          {TABS.map(({ key, label }) => {
-            const count =
-              key === 'ALL'
-                ? tasks.length
-                : tasks.filter((t) => t.status === key).length;
-            return (
+        {/* Search Bar & Sliders Button */}
+        <div className="flex items-center gap-2.5">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm sản phẩm, mã phiếu, mã kệ..."
+              className="w-full bg-white border border-wms-border-color rounded-xl pl-11 pr-8 py-3 text-[14px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-wms-primary/20 focus:border-wms-primary placeholder:text-wms-muted transition-all shadow-sm"
+              id="picking-search-input"
+            />
+            {searchTerm && (
               <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`py-2 text-[10px] font-extrabold rounded-lg transition-all text-center ${
-                  activeTab === key
-                    ? 'bg-white text-slate-800 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-                id={`picking-tab-${key}`}
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
-                {label}
-                <span className="block text-[9px] font-black opacity-70">{count}</span>
+                <X size={14} />
               </button>
-            );
-          })}
+            )}
+          </div>
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="w-12 h-12 bg-white border border-wms-border-color text-wms-text-main rounded-xl active:scale-95 transition-transform shadow-sm flex items-center justify-center cursor-pointer"
+          >
+            <SlidersHorizontal className="w-[18px] h-[18px]" />
+          </button>
         </div>
 
         {/* Loading State */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-wms-primary border-t-transparent rounded-full animate-spin" />
             <p className="text-xs text-slate-400 font-semibold">Đang tải nhiệm vụ...</p>
           </div>
-        ) : filteredTasks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white border border-slate-100 rounded-2xl">
+        ) : sortedTasks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white border border-wms-border-color rounded-2xl shadow-sm">
             <PackageSearch size={32} className="text-slate-300" />
             <div className="text-center">
-              <p className="text-xs font-extrabold text-slate-500">Không có nhiệm vụ nào</p>
+              <p className="text-xs font-extrabold text-slate-500">
+                {isFiltered ? 'Không tìm thấy kết quả phù hợp' : 'Không có nhiệm vụ nào'}
+              </p>
               <p className="text-[10px] text-slate-400 mt-1">
-                {searchTerm
-                  ? 'Không tìm thấy kết quả phù hợp'
+                {isFiltered
+                  ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
                   : 'Chưa có nhiệm vụ lấy hàng được giao'}
               </p>
             </div>
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredTasks.map((task) => (
+            {sortedTasks.map((task) => (
               <PickingTaskCard
                 key={task.id}
                 task={task}
@@ -156,6 +186,18 @@ export const PickingTaskList: React.FC<Props> = ({
           </div>
         )}
       </main>
+
+      <SortFilterSheet
+        open={sheetOpen}
+        sortOptions={sortOptions}
+        filterGroups={filterGroups}
+        value={sortFilter}
+        onApply={(val) => {
+          setSortFilter(val);
+          setSheetOpen(false);
+        }}
+        onClose={() => setSheetOpen(false)}
+      />
     </div>
   );
 };

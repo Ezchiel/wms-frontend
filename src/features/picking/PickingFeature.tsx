@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { PickingTask } from './pickingTypes';
 import { usePicking } from './usePicking';
 import PickingTaskList from './components/PickingTaskList';
@@ -60,28 +60,36 @@ export default function PickingFeature() {
     }
   }, [tasks, loading, view, isInitialized, fetchAvailable]);
 
-  const handleSelectTask = (task: PickingTask) => {
+  const handleSelectTask = useCallback((task: PickingTask) => {
     setActiveTask(task);
     setSelected(task);
     setView('detail');
-  };
+  }, [setSelected]);
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     setView('my_tasks');
     setActiveTask(null);
     clearSelected();
     fetchTasks();
-  };
+  }, [clearSelected, fetchTasks]);
 
-  const handleRefreshAvailable = () => {
-    fetchAvailable({ page: 1, size: 100 });
-  };
+  const [availableParams, setAvailableParams] = useState<any>({ page: 1, size: 100 });
 
-  const handleRefreshTasks = () => {
+  const handleRefreshAvailable = useCallback(() => {
+    fetchAvailable(availableParams);
+  }, [fetchAvailable, availableParams]);
+
+  const handleRefreshTasks = useCallback(() => {
     fetchTasks();
-  };
+  }, [fetchTasks]);
 
-  const handleClaim = async (issueId: number) => {
+  const handleFetchAvailable = useCallback((params: any) => {
+    const newParams = { page: 1, size: 100, ...params };
+    setAvailableParams(newParams);
+    fetchAvailable(newParams);
+  }, [fetchAvailable]);
+
+  const handleClaim = useCallback(async (issueId: number) => {
     try {
       await claimIssue(issueId);
       toast.success('Nhận phiếu thành công! Bắt đầu thực hiện nhiệm vụ.');
@@ -90,12 +98,12 @@ export default function PickingFeature() {
     } catch (err: any) {
       toast.error(err || 'Đã xảy ra lỗi khi nhận phiếu!');
     }
-  };
+  }, [claimIssue, fetchTasks]);
 
-  const handleBackToMyTasks = () => {
+  const handleBackToMyTasks = useCallback(() => {
     setView('my_tasks');
     fetchTasks();
-  };
+  }, [fetchTasks]);
 
   if (view === 'detail' && activeTask) {
     return (
@@ -117,6 +125,7 @@ export default function PickingFeature() {
         onClaim={handleClaim}
         onBackToMyTasks={tasks.length > 0 ? handleBackToMyTasks : undefined}
         actionLoading={actionLoading}
+        onFetchIssues={handleFetchAvailable}
       />
     );
   }

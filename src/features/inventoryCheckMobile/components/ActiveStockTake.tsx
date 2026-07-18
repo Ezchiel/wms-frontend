@@ -9,11 +9,7 @@ import { fetchProductByLpn } from '../../products/productThunks';
 import { fetchStocksByLocationAndProduct } from '../../inventoryStock/inventoryStockThunks';
 import { toast } from 'react-toastify';
 
-// ─── Public types ──────────────────────────────────────────────────────────────
-
-/** One line in the counting session that the employee fills in */
 export interface CountingItem {
-  /** Unique key for UI rendering */
   uiKey: string;
   productId: number;
   productName: string;
@@ -25,21 +21,13 @@ export interface CountingItem {
 }
 
 interface ActiveStockTakeProps {
-  /** Stock items at the selected location (pre-loaded system quantities) */
   stockItems: InventoryStock[];
-  /** Full product list (used for autocomplete when adding extra items) */
   products: Product[];
-  /** The location being counted */
   location: StorageLocation;
-  /** Notes entered during setup */
   notes: string;
-  /** Called when the operator finalises the count – passes the completed list */
   onFinalize: (items: CountingItem[], notes: string) => void;
-  /** Go back to location selection */
   onBack: () => void;
 }
-
-// ─── Helpers ───────────────────────────────────────────────────────────────────
 
 let _keyCounter = 0;
 const nextKey = () => `item-${++_keyCounter}`;
@@ -56,8 +44,6 @@ function buildFromStock(stocks: InventoryStock[]): CountingItem[] {
     reason: '',
   }));
 }
-
-// ─── Component ─────────────────────────────────────────────────────────────────
 
 export default function ActiveStockTake({
   stockItems,
@@ -80,8 +66,6 @@ export default function ActiveStockTake({
   const [addBatchNo, setAddBatchNo] = useState('');
 
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  // ── Quantity adjustments ──────────────────────────────────────────────────
 
   const setQty = (uiKey: string, val: number | null) => {
     setItems((prev) =>
@@ -119,21 +103,14 @@ export default function ActiveStockTake({
     setItems((prev) => prev.map((it) => (it.uiKey === uiKey ? { ...it, actualQuantity: 0 } : it)));
   };
 
-  // ── Scanner ───────────────────────────────────────────────────────────────
-
   const handleScannerScan = async (scannedText: string) => {
     setShowScanner(false);
 
     try {
-      // 1. Gọi API lấy thông tin sản phẩm từ mã LPN
-      //    Backend sẽ trả về cả batchNo của LPN này trong productResult
       const productResult = await dispatch(fetchProductByLpn(scannedText)).unwrap();
       const productId = productResult.id;
-
-      // 2. batchNo lấy trực tiếp từ kết quả tra cứu LPN (nguồn chính xác nhất)
       const batchNo = productResult.batchNo ?? '';
 
-      // 3. Gọi API lấy thông tin tồn kho cho vị trí và sản phẩm này (để cập nhật systemQty nếu cần)
       let systemQty = 0;
       try {
         const stockResult = await dispatch(
@@ -144,7 +121,6 @@ export default function ActiveStockTake({
         ).unwrap();
 
         if (stockResult && stockResult.length > 0) {
-          // Ưu tiên tìm đúng lô hàng, nếu không tìm thấy thì lấy stock đầu tiên
           const matchingStock = stockResult.find((s) => (s.batchNo ?? '') === batchNo);
           systemQty = matchingStock ? matchingStock.quantity : 0;
         }
@@ -152,23 +128,19 @@ export default function ActiveStockTake({
         console.warn('Failed to fetch system stocks, defaulting systemQuantity to 0:', err);
       }
 
-      // 4. Tìm xem trên giao diện có dòng nào khớp chính xác cả productId lẫn batchNo không
-      //    KHÔNG fallback về productId đơn thuần – điều đó gây ra lỗi tăng nhầm lô hàng
       const existingItem = items.find(
         (it) => it.productId === productId && it.batchNo === batchNo
       );
 
       if (existingItem) {
-        // Tăng số lượng đúng dòng
         adjustQty(existingItem.uiKey, 1);
-        setScannedFeedback(`Đã quét: ${existingItem.productName} – Lô ${batchNo || '(không có lô)'} (+1)`);
+        setScannedFeedback(`Scanned: ${existingItem.productName} – Batch ${batchNo || '(no batch)'} (+1)`);
         const targetUiKey = existingItem.uiKey;
         setTimeout(() => {
           itemRefs.current[targetUiKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           setTimeout(() => setScannedFeedback(null), 3000);
         }, 300);
       } else {
-        // Lô hàng chưa có trong danh sách → thêm mới
         const newItem: CountingItem = {
           uiKey: nextKey(),
           productId: productId,
@@ -181,16 +153,13 @@ export default function ActiveStockTake({
         };
 
         setItems((prev) => [newItem, ...prev]);
-        setScannedFeedback(`Thêm mới: ${productResult.productName} – Lô ${batchNo || '(không có lô)'} (+1)`);
+        setScannedFeedback(`New: ${productResult.productName} – Batch ${batchNo || '(no batch)'} (+1)`);
         setTimeout(() => setScannedFeedback(null), 3000);
       }
     } catch {
-      toast.warning(`Không tìm thấy sản phẩm với mã LPN: ${scannedText}`);
+      toast.warning(`Product not found with LPN: ${scannedText}`);
     }
   };
-
-
-  // ── Add extra product ─────────────────────────────────────────────────────
 
   const filteredForAdd = addSearch
     ? products
@@ -222,8 +191,6 @@ export default function ActiveStockTake({
     setShowAddProduct(false);
   };
 
-  // ── Submit ────────────────────────────────────────────────────────────────
-
   const handleFinalizeClick = () => {
     const uncounted = items.filter((it) => it.actualQuantity === null);
     if (uncounted.length > 0) {
@@ -232,8 +199,6 @@ export default function ActiveStockTake({
     }
     onFinalize(items, notes);
   };
-
-  // ── Filtering ─────────────────────────────────────────────────────────────
 
   const visibleItems = items.filter((it) => {
     const isPending = it.actualQuantity === null;
@@ -263,11 +228,8 @@ export default function ActiveStockTake({
     (i) => i.actualQuantity !== null && i.actualQuantity !== i.systemQuantity
   ).length;
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col font-sans">
-      {/* ── Sticky Header ── */}
       <header className="bg-white border-b border-slate-100 flex items-center justify-between px-4 py-3.5 sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-1.5">
           <button
@@ -284,11 +246,11 @@ export default function ActiveStockTake({
                 {location.zone} – {location.rack} – {location.shelf}
               </h1>
               <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.5 rounded">
-                Đang kiểm
+                Counting
               </span>
             </div>
             <p className="text-[10px] text-slate-400 font-medium">
-              Mã vị trí: {location.barcode}
+              Location: {location.barcode}
             </p>
           </div>
         </div>
@@ -299,7 +261,7 @@ export default function ActiveStockTake({
           id="scanner-active-trigger-btn"
         >
           <ScanQrCode />
-          <span>Quét kiểm</span>
+          <span>Scan</span>
         </button>
       </header>
 
@@ -316,10 +278,10 @@ export default function ActiveStockTake({
         {/* Tab filter strip */}
         <div className="grid grid-cols-4 gap-1.5 p-1 bg-slate-100 rounded-xl">
           {[
-            { key: 'all', label: `Tất cả (${totalCount})`, color: 'text-slate-800' },
-            { key: 'pending', label: `Chưa (${pendingCount})`, color: 'text-teal-700' },
-            { key: 'matched', label: `Khớp (${matchedCount})`, color: 'text-emerald-700' },
-            { key: 'discrepant', label: `Lệch (${discrepantCount})`, color: 'text-rose-700' },
+            { key: 'all', label: `All (${totalCount})`, color: 'text-slate-800' },
+            { key: 'pending', label: `Pending (${pendingCount})`, color: 'text-teal-700' },
+            { key: 'matched', label: `Matched (${matchedCount})`, color: 'text-emerald-700' },
+            { key: 'discrepant', label: `Discrepant (${discrepantCount})`, color: 'text-rose-700' },
           ].map(({ key, label, color }) => (
             <button
               key={key}
@@ -343,7 +305,7 @@ export default function ActiveStockTake({
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
             className="w-full bg-white border border-slate-100 rounded-xl pl-8 pr-4 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-100 placeholder-slate-400"
-            placeholder="Lọc nhanh (Tên sản phẩm, Số lô)..."
+            placeholder="Search (Product Name, Lot Number)..."
             id="local-filter-input"
           />
           {searchTerm && (
@@ -361,7 +323,7 @@ export default function ActiveStockTake({
           {visibleItems.length === 0 ? (
             <div className="p-8 text-center bg-white border border-slate-100 rounded-2xl">
               <SquareParkingOff size={24} className='text-slate-400 mx-auto mb-2' />
-              <p className="text-xs text-slate-400 font-bold">Không có mặt hàng nào</p>
+              <p className="text-xs text-slate-400 font-bold">No items found</p>
             </div>
           ) : (
             visibleItems.map((item) => {
@@ -395,22 +357,22 @@ export default function ActiveStockTake({
                       )}
                       {item.systemQuantity === 0 && (
                         <span className="text-[9px] bg-purple-100 text-purple-700 font-bold px-1.5 py-0.5 rounded-md inline-block mt-1">
-                          Thêm ngoài danh sách
+                          Add outside list
                         </span>
                       )}
                     </div>
                     <div className="shrink-0">
                       {isPending ? (
                         <span className="text-[9px] bg-slate-100 text-slate-500 font-extrabold px-2 py-0.5 rounded-md">
-                          Chờ đếm
+                          Pending
                         </span>
                       ) : isMatched ? (
                         <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-md">
-                          🟢 Khớp
+                          Match
                         </span>
                       ) : (
                         <span className="text-[9px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-md">
-                          🚨 {diff > 0 ? `+${diff}` : diff}
+                          {diff > 0 ? `+${diff}` : diff}
                         </span>
                       )}
                     </div>
@@ -420,7 +382,7 @@ export default function ActiveStockTake({
                   <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs border border-slate-100/50 gap-4">
                     <div>
                       <span className="text-[10px] text-slate-400 uppercase font-extrabold block">
-                        Số hệ thống
+                        System
                       </span>
                       <span className="font-extrabold text-slate-700 mt-0.5 block">
                         {item.systemQuantity}
@@ -428,7 +390,7 @@ export default function ActiveStockTake({
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] text-slate-400 uppercase font-extrabold block">
-                        Sai lệch
+                        Diff
                       </span>
                       <span
                         className={`font-mono font-black mt-0.5 block ${isPending
@@ -439,9 +401,9 @@ export default function ActiveStockTake({
                           }`}
                       >
                         {isPending
-                          ? 'Chưa rõ'
+                          ? 'Unclear'
                           : diff === 0
-                            ? 'Hoàn toàn khớp'
+                            ? 'Perfectly match'
                             : `${diff > 0 ? '+' : ''}${diff}`}
                       </span>
                     </div>
@@ -477,7 +439,7 @@ export default function ActiveStockTake({
                           const v = e.target.value === '' ? null : parseInt(e.target.value, 10);
                           setQty(item.uiKey, v);
                         }}
-                        placeholder="Số lượng đếm"
+                        placeholder="Quantity"
                         className="w-full text-center bg-white border border-slate-200 py-2.5 rounded-xl text-sm font-black text-slate-800 outline-none focus:ring-1 focus:ring-blue-100"
                         id={`qty-input-${item.uiKey}`}
                       />
@@ -521,7 +483,7 @@ export default function ActiveStockTake({
                         className="text-blue-600 hover:underline font-semibold"
                         id={`quick-match-${item.uiKey}`}
                       >
-                        Khớp hệ thống ({item.systemQuantity})
+                        Match ({item.systemQuantity})
                       </button>
                       <span className="text-slate-300">|</span>
                       <button
@@ -530,7 +492,7 @@ export default function ActiveStockTake({
                         className="text-amber-600 hover:underline font-semibold"
                         id={`quick-zero-${item.uiKey}`}
                       >
-                        Báo hết hàng (0)
+                        Report Empty (0)
                       </button>
                     </div>
                   )}
@@ -542,7 +504,7 @@ export default function ActiveStockTake({
                         type="text"
                         value={item.reason}
                         onChange={(e) => setReason(item.uiKey, e.target.value)}
-                        placeholder="Lý do lệch kho (tuỳ chọn)..."
+                        placeholder="Reason (optional)..."
                         className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 outline-none focus:ring-1 focus:ring-blue-100 placeholder-slate-400"
                         id={`reason-input-${item.uiKey}`}
                       />
@@ -561,7 +523,7 @@ export default function ActiveStockTake({
           id="add-extra-product-btn"
         >
           <CirclePlus size={12} />
-          Thêm sản phẩm ngoài danh sách
+          Add extra product
         </button>
       </main>
 
@@ -574,7 +536,7 @@ export default function ActiveStockTake({
             id="draft-back-btn"
           >
             <ArrowLeft size={16} />
-            <span>Quay lại</span>
+            <span>Back</span>
           </button>
           <button
             onClick={handleFinalizeClick}
@@ -582,7 +544,7 @@ export default function ActiveStockTake({
             id="finalize-sheet-btn"
           >
             <CircleCheckBig size={16} />
-            <span>Nộp phiếu kiểm</span>
+            <span>Submit</span>
           </button>
         </div>
       </footer>
@@ -597,7 +559,7 @@ export default function ActiveStockTake({
         <div className="fixed w-full mb-20 inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-extrabold text-sm text-slate-800">Thêm sản phẩm</h3>
+              <h3 className="font-extrabold text-sm text-slate-800">Add extra product</h3>
               <button
                 onClick={() => {
                   setShowAddProduct(false);
@@ -615,7 +577,7 @@ export default function ActiveStockTake({
               type="text"
               value={addSearch}
               onChange={(e) => setAddSearch(e.target.value)}
-              placeholder="Tìm sản phẩm theo tên hoặc SKU..."
+              placeholder="Search product name or SKU..."
               className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
               autoFocus
               id="add-product-search-input"
@@ -625,7 +587,7 @@ export default function ActiveStockTake({
               type="text"
               value={addBatchNo}
               onChange={(e) => setAddBatchNo(e.target.value)}
-              placeholder="Số lô (tuỳ chọn)"
+              placeholder="Lot Number (optional)"
               className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
               id="add-product-batch-input"
             />
@@ -645,11 +607,11 @@ export default function ActiveStockTake({
                 ))
               ) : addSearch ? (
                 <div className="py-4 text-center text-xs text-slate-400">
-                  Không tìm thấy sản phẩm nào khớp
+                  No matching products found
                 </div>
               ) : (
                 <div className="py-4 text-center text-xs text-slate-400">
-                  Nhập tên hoặc SKU để tìm sản phẩm
+                  Enter name or SKU to find product
                 </div>
               )}
             </div>

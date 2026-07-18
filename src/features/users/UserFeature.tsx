@@ -24,23 +24,23 @@ export const UserManagementFeature: React.FC = () => {
       {/* --- KPI CARDS --- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <StatCard
-          label="Tổng số người dùng"
+          label="Total users"
           value={state.meta?.totalElements || state.users.length}
           icon={Users}
           iconBg="bg-blue-50"
           iconColor="text-blue-500"
-          hint="Tài khoản trong hệ thống"
+          hint="Total users in system"
         />
         <StatCard
-          label="Đang hoạt động"
+          label="Active users"
           value={state.users.filter((u) => u.status === 'ACTIVE').length}
           icon={UserCheck}
           iconBg="bg-emerald-50"
           iconColor="text-emerald-500"
-          hint="Tài khoản Active ở trang này"
+          hint="Active users in this page"
         />
         <StatCard
-          label="Quản trị & Quản lý"
+          label="Admins & Managers"
           value={state.users.filter((u) => {
             const role = u.roleName?.toUpperCase();
             return role === 'ADMIN' || role === 'MANAGER';
@@ -48,7 +48,7 @@ export const UserManagementFeature: React.FC = () => {
           icon={ShieldAlert}
           iconBg="bg-amber-50"
           iconColor="text-amber-500"
-          hint="Admin & Manager ở trang này"
+          hint="Admin & Manager in this page"
         />
       </div>
 

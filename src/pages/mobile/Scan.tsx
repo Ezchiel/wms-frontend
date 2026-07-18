@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   ScanQrCode,
-  Package,
   CircleCheckBig,
   Boxes,
   Tag,
@@ -16,6 +15,7 @@ import { useAppDispatch } from '../../app/hooks';
 import { fetchProductByLpn } from '../../features/products/productThunks';
 import type { Product } from '../../features/products/productTypes';
 import QrCameraScanner from '../../features/inventoryCheckMobile/components/QrCameraScanner';
+import PageHeader from '../../layouts/MobileLayout/PageHeader';
 
 // ─── Scanned result state ─────────────────────────────────────────────────────
 
@@ -68,35 +68,25 @@ export default function LPNScannerPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-slate-50 min-h-screen flex flex-col font-sans text-neutral-800">
-      {/* ── Sticky Header ── */}
-      <header className="bg-white border-b border-slate-100 flex items-center justify-between px-4 py-3.5 sticky top-0 z-40 shadow-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
-            <Package className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="font-extrabold text-sm text-neutral-900 tracking-tight leading-none">
-              Quét mã LPN
-            </h1>
-            <span className="text-[10px] font-bold text-neutral-400 block uppercase tracking-wide">
-              Logistics WMS
-            </span>
-          </div>
-        </div>
-
-        <button
-          onClick={() => setShowScanner(true)}
-          className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-md transition-all flex items-center gap-1.5"
-          id="lpn-scan-trigger-btn"
-        >
-          <ScanQrCode className="w-4 h-4" />
-          <span>Quét LPN</span>
-        </button>
-      </header>
+    <div className="bg-wms-bg min-h-screen flex flex-col font-sans text-neutral-800">
+      {/* ── Page Header ── */}
+      <PageHeader
+        title="Scan LPN"
+        subtitle="Logistics WMS"
+        rightSlot={
+          <button
+            onClick={() => setShowScanner(true)}
+            className="bg-wms-primary hover:bg-wms-primary-hover active:scale-95 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+            id="lpn-scan-trigger-btn"
+          >
+            <ScanQrCode className="w-4 h-4" />
+            <span>Scan LPN</span>
+          </button>
+        }
+      />
 
       {/* ── Main ── */}
-      <main className="flex-1 max-w-md mx-auto w-full px-4 py-5 pb-32 space-y-4">
+      <main className="flex-1 max-w-md mx-auto w-full px-5 py-5 pb-32 space-y-4">
 
         {/* Success feedback banner */}
         {scanFeedback && (
@@ -109,11 +99,11 @@ export default function LPNScannerPage() {
         {/* Error banner */}
         {errorMsg && !isLoading && (
           <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-bold space-y-1">
-            <p className="font-extrabold">⚠️ Lỗi tra cứu LPN</p>
+            <p className="font-extrabold">Error scanning LPN</p>
             <p className="font-medium">{errorMsg}</p>
             {lastScannedRaw && (
               <p className="font-mono text-[10px] text-red-400 bg-red-100 px-2 py-1 rounded-lg break-all">
-                Mã đã quét: {lastScannedRaw}
+                Scanned: {lastScannedRaw}
               </p>
             )}
           </div>
@@ -121,38 +111,38 @@ export default function LPNScannerPage() {
 
         {/* Debug: last scanned (shown while loading too) */}
         {lastScannedRaw && isLoading && (
-          <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-xl text-[10px] font-mono text-blue-600 break-all">
-            Đang tra: {lastScannedRaw}
+          <div className="p-2.5 bg-wms-bg border border-wms-border-color rounded-xl text-[10px] font-mono text-wms-primary break-all">
+            Searching...: {lastScannedRaw}
           </div>
         )}
 
         {/* Loading overlay */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-16 space-y-3">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            <p className="text-xs text-slate-500 font-semibold">Đang tra cứu sản phẩm...</p>
+            <Loader2 className="w-8 h-8 animate-spin text-wms-primary" />
+            <p className="text-xs text-slate-500 font-semibold">Searching...</p>
           </div>
         )}
 
         {/* Empty state */}
         {!isLoading && !result && (
-          <div className="flex flex-col items-center justify-center py-20 space-y-5 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-blue-50 border-2 border-dashed border-blue-200 flex items-center justify-center">
-              <ScanQrCode className="w-10 h-10 text-blue-400" />
+          <div className="flex flex-col items-center justify-center py-20 space-y-5 text-center bg-white border border-wms-border-color rounded-2xl p-6 shadow-sm">
+            <div className="w-20 h-20 rounded-3xl bg-wms-bg border-2 border-dashed border-wms-border-color flex items-center justify-center">
+              <ScanQrCode className="w-10 h-10 text-wms-muted" />
             </div>
             <div className="space-y-1.5">
-              <p className="text-sm font-extrabold text-slate-700">Chưa có kết quả quét</p>
+              <p className="text-sm font-extrabold text-slate-700">No data</p>
               <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-[220px]">
-                Nhấn nút <span className="font-bold text-blue-600">Quét LPN</span> ở góc phải để bắt đầu quét mã QR kiện hàng.
+                Press <span className="font-bold text-wms-primary">Scan LPN</span> to start scanning LPN QR code.
               </p>
             </div>
             <button
               onClick={() => setShowScanner(true)}
-              className="mt-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-xs px-6 py-3 rounded-xl shadow-md transition-all flex items-center gap-2"
+              className="mt-2 bg-wms-primary hover:bg-wms-primary-hover active:scale-95 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
               id="lpn-scan-empty-btn"
             >
               <ScanQrCode className="w-4 h-4" />
-              Bắt đầu quét
+              Start Scanning
             </button>
           </div>
         )}
@@ -163,18 +153,18 @@ export default function LPNScannerPage() {
             {/* Scan count badge */}
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-widest font-extrabold text-slate-400">
-                Thông tin kiện hàng
+                LPN Info
               </span>
-              <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">
-                Đã quét {scanCount} lần
+              <span className="text-[10px] bg-wms-primary/10 text-wms-primary font-bold px-2 py-0.5 rounded-full">
+                Scanned {scanCount} times
               </span>
             </div>
 
             {/* Main card */}
-            <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs space-y-4">
+            <div className="bg-white border border-wms-border-color rounded-2xl p-4 shadow-sm space-y-4">
               {/* Product header */}
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-wms-primary flex items-center justify-center text-white shrink-0">
                   <Boxes className="w-5 h-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -187,20 +177,20 @@ export default function LPNScannerPage() {
                 </div>
                 <button
                   onClick={() => setResult(null)}
-                  className="shrink-0 p-1.5 rounded-xl bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
+                  className="shrink-0 p-1.5 rounded-xl bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors cursor-pointer"
                   id="clear-scan-result-btn"
-                  title="Xoá kết quả"
+                  title="Clear scan result"
                 >
                   <X size={14} />
                 </button>
               </div>
 
               {/* LPN barcode row */}
-              <div className="flex items-center p-3 bg-slate-50 rounded-xl border border-slate-100 gap-3">
-                <ScanQrCode size={16} className="text-blue-500 shrink-0" />
+              <div className="flex items-center p-3 bg-wms-bg rounded-xl border border-wms-border-color gap-3">
+                <ScanQrCode size={16} className="text-wms-primary shrink-0" />
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-extrabold block tracking-wide">
-                    Mã LPN
+                    LPN
                   </span>
                   <span className="text-xs font-black text-slate-800 font-mono">{result.lpn}</span>
                 </div>
@@ -209,22 +199,22 @@ export default function LPNScannerPage() {
               {/* Details grid */}
               <div className="grid grid-cols-2 gap-3">
                 {/* Unit */}
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                <div className="p-3 bg-wms-bg rounded-xl border border-wms-border-color space-y-1">
                   <div className="flex items-center gap-1.5 text-slate-400">
                     <Tag size={11} />
                     <span className="text-[10px] uppercase font-extrabold tracking-wide">
-                      Đơn vị tính
+                      Unit
                     </span>
                   </div>
                   <p className="text-sm font-black text-slate-800">{result.product.unit}</p>
                 </div>
 
                 {/* Min stock */}
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                <div className="p-3 bg-wms-bg rounded-xl border border-wms-border-color space-y-1">
                   <div className="flex items-center gap-1.5 text-slate-400">
                     <BarChart3 size={11} />
                     <span className="text-[10px] uppercase font-extrabold tracking-wide">
-                      Tồn tối thiểu
+                      Min Stock
                     </span>
                   </div>
                   <p className="text-sm font-black text-slate-800">
@@ -235,11 +225,11 @@ export default function LPNScannerPage() {
 
               {/* Product group */}
               {result.product.productGroup && (
-                <div className="flex items-center p-3 bg-slate-50 rounded-xl border border-slate-100 gap-3">
+                <div className="flex items-center p-3 bg-wms-bg rounded-xl border border-wms-border-color gap-3">
                   <Layers size={14} className="text-purple-500 shrink-0" />
                   <div>
                     <span className="text-[10px] text-slate-400 uppercase font-extrabold block tracking-wide">
-                      Nhóm sản phẩm
+                      Product Group
                     </span>
                     <span className="text-xs font-bold text-slate-700">
                       {result.product.productGroup.groupName}
@@ -250,11 +240,11 @@ export default function LPNScannerPage() {
 
               {/* Description */}
               {result.product.description && (
-                <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl">
-                  <span className="text-[10px] text-blue-400 uppercase font-extrabold block tracking-wide mb-1">
-                    Ghi chú sản phẩm
+                <div className="p-3 bg-wms-primary/5 border border-wms-primary/20 rounded-xl">
+                  <span className="text-[10px] text-wms-primary uppercase font-extrabold block tracking-wide mb-1">
+                    Product description
                   </span>
-                  <p className="text-xs text-blue-800 font-medium leading-relaxed">
+                  <p className="text-xs text-wms-text-main font-medium leading-relaxed">
                     {result.product.description}
                   </p>
                 </div>
@@ -264,11 +254,11 @@ export default function LPNScannerPage() {
             {/* Re-scan button */}
             <button
               onClick={() => setShowScanner(true)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-white border border-dashed border-blue-200 rounded-2xl text-blue-600 text-xs font-bold hover:bg-blue-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-white border border-dashed border-wms-border-color rounded-2xl text-wms-primary text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
               id="rescan-lpn-btn"
             >
               <ScanQrCode size={14} />
-              Quét mã LPN khác
+              Scan another LPN
             </button>
           </div>
         )}

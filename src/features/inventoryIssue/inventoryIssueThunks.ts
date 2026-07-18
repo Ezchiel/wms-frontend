@@ -145,10 +145,10 @@ export const fetchAvailableIssues = createAsyncThunk<
   { rejectValue: string }
 >('inventoryIssues/fetchAvailable', async (params, { rejectWithValue }) => {
   try {
-    const { keyword, page = 1, size = 10, sortBy = 'id', sortDir = 'desc' } = params;
+    const { keyword, page = 1, size = 10, sortBy = 'id', sortDir = 'desc', fromDate, toDate } = params;
 
     const response = await axiosClient.get<ApiResponse<InventoryIssue[]>>('/issues/available', {
-      params: { keyword, page, size, sortBy, sortDir },
+      params: { keyword, page, size, sortBy, sortDir, fromDate, toDate },
     });
 
     return response.data;

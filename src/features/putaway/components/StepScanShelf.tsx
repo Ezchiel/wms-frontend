@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MapPin, QrCode, AlertTriangle } from 'lucide-react';
 import QrCameraScanner from '../../inventoryCheckMobile/components/QrCameraScanner';
 
 interface Props {
@@ -37,7 +38,7 @@ export const StepScanShelf: React.FC<Props> = ({
       {/* Vị trí chỉ định */}
       <div className="flex items-center gap-3 p-4 bg-wms-primary/5 border border-wms-primary/20 rounded-2xl">
         <div className="w-11 h-11 rounded-xl bg-wms-primary/10 flex items-center justify-center shrink-0">
-          <i className="fa-solid fa-location-dot text-wms-primary text-[18px]" />
+          <MapPin className="text-wms-primary w-[18px] h-[18px]" />
         </div>
         <div>
           <p className="text-[11px] text-wms-muted font-bold uppercase">Cần quét kệ</p>
@@ -48,9 +49,9 @@ export const StepScanShelf: React.FC<Props> = ({
       {/* Scan button */}
       <button
         onClick={() => setShowScanner(true)}
-        className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-sm px-4 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+        className="bg-wms-primary hover:bg-wms-primary-hover active:scale-95 text-white font-extrabold text-sm px-4 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
       >
-        <i className="fa-solid fa-qrcode text-[18px]"></i>
+        <QrCode className="w-[18px] h-[18px]" />
         Quét mã QR kệ
       </button>
 
@@ -89,7 +90,7 @@ export const StepScanShelf: React.FC<Props> = ({
       {conflictError && (
         <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-300 rounded-2xl">
           <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-            <i className="fa-solid fa-triangle-exclamation text-amber-600 text-[16px]" />
+            <AlertTriangle className="text-amber-600 w-[16px] h-[16px]" />
           </div>
           <div className="flex-1">
             <p className="text-[12px] font-extrabold text-amber-800 uppercase tracking-wide mb-1">

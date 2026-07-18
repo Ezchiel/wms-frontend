@@ -44,7 +44,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
 
   const handleStartInventory = () => {
     if (!selectedLocationId) {
-      toast.error('Vui lòng quét hoặc chọn vị trí kiểm kê!');
+      toast.error('Please scan or select an inventory location!');
       return;
     }
     onCreate({ locationId: Number(selectedLocationId), notes: notes.trim() });
@@ -58,9 +58,9 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
     } catch (error: unknown) {
       setShowScanner(false);
       if (axios.isAxiosError(error) && error.response) {
-        toast.error('Lỗi khi tìm vị trí ứng với mã vạch này!');
+        toast.error('Error finding location with this barcode!');
       } else {
-        toast.error('Không tìm thấy vị trí ứng với mã vạch này!');
+        toast.error('Location not found for this barcode!');
       }
     }
   };
@@ -72,7 +72,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
         <button onClick={onBack} className="p-1 active:opacity-70 transition-opacity">
           <ChevronLeft size={24} />
         </button>
-        <h1 className="font-semibold text-lg">Tạo phiếu kiểm kê</h1>
+        <h1 className="font-semibold text-lg">Create Stock Take</h1>
       </header>
 
       {/* ── Body ── */}
@@ -80,9 +80,9 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
         {/* Hero card */}
         <div className="bg-blue-600 p-6 rounded-3xl text-white shadow-lg shadow-blue-200 relative overflow-hidden">
           <div className="relative z-10">
-            <h2 className="text-xl font-bold">Xác định vị trí kiểm kê</h2>
+            <h2 className="text-xl font-bold">Identify Stock Take Location</h2>
             <p className="text-sm text-blue-100 mt-2 opacity-80">
-              Quét mã barcode của vị trí hoặc tìm kiếm bằng tên / mã vị trí.
+              Scan the location barcode or search by name/code.
             </p>
           </div>
           <MapPin className="absolute -right-4 -bottom-4 text-white/10" size={120} />
@@ -96,20 +96,20 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
             id="scan-location-btn"
           >
             <ScanQrCode size={32} />
-            <span className="font-bold">Quét Barcode vị trí</span>
+            <span className="font-bold">Scan Location Barcode</span>
           </button>
 
           {/* Divider */}
           <div className="relative flex items-center gap-4 py-2">
             <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-xs text-slate-400 font-bold uppercase">Hoặc tìm kiếm</span>
+            <span className="text-xs text-slate-400 font-bold uppercase">Or search</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
 
           {/* Location search */}
           <div className="space-y-1.5">
             <label className="text-[11px] font-bold text-slate-400 ml-1 uppercase">
-              Vị trí kiểm kê
+              Inventory Location
             </label>
 
             <div className="relative">
@@ -124,7 +124,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
                 placeholder={
                   displaySelectedLocation
                     ? `${displaySelectedLocation.zone} - ${displaySelectedLocation.rack} - ${displaySelectedLocation.shelf}`
-                    : 'Nhập tên khu vực, kệ, vị trí...'
+                    : 'Enter location name, rack, or zone...'
                 }
                 className="w-full bg-white border border-slate-200 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 font-medium"
                 id="location-search-input"
@@ -166,7 +166,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
                     ))
                   ) : (
                     <div className="p-4 text-center text-sm text-slate-400">
-                      Không tìm thấy vị trí phù hợp
+                      No matching location found
                     </div>
                   )}
                 </div>
@@ -195,12 +195,12 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-bold text-slate-400 ml-1 uppercase">Ghi chú</label>
+            <label className="text-[11px] font-bold text-slate-400 ml-1 uppercase">Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 min-h-24 resize-none text-sm"
-              placeholder="Ghi chú hoặc hướng dẫn kiểm kê..."
+              placeholder="Enter notes or instructions for stock taking..."
               id="notes-textarea"
             />
           </div>
@@ -215,7 +215,7 @@ export default function CreateStockTake({ locations, onCreate, onBack }: CreateS
           className="w-full bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-100 transition-all active:scale-98 disabled:cursor-not-allowed"
           id="start-inventory-btn"
         >
-          {selectedLocationId ? 'Bắt đầu kiểm kê' : 'Chọn vị trí để tiếp tục'}
+          {selectedLocationId ? 'Start Inventory' : 'Select location to continue'}
         </button>
       </footer>
 

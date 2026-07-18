@@ -85,8 +85,6 @@ export const StockTrendChart: React.FC<StockTrendChartProps> = ({
 
       {/* Chart container */}
       <div className="bg-white rounded-3xl p-6 shadow-[0_4px_15px_rgba(0,0,0,0.03)] h-[400px] flex flex-col justify-between relative">
-        <h3 className="text-gray-755 text-sm font-bold mb-4">Biểu đồ xu hướng tồn kho</h3>
-
         {loading ? (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-3xl z-10">
             <div className="w-10 h-10 border-4 border-wms-primary border-t-transparent rounded-full animate-spin"></div>

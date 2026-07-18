@@ -15,6 +15,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import PageHeader from '../../layouts/MobileLayout/PageHeader';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -65,9 +66,10 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans text-slate-800 pb-12">
+    <div className="bg-wms-bg min-h-screen font-sans text-slate-800 pb-12">
+      <PageHeader title="Profile" />
       {/* --- HEADER BLOCK --- */}
-      <div className="relative overflow-hidden bg-linear-to-r from-blue-600 to-indigo-700 pb-28 pt-8 px-6 text-white rounded-b-[2.5rem] shadow-lg">
+      <div className="relative overflow-hidden bg-linear-to-r from-wms-primary to-indigo-700 pb-28 pt-8 px-6 text-white rounded-b-[2.5rem] shadow-lg">
         {/* Decorative background elements */}
         <div className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
         <div className="absolute bottom-[-20px] left-[-30px] w-32 h-32 bg-indigo-500/20 rounded-full blur-xl"></div>
@@ -115,21 +117,21 @@ const ProfilePage: React.FC = () => {
       <div className="px-4 -mt-16 relative z-10">
         <div className="bg-white rounded-3xl p-5 shadow-xl border border-slate-100 grid grid-cols-3 gap-2 text-center divide-x divide-slate-100">
           <div className="space-y-1">
-            <span className="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">Hoạt động</span>
+            <span className="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">Activity</span>
             <div className="flex items-center justify-center gap-1 text-emerald-600">
               <Activity className="w-4 h-4 animate-pulse" />
-              <span className="text-xs font-black">Sẵn sàng</span>
+              <span className="text-xs font-black">Ready</span>
             </div>
           </div>
           <div className="space-y-1 px-1">
-            <span className="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">Nhiệm vụ</span>
+            <span className="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">Tasks</span>
             <div className="flex items-center justify-center gap-1 text-blue-600">
               <CheckCircle2 className="w-4 h-4" />
-              <span className="text-xs font-black">12 Đã xong</span>
+              <span className="text-xs font-black">12 Completed</span>
             </div>
           </div>
           <div className="space-y-1">
-            <span className="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">Thiết bị</span>
+            <span className="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">Device</span>
             <div className="flex items-center justify-center gap-1 text-slate-700">
               <Smartphone className="w-4 h-4" />
               <span className="text-xs font-black">Handheld 01</span>
@@ -142,7 +144,7 @@ const ProfilePage: React.FC = () => {
       <div className="px-4 mt-6 space-y-4">
         <div className="bg-white rounded-3xl p-3 shadow-xs border border-slate-100/80 space-y-0.5">
           <div className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-            Thông tin tài khoản
+            Account Info
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
@@ -151,7 +153,7 @@ const ProfilePage: React.FC = () => {
                 <UserIcon className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-800">Tên người dùng</p>
+                <p className="text-xs font-bold text-slate-800">Username</p>
                 <p className="text-[10px] text-slate-500 font-medium">{username}</p>
               </div>
             </div>
@@ -163,7 +165,7 @@ const ProfilePage: React.FC = () => {
                 <Shield className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-800">Quyền truy cập</p>
+                <p className="text-xs font-bold text-slate-800">Role</p>
                 <p className="text-[10px] text-slate-500 font-medium">{user?.role || 'Operator'}</p>
               </div>
             </div>
@@ -175,8 +177,8 @@ const ProfilePage: React.FC = () => {
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-800">Khu vực làm việc</p>
-                <p className="text-[10px] text-slate-500 font-medium">Kho tổng (Main Warehouse)</p>
+                <p className="text-xs font-bold text-slate-800">Working Area</p>
+                <p className="text-[10px] text-slate-500 font-medium">Main Warehouse</p>
               </div>
             </div>
           </div>
@@ -184,7 +186,7 @@ const ProfilePage: React.FC = () => {
 
         <div className="bg-white rounded-3xl p-3 shadow-xs border border-slate-100/80 space-y-0.5">
           <div className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-            Hệ thống & Cài đặt
+            System & Settings
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
@@ -192,7 +194,7 @@ const ProfilePage: React.FC = () => {
               <div className="w-9 h-9 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center">
                 <Settings className="w-5 h-5" />
               </div>
-              <span className="text-xs font-bold text-slate-800">Cấu hình thiết bị</span>
+              <span className="text-xs font-bold text-slate-800">Device Settings</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </div>
@@ -202,7 +204,7 @@ const ProfilePage: React.FC = () => {
               <div className="w-9 h-9 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center">
                 <Bell className="w-5 h-5" />
               </div>
-              <span className="text-xs font-bold text-slate-800">Thông báo từ hệ thống</span>
+              <span className="text-xs font-bold text-slate-800">System Notifications</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </div>
@@ -212,7 +214,7 @@ const ProfilePage: React.FC = () => {
               <div className="w-9 h-9 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center">
                 <HelpCircle className="w-5 h-5" />
               </div>
-              <span className="text-xs font-bold text-slate-800">Trợ giúp & Tài liệu</span>
+              <span className="text-xs font-bold text-slate-800">Help & Documentation</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </div>
@@ -225,7 +227,7 @@ const ProfilePage: React.FC = () => {
           id="btn-logout-mobile"
         >
           <LogOut className="w-4 h-4" />
-          <span>ĐĂNG XUẤT</span>
+          <span>LOG OUT</span>
         </button>
       </div>
 
@@ -237,9 +239,9 @@ const ProfilePage: React.FC = () => {
               <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-1">
                 <LogOut className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-extrabold text-slate-800">Xác nhận đăng xuất?</h3>
+              <h3 className="text-base font-extrabold text-slate-800">Confirm Logout?</h3>
               <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                Bạn có chắc chắn muốn đăng xuất khỏi hệ thống? Các phiên làm việc hiện tại sẽ bị kết thúc.
+                Are you sure you want to log out of the system? Current sessions will be terminated.
               </p>
             </div>
 
@@ -248,14 +250,14 @@ const ProfilePage: React.FC = () => {
                 onClick={handleCancelLogout}
                 className="py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold text-xs rounded-xl transition-all cursor-pointer"
               >
-                Hủy bỏ
+                Cancel
               </button>
               <button
                 onClick={handleConfirmLogout}
                 className="py-3 bg-red-500 hover:bg-red-600 text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer shadow-md shadow-red-500/20"
                 id="btn-confirm-logout-yes"
               >
-                Đăng xuất
+                Log out
               </button>
             </div>
           </div>

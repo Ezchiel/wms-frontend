@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { QrCode } from 'lucide-react';
 import QrCameraScanner from '../../inventoryCheckMobile/components/QrCameraScanner';
 
 interface Props {
@@ -23,9 +24,9 @@ export const StepScanLPN: React.FC<Props> = ({ inputRef, value, error, onChange,
       {/* Scanner trigger button */}
       <button
         onClick={() => setShowScanner(true)}
-        className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold text-sm px-4 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+        className="bg-wms-primary hover:bg-wms-primary-hover active:scale-95 text-white font-extrabold text-sm px-4 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
       >
-        <i className="fa-solid fa-qrcode text-[18px]"></i>
+        <QrCode className="w-[18px] h-[18px]" />
         Mở Camera quét LPN
       </button>
 

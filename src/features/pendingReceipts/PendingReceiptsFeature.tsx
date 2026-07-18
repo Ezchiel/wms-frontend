@@ -206,19 +206,21 @@ export const PendingReceiptsFeature: React.FC = () => {
       <div className="w-full bg-white rounded-2xl p-6 shadow-sm border border-slate-100 overflow-x-auto">
 
         {/* Search filter row */}
-        <div className="flex items-center justify-between gap-4 mb-5">
-          <div className="relative w-72">
-            <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[14px]"></i>
-            <input
-              type="text"
-              placeholder="Search by code..."
-              value={searchKeyword}
-              onChange={(e) => {
-                setCurrentPage(1);
-                setSearchKeyword(e.target.value);
-              }}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all placeholder:text-slate-400"
-            />
+        <div className="flex justify-between items-center mb-6.25">
+          <div className="flex items-center gap-3.75">
+            <div className="flex items-center gap-2.5 text-[13px] font-medium">
+              <label className="text-wms-text-main">Receipt code</label>
+              <input
+                type="text"
+                placeholder="Please enter here..."
+                value={searchKeyword}
+                onChange={(e) => {
+                  setCurrentPage(1);
+                  setSearchKeyword(e.target.value);
+                }}
+                className="py-2 px-3.75 border border-solid border-wms-border-color rounded-md outline-none text-[13px] text-wms-text-main placeholder:text-wms-muted focus:border-wms-primary transition-colors"
+              />
+            </div>
           </div>
 
           <div className="text-[12px] bg-blue-50 border border-blue-100 text-blue-700 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 animate-pulse">
@@ -234,69 +236,67 @@ export const PendingReceiptsFeature: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto rounded-xl border border-slate-100">
-              <table className="w-full border-collapse text-[13px] text-slate-700">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-semibold text-left">
-                    <th className="py-3.5 px-4">Receipt Code</th>
-                    <th className="py-3.5 px-4">Scanned By</th>
-                    <th className="py-3.5 px-4">Scanned At</th>
-                    <th className="py-3.5 px-4">Supplier</th>
-                    <th className="py-3.5 px-4 text-right">Total Amount</th>
-                    <th className="py-3.5 px-4">Notes</th>
-                    <th className="py-3.5 px-4 text-center">Actions</th>
+            <table className="w-full border-collapse text-[13px]">
+              <thead className="bg-[#f8fafc]">
+                <tr>
+                  <th className="text-start p-3.75 text-wms-muted font-medium">Receipt Code</th>
+                  <th className="text-start p-3.75 text-wms-muted font-medium">Scanned By</th>
+                  <th className="text-start p-3.75 text-wms-muted font-medium">Scanned At</th>
+                  <th className="text-start p-3.75 text-wms-muted font-medium">Supplier</th>
+                  <th className="text-start p-3.75 text-wms-muted font-medium">Total Amount</th>
+                  <th className="text-start p-3.75 text-wms-muted font-medium">Notes</th>
+                  <th className="text-start p-3.75 text-wms-muted font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receipts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-slate-400 text-[13px]">
+                      No pending draft receipts. Try scanning a delivery note from the mobile app!
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {receipts.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-400 text-[13px]">
-                        No pending draft receipts. Try scanning a delivery note from the mobile app!
+                ) : (
+                  receipts.map((receipt) => (
+                    <tr
+                      key={receipt.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main font-medium">{receipt.receiptCode}</td>
+                      <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 rounded-full text-[11px] font-medium">
+                          <i className="fa-solid fa-user-circle text-slate-400"></i>
+                          {receipt.scannedBy || receipt.createdBy}
+                        </span>
+                      </td>
+                      <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
+                        {receipt.scannedAt ? new Date(receipt.scannedAt).toLocaleString() : new Date(receipt.createdAt).toLocaleString()}
+                      </td>
+                      <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
+                        {receipt.supplierName ? (
+                          receipt.supplierName
+                        ) : (
+                          <span className="text-red-400 italic">Unmatched</span>
+                        )}
+                      </td>
+                      <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
+                        đ{receipt.totalAmount ? receipt.totalAmount.toLocaleString() : '0'}
+                      </td>
+                      <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main" title={receipt.notes}>
+                        {receipt.notes || '-'}
+                      </td>
+                      <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
+                        <button
+                          onClick={() => handleOpenReview(receipt)}
+                          className="mr-2 px-4 py-1 border border-wms-primary rounded-[7px] text-wms-primary hover:bg-wms-primary hover:text-white transition-all cursor-pointer"
+                        >
+                          Review
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    receipts.map((receipt) => (
-                      <tr
-                        key={receipt.id}
-                        className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
-                      >
-                        <td className="py-3.5 px-4 font-mono font-bold text-slate-900">{receipt.receiptCode}</td>
-                        <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 rounded-full text-[11px] font-medium">
-                            <i className="fa-solid fa-user-circle text-slate-400"></i>
-                            {receipt.scannedBy || receipt.createdBy}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-500">
-                          {receipt.scannedAt ? new Date(receipt.scannedAt).toLocaleString() : new Date(receipt.createdAt).toLocaleString()}
-                        </td>
-                        <td className="py-3.5 px-4 font-medium">
-                          {receipt.supplierName ? (
-                            receipt.supplierName
-                          ) : (
-                            <span className="text-red-400 italic">Unmatched</span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-semibold text-slate-900">
-                          đ{receipt.totalAmount ? receipt.totalAmount.toLocaleString() : '0'}
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-400 max-w-[200px] truncate" title={receipt.notes}>
-                          {receipt.notes || '-'}
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <button
-                            onClick={() => handleOpenReview(receipt)}
-                            className="mr-2 px-4 py-1 border border-wms-primary rounded-[7px] text-wms-primary hover:bg-wms-primary hover:text-white transition-all cursor-pointer"
-                          >
-                            Review
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
 
             {meta && <Pagination meta={meta} onPageChange={setCurrentPage} />}
           </>
