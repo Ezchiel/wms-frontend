@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Product } from '../productTypes';
 import { StatusBadge } from '../../../components/StatusBadge';
 
@@ -10,6 +11,8 @@ interface ProductTableProps {
 }
 
 const ProductTable: React.FC<ProductTableProps> = ({ heads, data, onDelete, onEdit }) => {
+  const navigate = useNavigate();
+
   return (
     <table className="w-full border-collapse text-[13px]">
       <thead className="bg-[#f8fafc]">
@@ -35,7 +38,7 @@ const ProductTable: React.FC<ProductTableProps> = ({ heads, data, onDelete, onEd
             </td>
             <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
               <StatusBadge
-                text={product.productGroup?.groupName || 'Chưa phân nhóm'}
+                text={product.groupName || product.productGroup?.groupName || 'Chưa phân nhóm'}
                 variant="neutral"
               />
             </td>
@@ -43,6 +46,13 @@ const ProductTable: React.FC<ProductTableProps> = ({ heads, data, onDelete, onEd
               {product.minStockLevel}
             </td>
             <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
+              <button
+                onClick={() => navigate(`/stock-cards?productId=${product.id}`)}
+                className="mr-2 px-3 py-1 border border-slate-400 rounded-[7px] text-slate-600 cursor-pointer hover:bg-slate-600 hover:text-white"
+                title="Xem thẻ kho"
+              >
+                Stock card
+              </button>
               <button
                 onClick={() => onEdit && onEdit(product)}
                 className="mr-2 px-5 py-1 border border-wms-primary rounded-[7px] text-wms-primary cursor-pointer hover:bg-wms-primary hover:text-white"
@@ -64,5 +74,6 @@ const ProductTable: React.FC<ProductTableProps> = ({ heads, data, onDelete, onEd
     </table>
   );
 };
+
 
 export default ProductTable;

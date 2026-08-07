@@ -27,13 +27,12 @@ function ItemCard({
 
   return (
     <div
-      className={`bg-white rounded-2xl shadow-sm border transition-all duration-300 overflow-hidden ${
-        state.isPrinted
-          ? 'border-green-200'
-          : isComplete
-            ? 'border-wms-primary/40'
-            : 'border-wms-border-color'
-      }`}
+      className={`bg-white rounded-2xl shadow-sm border transition-all duration-300 overflow-hidden ${state.isPrinted
+        ? 'border-green-200'
+        : isComplete
+          ? 'border-wms-primary/40'
+          : 'border-wms-border-color'
+        }`}
     >
       {/* ── Card Header ── */}
       <button
@@ -42,13 +41,12 @@ function ItemCard({
       >
         {/* Status dot */}
         <div
-          className={`mt-0.5 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-            state.isPrinted
-              ? 'bg-green-100 text-green-600'
-              : isComplete
-                ? 'bg-wms-primary/10 text-wms-primary'
-                : 'bg-wms-bg text-wms-muted'
-          }`}
+          className={`mt-0.5 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${state.isPrinted
+            ? 'bg-green-100 text-green-600'
+            : isComplete
+              ? 'bg-wms-primary/10 text-wms-primary'
+              : 'bg-wms-bg text-wms-muted'
+            }`}
         >
           {state.isPrinted ? (
             <Check className="w-[14px] h-[14px]" />
@@ -67,13 +65,12 @@ function ItemCard({
             <div className="flex items-center gap-1.5 shrink-0">
               {state.isPrinted && (
                 <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 bg-green-50 text-green-600 border border-green-200 rounded-md">
-                  Đã in
+                  Printed
                 </span>
               )}
               <ChevronDown
-                className={`w-[11px] h-[11px] text-wms-muted transition-transform duration-300 ${
-                  expanded ? 'rotate-180' : ''
-                }`}
+                className={`w-[11px] h-[11px] text-wms-muted transition-transform duration-300 ${expanded ? 'rotate-180' : ''
+                  }`}
               />
             </div>
           </div>
@@ -93,10 +90,10 @@ function ItemCard({
           {/* Qty summary */}
           <div className="mt-3 bg-wms-bg rounded-xl p-3 flex items-center justify-between">
             <div>
-              <p className="text-[11px] uppercase font-bold text-wms-muted mb-0.5">Cần nhập</p>
+              <p className="text-[11px] uppercase font-bold text-wms-muted mb-0.5">Need to Count</p>
               <p className="text-[16px] font-bold text-wms-text-main">
                 {detail.quantity}{' '}
-                <span className="text-[12px] font-medium text-wms-muted">cái</span>
+                <span className="text-[12px] font-medium text-wms-muted">Unit</span>
               </p>
             </div>
 
@@ -130,13 +127,12 @@ function ItemCard({
                     const delta = val - state.countedQty;
                     onQtyChange(delta);
                   }}
-                  className={`w-full text-center bg-transparent border-none p-0 text-[20px] font-black outline-none focus:ring-0 transition-colors ${
-                    state.countedQty >= detail.quantity
-                      ? 'text-green-600'
-                      : state.countedQty > 0
-                        ? 'text-wms-primary'
-                        : 'text-wms-muted'
-                  }`}
+                  className={`w-full text-center bg-transparent border-none p-0 text-[20px] font-black outline-none focus:ring-0 transition-colors ${state.countedQty >= detail.quantity
+                    ? 'text-green-600'
+                    : state.countedQty > 0
+                      ? 'text-wms-primary'
+                      : 'text-wms-muted'
+                    }`}
                 />
               </div>
 
@@ -154,7 +150,7 @@ function ItemCard({
           <div className="space-y-2.5">
             <div>
               <label className="text-[11px] font-bold uppercase text-wms-muted mb-1.5 block">
-                Số lô (Batch No)
+                Batch No
               </label>
               <input
                 type="text"
@@ -169,7 +165,7 @@ function ItemCard({
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="text-[11px] font-bold uppercase text-wms-muted mb-1.5 block">
-                  Hạn sử dụng
+                  EXP
                 </label>
                 <input
                   type="date"
@@ -200,7 +196,7 @@ function ItemCard({
             <div className="flex items-center gap-2 p-2.5 bg-green-50 border border-green-200 rounded-xl">
               <Tag className="text-green-600 w-[14px] h-[14px]" />
               <div className="flex-1">
-                <p className="text-[11px] text-green-600 font-bold">LPN đã tạo</p>
+                <p className="text-[11px] text-green-600 font-bold">LPN Code</p>
                 <p className="text-[12px] font-black text-green-700">{state.lpnCode}</p>
               </div>
             </div>
@@ -219,26 +215,25 @@ function ItemCard({
             <button
               onClick={onPrint}
               disabled={state.isSubmitting || state.countedQty <= 0}
-              className={`w-full py-3 rounded-xl font-bold text-[13px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm disabled:opacity-50 cursor-pointer ${
-                state.isPrinted
-                  ? 'bg-white border border-wms-border-color text-wms-text-main'
-                  : 'bg-wms-primary text-white shadow-[0_4px_12px_rgba(59,130,246,0.3)]'
-              }`}
+              className={`w-full py-3 rounded-xl font-bold text-[13px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm disabled:opacity-50 cursor-pointer ${state.isPrinted
+                ? 'bg-white border border-wms-border-color text-wms-text-main'
+                : 'bg-wms-primary text-white shadow-[0_4px_12px_rgba(59,130,246,0.3)]'
+                }`}
             >
               {state.isSubmitting ? (
                 <>
                   <Loader2 className="animate-spin w-[16px] h-[16px]" />
-                  Đang tạo tem...
+                  Processing...
                 </>
               ) : state.isPrinted ? (
                 <>
                   <RotateCw className="w-[15px] h-[15px]" />
-                  In lại tem
+                  Print Again
                 </>
               ) : (
                 <>
                   <QrCode className="w-[16px] h-[16px]" />
-                  Tạo mã LPN & In tem
+                  Create LPN & Print
                 </>
               )}
             </button>

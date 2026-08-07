@@ -14,6 +14,7 @@ import pickingReducer from '../features/picking/pickingSlice';
 import dashboardReducer from '../features/dashboard/dashboardSlice.ts';
 import reportsReducer from '../features/reports/reportsSlice.ts';
 import notificationReducer from '../features/notifications/notificationSlice.ts';
+import stockCardReducer from '../features/stockCard/stockCardSlice.ts';
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     reports: reportsReducer,
     notifications: notificationReducer,
+    stockCard: stockCardReducer,
   },
 });
 

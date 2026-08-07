@@ -27,28 +27,28 @@ const formatDate = (isoStr: string) => {
 };
 
 export default function ReportModal({ check, onClose }: ReportModalProps) {
-  const totalItems = check.details.length;
-  const matchedItems = check.details.filter((d) => d.variance === 0);
-  const discrepantItems = check.details.filter((d) => d.variance !== 0);
+  // const totalItems = check.details.length;
+  // const matchedItems = check.details.filter((d) => d.variance === 0);
+  // const discrepantItems = check.details.filter((d) => d.variance !== 0);
   const totalVariance = check.details.reduce((sum, d) => sum + Math.abs(d.variance), 0);
-  const accuracyPercent =
-    totalItems > 0 ? Math.round((matchedItems.length / totalItems) * 100) : 100;
+  // const accuracyPercent =
+  //   totalItems > 0 ? Math.round((matchedItems.length / totalItems) * 100) : 100;
 
   const statusCfg = STATUS_LABELS[check.status] ?? STATUS_LABELS['PENDING'];
 
   return (
-    <div className="fixed mb-22 inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-end justify-center sm:items-center p-0 sm:p-4">
-      <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+    <div className="fixed inset-x-0 top-0 bottom-22 sm:bottom-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-end justify-center sm:items-center p-0 sm:p-4">
+      <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[60vh] overflow-hidden">
         {/* Header */}
-        <div className="bg-slate-900 text-white px-5 pt-5 pb-4 shrink-0">
+        <div className="bg-blue-600 text-white px-5 pt-5 pb-4 shrink-0">
           <div className="flex justify-between items-start gap-2">
             <div className="space-y-1 flex-1 min-w-0">
-              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 block">
-                Kết quả kiểm kê
+              <span className="text-[9px] uppercase font-bold tracking-widest text-slate-200 block">
+                Check results
               </span>
               <h2 className="text-lg font-black tracking-tight truncate">{check.checkCode}</h2>
               <p className="text-[10px] text-slate-300 truncate">
-                {formatDate(check.checkDate)} · Tạo bởi{' '}
+                {formatDate(check.checkDate)} · Created by{' '}
                 <strong className="text-white">{check.createdBy || 'N/A'}</strong>
               </p>
             </div>
@@ -69,31 +69,31 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
           </div>
 
           {/* KPI summary row */}
-          <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-white/10">
+          {/* <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-white/10">
             <div className="text-center">
-              <p className="text-[10px] text-slate-400 uppercase font-bold">Tổng</p>
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Total</p>
               <p className="text-lg font-black text-white">{totalItems}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] text-emerald-400 uppercase font-bold">Khớp</p>
+              <p className="text-[10px] text-emerald-400 uppercase font-bold">Matched</p>
               <p className="text-lg font-black text-emerald-300">{matchedItems.length}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] text-rose-400 uppercase font-bold">Lệch</p>
+              <p className="text-[10px] text-rose-400 uppercase font-bold">Discrepant</p>
               <p className="text-lg font-black text-rose-300">{discrepantItems.length}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] text-slate-400 uppercase font-bold">Độ CX</p>
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Accuracy</p>
               <p className="text-lg font-black text-white">{accuracyPercent}%</p>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Notes */}
         {check.notes && (
           <div className="px-5 py-3 bg-blue-50 border-b border-blue-100 shrink-0">
             <p className="text-[11px] text-blue-700 font-medium">
-              <span className="font-bold">Ghi chú:</span> {check.notes}
+              <span className="font-bold">Note:</span> {check.notes}
             </p>
           </div>
         )}
@@ -103,18 +103,18 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
           <div className="px-5 py-2.5 bg-rose-50 border-b border-rose-100 shrink-0 flex items-center gap-2">
             <span className="material-symbols-outlined text-sm text-rose-500">warning</span>
             <p className="text-[11px] text-rose-700 font-semibold">
-              Tổng sai lệch:{' '}
-              <strong className="font-black text-rose-800">{totalVariance} đơn vị</strong>
+              Total discrepancy:{' '}
+              <strong className="font-black text-rose-800">{totalVariance} units</strong>
             </p>
           </div>
         )}
 
         {/* Details list */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-3">
           {check.details.length === 0 ? (
             <div className="py-12 flex flex-col items-center text-slate-400 gap-2">
               <span className="material-symbols-outlined text-4xl">inbox</span>
-              <p className="text-xs font-semibold">Không có chi tiết kiểm kê</p>
+              <p className="text-xs font-semibold">No inventory check details</p>
             </div>
           ) : (
             check.details.map((detail) => {
@@ -136,12 +136,12 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
                       <div className="flex items-center gap-1.5 mt-1">
                         <MapPin size={11} className="text-blue-500" />
                         <span className="text-[10px] font-mono text-slate-500">
-                          {detail.locationBarcode || `Vị trí #${detail.locationId}`}
+                          {detail.locationBarcode || `Location #${detail.locationId}`}
                         </span>
                         {detail.batchNo && (
                           <>
                             <span className="text-slate-300">·</span>
-                            <span className="text-[10px] text-slate-400">Lô: {detail.batchNo}</span>
+                            <span className="text-[10px] text-slate-400">Batch: {detail.batchNo}</span>
                           </>
                         )}
                       </div>
@@ -149,11 +149,11 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
                     <div className="shrink-0">
                       {isMatched ? (
                         <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                          🟢 Khớp
+                          Khớp
                         </span>
                       ) : (
                         <span className="text-[9px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                          🚨 {diff > 0 ? `+${diff}` : diff}
+                          {diff > 0 ? `+${diff}` : diff}
                         </span>
                       )}
                     </div>
@@ -193,14 +193,14 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
             className="px-3.5 py-3 shrink-0 text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
             id="report-print-btn"
           >
-            <span className="material-symbols-outlined block text-sm">print</span>
+            <span className="material-symbols-outlined block text-sm">Print</span>
           </button>
           <button
             onClick={onClose}
-            className="flex-1 min-w-0 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-sm transition-colors"
+            className="flex-1 min-w-0 bg-blue-600 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-sm transition-colors"
             id="report-close-btn"
           >
-            Đóng báo cáo
+            Close
           </button>
         </div>
       </div>

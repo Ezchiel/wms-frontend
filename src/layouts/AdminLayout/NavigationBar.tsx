@@ -34,6 +34,7 @@ const NavigationBar: React.FC = () => {
         { title: 'Pending receipts', path: '/inventory-receipts-pending' },
         { title: 'Inventory issues', path: '/inventory-issues' },
         { title: 'Inventory checks', path: '/inventory-checks' },
+        { title: 'Stock cards', path: '/stock-cards' },
       ],
     },
     {

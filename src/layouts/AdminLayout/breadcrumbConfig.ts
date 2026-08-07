@@ -9,6 +9,7 @@ export const breadcrumbConfig: Record<string, string[]> = {
   '/inventory-receipts-pending': ['Operation', 'Pending receipts'],
   '/inventory-issues': ['Operation', 'Issues'],
   '/inventory-checks': ['Operation', 'Checks'],
+  '/stock-cards': ['Operation', 'Stock cards'],
   '/dashboard': ['Reports', 'Dashboard'],
   '/reports': ['Reports', 'Reports'],
   '/profile': ['Account', 'Profile'],

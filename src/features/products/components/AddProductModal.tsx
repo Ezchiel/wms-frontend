@@ -15,7 +15,7 @@ const AddProductModal: React.FC<Props> = ({ isOpen, groups, onClose, onSave, ini
     productCode: initialData?.productCode || '',
     productName: initialData?.productName || '',
     unit: initialData?.unit || '',
-    groupId: initialData?.productGroup?.id || 0,
+    groupId: initialData?.groupId || initialData?.productGroup?.id || 0,
     description: initialData?.description || '',
     minStockLevel: initialData?.minStockLevel || 0,
   });

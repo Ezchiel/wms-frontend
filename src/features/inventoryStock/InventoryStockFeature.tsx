@@ -15,6 +15,7 @@ export const InventoryStockFeature: React.FC = () => {
     'Batch No',
     'Expiry Date',
     'Serial Number',
+    'Actions',
   ];
 
   const getTabColor = (index: number) => {
@@ -30,7 +31,7 @@ export const InventoryStockFeature: React.FC = () => {
       <div className="bg-transparent flex flex-col overflow-x-auto">
         <div className='flex justify-between'>
           <TabNavigation
-            tabs={['All stocks', 'Low stock alerts']}
+            tabs={['All stocks']}
             activeTabIndex={state.tabIndex}
             onTabChange={actions.setTabIndex}
             getTabColor={getTabColor}

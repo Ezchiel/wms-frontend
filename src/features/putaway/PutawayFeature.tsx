@@ -20,15 +20,14 @@ export const PutawayFeature: React.FC = () => {
       {STEPS.map((_, i) => (
         <div
           key={i}
-          className={`h-2 rounded-full transition-all duration-300 ${
-            state.step === 'success'
-              ? 'w-2 bg-green-500'
-              : i === currentStepIndex
-                ? 'w-5 bg-wms-primary'
-                : i < currentStepIndex
-                  ? 'w-2 bg-wms-primary/40'
-                  : 'w-2 bg-wms-border-color'
-          }`}
+          className={`h-2 rounded-full transition-all duration-300 ${state.step === 'success'
+            ? 'w-2 bg-green-500'
+            : i === currentStepIndex
+              ? 'w-5 bg-wms-primary'
+              : i < currentStepIndex
+                ? 'w-2 bg-wms-primary/40'
+                : 'w-2 bg-wms-border-color'
+            }`}
         />
       ))}
     </div>
@@ -37,8 +36,8 @@ export const PutawayFeature: React.FC = () => {
   return (
     <div className="bg-wms-bg min-h-screen font-sans text-wms-text-main flex flex-col">
       <PageHeader
-        title="Cất hàng (Putaway)"
-        subtitle={state.completedCount > 0 ? `${state.completedCount} kiện đã cất xong` : undefined}
+        title="Putaway"
+        subtitle={state.completedCount > 0 ? `${state.completedCount} items put away` : undefined}
         backTo={state.step !== 'scan_lpn' && state.step !== 'success' ? actions.handleBack : "/mobile/tasks"}
         rightSlot={progressDots}
       />
@@ -49,7 +48,7 @@ export const PutawayFeature: React.FC = () => {
           <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-[1px] flex items-center justify-center">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="animate-spin text-wms-primary w-8 h-8" />
-              <span className="text-[12px] font-medium text-wms-muted">Đang xử lý...</span>
+              <span className="text-[12px] font-medium text-wms-muted">Processing...</span>
             </div>
           </div>
         )}

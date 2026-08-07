@@ -41,7 +41,7 @@ export const StepScanShelf: React.FC<Props> = ({
           <MapPin className="text-wms-primary w-[18px] h-[18px]" />
         </div>
         <div>
-          <p className="text-[11px] text-wms-muted font-bold uppercase">Cần quét kệ</p>
+          <p className="text-[11px] text-wms-muted font-bold uppercase">Scan shelf</p>
           <p className="text-[20px] font-black text-wms-primary">{suggestedCode}</p>
         </div>
       </div>
@@ -52,21 +52,21 @@ export const StepScanShelf: React.FC<Props> = ({
         className="bg-wms-primary hover:bg-wms-primary-hover active:scale-95 text-white font-extrabold text-sm px-4 py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
       >
         <QrCode className="w-[18px] h-[18px]" />
-        Quét mã QR kệ
+        Scan shelf
       </button>
 
       {/* Manual input fallback */}
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-wms-border-color">
         <div className="p-4">
           <p className="text-[11px] font-bold text-wms-muted uppercase tracking-wider mb-2">
-            Hoặc nhập thủ công
+            Manual input
           </p>
           <input
             ref={shelfRef}
             value={shelfInput}
             onChange={(e) => onInputChange(e.target.value.toUpperCase())}
             onKeyDown={(e) => e.key === 'Enter' && onConfirm()}
-            placeholder="Nhập mã kệ..."
+            placeholder="Scan shelf..."
             className="w-full py-2.5 px-3 border border-wms-border-color rounded-xl font-bold text-[13px] outline-none focus:border-wms-primary transition-colors"
           />
           {shelfInput && (
@@ -74,7 +74,7 @@ export const StepScanShelf: React.FC<Props> = ({
               onClick={() => onConfirm()}
               className="mt-3 w-full py-2.5 bg-wms-primary text-white font-bold rounded-xl text-[13px] hover:bg-wms-primary-hover active:scale-95 transition-all"
             >
-              Xác nhận
+              Confirm
             </button>
           )}
         </div>
@@ -94,13 +94,13 @@ export const StepScanShelf: React.FC<Props> = ({
           </div>
           <div className="flex-1">
             <p className="text-[12px] font-extrabold text-amber-800 uppercase tracking-wide mb-1">
-              Vị trí không phù hợp
+              Wrong location
             </p>
             <p className="text-[13px] text-amber-700 font-medium leading-snug">
               {conflictError}
             </p>
             <p className="text-[11px] text-amber-600 mt-1.5 font-semibold">
-              Vui lòng quét mã kệ khác.
+              Please scan another shelf.
             </p>
           </div>
         </div>

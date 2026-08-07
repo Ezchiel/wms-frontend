@@ -15,6 +15,7 @@ import {
   ReportsPage,
   PendingReceiptsPage,
   ProfilePage as AdminProfilePage,
+  StockCardPage,
 } from '../pages/admin/index.ts';
 import { LoginPage } from '../pages/auth';
 import {
@@ -26,6 +27,7 @@ import {
   TasksPage,
   ProfilePage,
   ReceiptScanPage,
+  StockCardMobilePage,
 } from '../pages/mobile';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import PublicRoute from './PublicRoute.tsx';
@@ -108,6 +110,10 @@ export const router = createBrowserRouter([
                 element: <InventoryCheckPage />,
               },
               {
+                path: 'stock-cards',
+                element: <StockCardPage />,
+              },
+              {
                 path: 'profile',
                 element: <AdminProfilePage />,
               },
@@ -163,6 +169,10 @@ export const router = createBrowserRouter([
               {
                 path: 'picking',
                 element: <PickingPage />,
+              },
+              {
+                path: 'stock-card/:productId',
+                element: <StockCardMobilePage />,
               },
               {
                 path: 'profile',

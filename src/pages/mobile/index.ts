@@ -7,3 +7,4 @@ export { default as InventoryCheckMobilePage } from './InventoryCheckMobilePage'
 export { default as PickingPage } from './PickingPage';
 export { default as ProfilePage } from './ProfilePage';
 export { default as ReceiptScanPage } from './ReceiptScanPage';
+export { default as StockCardMobilePage } from './StockCardMobilePage';

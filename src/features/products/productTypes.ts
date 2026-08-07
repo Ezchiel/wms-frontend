@@ -14,7 +14,10 @@ export interface Product {
   productCode: string;
   productName: string;
   unit: string;
-  productGroup: ProductGroup;
+  groupId?: number;
+  groupCode?: string;
+  groupName?: string;
+  productGroup?: ProductGroup;
   description?: string;
   minStockLevel: number;
   batchNo?: string;

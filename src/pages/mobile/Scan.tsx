@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ScanQrCode,
   CircleCheckBig,
@@ -8,6 +9,7 @@ import {
   BarChart3,
   X,
   Loader2,
+  History,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -28,6 +30,7 @@ interface ScannedResult {
 
 export default function LPNScannerPage() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [showScanner, setShowScanner] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -224,7 +227,7 @@ export default function LPNScannerPage() {
               </div>
 
               {/* Product group */}
-              {result.product.productGroup && (
+              {(result.product.groupName || result.product.productGroup?.groupName) && (
                 <div className="flex items-center p-3 bg-wms-bg rounded-xl border border-wms-border-color gap-3">
                   <Layers size={14} className="text-purple-500 shrink-0" />
                   <div>
@@ -232,7 +235,7 @@ export default function LPNScannerPage() {
                       Product Group
                     </span>
                     <span className="text-xs font-bold text-slate-700">
-                      {result.product.productGroup.groupName}
+                      {result.product.groupName || result.product.productGroup?.groupName}
                     </span>
                   </div>
                 </div>
@@ -251,15 +254,25 @@ export default function LPNScannerPage() {
               )}
             </div>
 
-            {/* Re-scan button */}
-            <button
-              onClick={() => setShowScanner(true)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-white border border-dashed border-wms-border-color rounded-2xl text-wms-primary text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
-              id="rescan-lpn-btn"
-            >
-              <ScanQrCode size={14} />
-              Scan another LPN
-            </button>
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate(`/mobile/stock-card/${result.product.id}`)}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-wms-primary text-white rounded-2xl text-xs font-bold hover:bg-wms-primary-hover transition-colors cursor-pointer shadow-sm"
+                id="view-stock-card-btn"
+              >
+                <History size={14} />
+                Xem lịch sử thẻ kho
+              </button>
+              <button
+                onClick={() => setShowScanner(true)}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white border border-dashed border-wms-border-color rounded-2xl text-wms-primary text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+                id="rescan-lpn-btn"
+              >
+                <ScanQrCode size={14} />
+                Scan another LPN
+              </button>
+            </div>
           </div>
         )}
       </main>

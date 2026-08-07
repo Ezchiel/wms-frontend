@@ -54,7 +54,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ onClose }) 
   };
 
   return (
-    <div className="absolute right-0 mt-3.5 w-96 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-[fadeIn_0.15s_ease-out]">
+    <div className="absolute right-0 mt-3.5 w-96 bg-white border border-gray-200 rounded-2xl shadow-xl z-100 overflow-hidden animate-[fadeIn_0.15s_ease-out]">
       {/* --- HEADER --- */}
       <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
         <div className="flex items-center gap-2">

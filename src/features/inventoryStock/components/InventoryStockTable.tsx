@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { StorageLocation } from '../../storageLocation/storageLocationTypes';
 import type { InventoryStock } from '../inventoryStockTypes';
 
@@ -9,6 +10,8 @@ interface InventoryStockTableProps {
 }
 
 const InventoryStockTable: React.FC<InventoryStockTableProps> = ({ heads, data, locations }) => {
+  const navigate = useNavigate();
+
   const getLocationDescription = (locationId: number) => {
     const foundLoc = locations.find((loc) => loc.id === locationId);
     return foundLoc?.description || `Location ${locationId}`;
@@ -55,6 +58,15 @@ const InventoryStockTable: React.FC<InventoryStockTableProps> = ({ heads, data, 
               <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
                 {stock.serialNumber || 'N/A'}
               </td>
+              <td className="py-4.5 px-3.75 border-b border-b-wms-border-color text-wms-text-main">
+                <button
+                  onClick={() => navigate(`/stock-cards?productId=${stock.productId}`)}
+                  className="px-3 py-1 border border-slate-400 rounded-[7px] text-slate-600 cursor-pointer hover:bg-slate-600 hover:text-white"
+                  title="Xem thẻ kho"
+                >
+                  Stock card
+                </button>
+              </td>
             </tr>
           ))
         )}
@@ -62,5 +74,6 @@ const InventoryStockTable: React.FC<InventoryStockTableProps> = ({ heads, data, 
     </table>
   );
 };
+
 
 export default InventoryStockTable;
