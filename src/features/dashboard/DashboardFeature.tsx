@@ -1,4 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Client } from '@stomp/stompjs';
+import { toast } from 'react-toastify';
+import { useAppDispatch } from '../../app/hooks';
+import { setLowStockAlerts } from './dashboardSlice';
+import type { LowStockAlert } from './dashboardTypes';
 import { useDashboard } from './useDashboard';
 import { SummaryCard } from './components/SummaryCard';
 import { StockByZoneChart } from './components/StockByZoneChart';
@@ -10,6 +15,52 @@ import { ClipboardCheck, Layers } from 'lucide-react';
 
 export const DashboardFeature: React.FC = () => {
   const { state } = useDashboard();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token') || '';
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+    const baseUrl = apiBase.replace(/\/api\/?$/, '');
+    const wsUrl = baseUrl.replace(/^https/, 'wss').replace(/^http/, 'ws') + `/ws-native?token=${encodeURIComponent(token)}&ngrok-skip-browser-warning=true`;
+
+    console.log('[WebSocket Low Stock Alert] Connecting to:', wsUrl);
+
+    const stompClient = new Client({
+      webSocketFactory: () => new WebSocket(wsUrl),
+      debug: (str) => console.log('[STOMP Low Stock Alert]', str),
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    stompClient.onConnect = () => {
+      console.log('[STOMP Low Stock Alert] Connected to WebSocket');
+      stompClient.subscribe('/topic/low-stock-alerts', (message) => {
+        console.log('[STOMP Low Stock Alert] Received event:', message.body);
+        try {
+          const alerts: LowStockAlert[] = JSON.parse(message.body);
+          dispatch(setLowStockAlerts(alerts));
+          if (alerts.length > 0) {
+            toast.warning(`[Cảnh báo tồn kho real-time] Phát hiện biến động: ${alerts.length} sản phẩm ở mức cảnh báo!`, {
+              toastId: 'low-stock-realtime-alert',
+            });
+          }
+        } catch (err) {
+          console.error('[STOMP Low Stock Alert] Parse error:', err);
+        }
+      });
+    };
+
+    stompClient.onStompError = (frame) => {
+      console.error('[STOMP Low Stock Alert] Broker error:', frame.headers['message']);
+    };
+
+    stompClient.activate();
+
+    return () => {
+      stompClient.deactivate();
+    };
+  }, [dispatch]);
 
   return (
     <div className="w-full pl-75 pr-10 pb-6 text-wms-text-main">

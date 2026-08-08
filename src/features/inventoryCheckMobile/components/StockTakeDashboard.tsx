@@ -15,19 +15,19 @@ interface StockTakeDashboardProps {
 const STATUS_CONFIG: Record<CheckStatus, { label: string; bg: string; text: string; dot: string }> =
 {
   PENDING: {
-    label: 'Chờ xác nhận',
+    label: 'Pending',
     bg: 'bg-amber-100',
     text: 'text-amber-700',
     dot: 'bg-amber-400',
   },
   COMPLETED: {
-    label: 'Hoàn thành',
+    label: 'Completed',
     bg: 'bg-emerald-100',
     text: 'text-emerald-700',
     dot: 'bg-emerald-400',
   },
   CANCELLED: {
-    label: 'Đã huỷ',
+    label: 'Cancelled',
     bg: 'bg-red-100',
     text: 'text-red-600',
     dot: 'bg-red-400',
@@ -239,14 +239,14 @@ export default function StockTakeDashboard({
                       </p>
                       {check.createdBy && (
                         <p className="text-[10px] text-slate-400 mt-0.5">
-                          Tạo bởi: <span className="font-semibold text-slate-600">{check.createdBy}</span>
+                          Created by: <span className="font-semibold text-slate-600">{check.createdBy}</span>
                         </p>
                       )}
                     </div>
 
                     {/* Lines summary badge */}
                     <div className="shrink-0 text-right">
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">Số dòng</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-bold">Lines</p>
                       <p className="text-lg font-black text-slate-700 font-mono">{totalLines}</p>
                     </div>
                   </div>
@@ -262,7 +262,7 @@ export default function StockTakeDashboard({
                   {check.status === 'PENDING' && discrepantCount > 0 && (
                     <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-1.5">
                       <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
-                      <span className="font-semibold">{discrepantCount} dòng có sai lệch</span>
+                      <span className="font-semibold">{discrepantCount} discrepancy items</span>
                     </div>
                   )}
 
@@ -277,7 +277,7 @@ export default function StockTakeDashboard({
                       id={`view-check-btn-${check.id}`}
                     >
                       {check.status === 'PENDING' ? <ReceiptText size={16} /> : <ChartArea size={16} />}
-                      {check.status === 'PENDING' ? 'Xem chi tiết' : 'Xem báo cáo'}
+                      {check.status === 'PENDING' ? 'View details' : 'View report'}
                     </button>
                   </div>
                 </div>

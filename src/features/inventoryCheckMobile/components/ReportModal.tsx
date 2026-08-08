@@ -7,9 +7,9 @@ interface ReportModalProps {
 }
 
 const STATUS_LABELS: Record<string, { label: string; bg: string; text: string }> = {
-  PENDING: { label: 'Chờ xác nhận', bg: 'bg-amber-100', text: 'text-amber-700' },
-  COMPLETED: { label: 'Hoàn thành', bg: 'bg-emerald-100', text: 'text-emerald-700' },
-  CANCELLED: { label: 'Đã huỷ', bg: 'bg-red-100', text: 'text-red-600' },
+  PENDING: { label: 'Pending', bg: 'bg-amber-100', text: 'text-amber-700' },
+  COMPLETED: { label: 'Completed', bg: 'bg-emerald-100', text: 'text-emerald-700' },
+  CANCELLED: { label: 'Cancelled', bg: 'bg-red-100', text: 'text-red-600' },
 };
 
 const formatDate = (isoStr: string) => {
@@ -27,12 +27,7 @@ const formatDate = (isoStr: string) => {
 };
 
 export default function ReportModal({ check, onClose }: ReportModalProps) {
-  // const totalItems = check.details.length;
-  // const matchedItems = check.details.filter((d) => d.variance === 0);
-  // const discrepantItems = check.details.filter((d) => d.variance !== 0);
   const totalVariance = check.details.reduce((sum, d) => sum + Math.abs(d.variance), 0);
-  // const accuracyPercent =
-  //   totalItems > 0 ? Math.round((matchedItems.length / totalItems) * 100) : 100;
 
   const statusCfg = STATUS_LABELS[check.status] ?? STATUS_LABELS['PENDING'];
 
@@ -67,26 +62,6 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
               </span>
             </div>
           </div>
-
-          {/* KPI summary row */}
-          {/* <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-white/10">
-            <div className="text-center">
-              <p className="text-[10px] text-slate-400 uppercase font-bold">Total</p>
-              <p className="text-lg font-black text-white">{totalItems}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[10px] text-emerald-400 uppercase font-bold">Matched</p>
-              <p className="text-lg font-black text-emerald-300">{matchedItems.length}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[10px] text-rose-400 uppercase font-bold">Discrepant</p>
-              <p className="text-lg font-black text-rose-300">{discrepantItems.length}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[10px] text-slate-400 uppercase font-bold">Accuracy</p>
-              <p className="text-lg font-black text-white">{accuracyPercent}%</p>
-            </div>
-          </div> */}
         </div>
 
         {/* Notes */}
@@ -149,7 +124,7 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
                     <div className="shrink-0">
                       {isMatched ? (
                         <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                          Khớp
+                          Match
                         </span>
                       ) : (
                         <span className="text-[9px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-md flex items-center gap-0.5">
@@ -161,12 +136,12 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
 
                   <div className="flex gap-3 mt-3 p-2.5 bg-white rounded-xl border border-slate-100">
                     <div className="flex-1 text-center">
-                      <p className="text-[9px] uppercase font-bold text-slate-400">Hệ thống</p>
+                      <p className="text-[9px] uppercase font-bold text-slate-400">System</p>
                       <p className="text-sm font-black text-slate-700">{detail.systemQuantity}</p>
                     </div>
                     <div className="w-px bg-slate-100" />
                     <div className="flex-1 text-center">
-                      <p className="text-[9px] uppercase font-bold text-slate-400">Thực tế</p>
+                      <p className="text-[9px] uppercase font-bold text-slate-400">Actual</p>
                       <p
                         className={`text-sm font-black ${isMatched ? 'text-emerald-600' : 'text-rose-600'}`}
                       >
@@ -177,7 +152,7 @@ export default function ReportModal({ check, onClose }: ReportModalProps) {
 
                   {!isMatched && detail.reason && (
                     <p className="mt-2 text-[10px] text-slate-500 italic">
-                      Lý do: {detail.reason}
+                      Reason: {detail.reason}
                     </p>
                   )}
                 </div>

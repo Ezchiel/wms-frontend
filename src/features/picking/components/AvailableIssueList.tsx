@@ -175,7 +175,7 @@ export const AvailableIssueList: React.FC<Props> = ({
                   disabled={actionLoading}
                   className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl transition-all shadow-xs cursor-pointer mt-2"
                 >
-                  {actionLoading ? 'Đang nhận phiếu...' : 'Nhận & bắt đầu picking'}
+                  {actionLoading ? 'Claiming...' : 'Claim & start picking'}
                 </button>
               </div>
             ))}

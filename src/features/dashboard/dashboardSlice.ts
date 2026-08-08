@@ -1,11 +1,11 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import {
   fetchTotalStock,
   fetchStockByZone,
   fetchStockByProduct,
   fetchLowStockAlerts,
 } from './dashboardThunks';
-import type { DashboardState } from './dashboardTypes';
+import type { DashboardState, LowStockAlert } from './dashboardTypes';
 
 const initialState: DashboardState = {
   totalStock: null,
@@ -22,6 +22,9 @@ const dashboardSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
+    },
+    setLowStockAlerts: (state, action: PayloadAction<LowStockAlert[]>) => {
+      state.lowStockAlerts = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -84,5 +87,5 @@ const dashboardSlice = createSlice({
   },
 });
 
-export const { clearError } = dashboardSlice.actions;
+export const { clearError, setLowStockAlerts } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

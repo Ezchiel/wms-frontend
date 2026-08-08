@@ -3,7 +3,6 @@ import type { PickingTask } from '../pickingTypes';
 import PickingTaskCard from './PickingTaskCard';
 import { RefreshCw, Search, X, PackageSearch, SlidersHorizontal } from 'lucide-react';
 import PageHeader from '../../../layouts/MobileLayout/PageHeader';
-import StatCard from '../../../layouts/MobileLayout/StatCard';
 import SortFilterSheet from '../../../components/mobile/SortFilterSheet';
 
 interface Props {
@@ -31,22 +30,22 @@ export const PickingTaskList: React.FC<Props> = ({
   });
 
   const sortOptions = [
-    { value: 'id_desc', label: 'Nhiệm vụ mới nhất' },
-    { value: 'id_asc', label: 'Nhiệm vụ cũ nhất' },
-    { value: 'productName_asc', label: 'Tên sản phẩm A-Z' },
-    { value: 'productName_desc', label: 'Tên sản phẩm Z-A' },
+    { value: 'id_desc', label: 'Newest' },
+    { value: 'id_asc', label: 'Oldest' },
+    { value: 'productName_asc', label: 'Product name A-Z' },
+    { value: 'productName_desc', label: 'Product name Z-A' },
   ];
 
   const filterGroups = [
     {
       key: 'status',
-      label: 'Trạng thái',
+      label: 'Status',
       type: 'chip' as const,
       options: [
-        { value: 'ALL', label: 'Tất cả' },
-        { value: 'PENDING', label: 'Chờ lấy' },
-        { value: 'IN_PROGRESS', label: 'Đang làm' },
-        { value: 'DONE', label: 'Hoàn thành' },
+        { value: 'ALL', label: 'All' },
+        { value: 'PENDING', label: 'Pending' },
+        { value: 'IN_PROGRESS', label: 'In progress' },
+        { value: 'DONE', label: 'Done' },
       ],
     },
   ];
@@ -81,8 +80,8 @@ export const PickingTaskList: React.FC<Props> = ({
     <div className="bg-wms-bg min-h-screen flex flex-col font-sans">
       {/* Shared Page Header */}
       <PageHeader
-        title="Lấy hàng"
-        subtitle="Các nhiệm vụ được giao cho bạn"
+        title="Picking"
+        subtitle="Tasks assigned to you"
         rightSlot={
           <>
             {!tasks.some((t) => t.status === 'PENDING' || t.status === 'IN_PROGRESS') && onSelectNewIssue && (
@@ -90,7 +89,7 @@ export const PickingTaskList: React.FC<Props> = ({
                 onClick={onSelectNewIssue}
                 className="py-1.5 px-3 bg-wms-primary hover:bg-wms-primary-hover text-white font-extrabold text-[10px] rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
               >
-                Chọn phiếu mới
+                Claim new issues
               </button>
             )}
             <button
@@ -106,25 +105,6 @@ export const PickingTaskList: React.FC<Props> = ({
       />
 
       <main className="flex-1 max-w-md mx-auto w-full px-5 py-4 space-y-4 pb-28">
-        {/* Lưới 3 KPI Card dùng chung */}
-        <div className="grid grid-cols-3 gap-3">
-          <StatCard
-            label="Chờ lấy"
-            value={tasks.filter((t) => t.status === 'PENDING').length}
-            tone="warning"
-          />
-          <StatCard
-            label="Đang làm"
-            value={tasks.filter((t) => t.status === 'IN_PROGRESS').length}
-            tone="default"
-          />
-          <StatCard
-            label="Hoàn thành"
-            value={tasks.filter((t) => t.status === 'DONE').length}
-            tone="success"
-          />
-        </div>
-
         {/* Search Bar & Sliders Button */}
         <div className="flex items-center gap-2.5">
           <div className="relative flex-1">
@@ -158,19 +138,19 @@ export const PickingTaskList: React.FC<Props> = ({
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div className="w-8 h-8 border-4 border-wms-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-slate-400 font-semibold">Đang tải nhiệm vụ...</p>
+            <p className="text-xs text-slate-400 font-semibold">Loading...</p>
           </div>
         ) : sortedTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white border border-wms-border-color rounded-2xl shadow-sm">
             <PackageSearch size={32} className="text-slate-300" />
             <div className="text-center">
               <p className="text-xs font-extrabold text-slate-500">
-                {isFiltered ? 'Không tìm thấy kết quả phù hợp' : 'Không có nhiệm vụ nào'}
+                {isFiltered ? 'No result found' : 'No tasks assigned'}
               </p>
               <p className="text-[10px] text-slate-400 mt-1">
                 {isFiltered
-                  ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
-                  : 'Chưa có nhiệm vụ lấy hàng được giao'}
+                  ? 'Try changing filters or search keywords'
+                  : 'No picking tasks assigned'}
               </p>
             </div>
           </div>

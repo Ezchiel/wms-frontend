@@ -26,13 +26,13 @@ export const PickingTaskCard: React.FC<Props> = ({ task, onSelect }) => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return 'Chờ lấy';
+        return 'Pending';
       case 'IN_PROGRESS':
-        return 'Đang lấy';
+        return 'In progress';
       case 'DONE':
-        return 'Đã xong';
+        return 'Done';
       case 'FAILED':
-        return 'Thất bại';
+        return 'Failed';
       default:
         return status;
     }
@@ -63,11 +63,11 @@ export const PickingTaskCard: React.FC<Props> = ({ task, onSelect }) => {
       <div className="grid grid-cols-2 gap-3 pt-1 text-[11px] text-slate-500 font-semibold">
         <div className="flex items-center gap-1.5 min-w-0">
           <FileText size={13} className="text-slate-400 shrink-0" />
-          <span className="truncate">Phiếu: {task.issueCode}</span>
+          <span className="truncate">Issue: {task.issueCode}</span>
         </div>
         <div className="flex items-center gap-1.5 min-w-0 justify-end">
           <Box size={13} className="text-slate-400 shrink-0" />
-          <span>Lượng: {task.pickedQuantity}/{task.requiredQuantity}</span>
+          <span>Quantity: {task.pickedQuantity}/{task.requiredQuantity}</span>
         </div>
       </div>
 
@@ -79,7 +79,7 @@ export const PickingTaskCard: React.FC<Props> = ({ task, onSelect }) => {
           </div>
           <div className="min-w-0">
             <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide block leading-none">
-              Vị trí kệ
+              Location
             </span>
             <span className="text-xs font-black text-slate-700 font-mono block mt-0.5 leading-none">
               {task.locationBarcode}
@@ -87,7 +87,7 @@ export const PickingTaskCard: React.FC<Props> = ({ task, onSelect }) => {
           </div>
         </div>
         <span className="text-[10px] text-slate-400 font-medium truncate max-w-[120px]">
-          {task.locationDescription || 'Không có mô tả'}
+          {task.locationDescription || 'No description'}
         </span>
       </div>
 
@@ -97,7 +97,7 @@ export const PickingTaskCard: React.FC<Props> = ({ task, onSelect }) => {
           onClick={() => onSelect(task)}
           className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold text-xs rounded-xl transition-all shadow-xs"
         >
-          <span>{task.status === 'PENDING' ? 'Bắt đầu lấy hàng' : 'Tiếp tục lấy hàng'}</span>
+          <span>{task.status === 'PENDING' ? 'Start Picking' : 'Continue Picking'}</span>
           <ArrowRight size={13} />
         </button>
       )}
