@@ -1,17 +1,24 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import axiosClient from '../../api/axiosClient';
-import type { ApiResponse } from '../../types/api.types';
+import type { ApiResponse, Meta } from '../../types/api.types';
 import type { InventoryStock } from './inventoryStockTypes';
 
 export const fetchInventoryStocks = createAsyncThunk<
-  InventoryStock[],
-  void,
+  { data: InventoryStock[]; meta: Meta },
+  { page?: number; size?: number } | void,
   { rejectValue: string }
->('inventoryStocks/fetchAll', async (_, { rejectWithValue }) => {
+>('inventoryStocks/fetchAll', async (params, { rejectWithValue }) => {
   try {
-    const response = await axiosClient.get<ApiResponse<InventoryStock[]>>('/inventory-stocks');
-    return response.data.data;
+    const page = params?.page ?? 1;
+    const size = params?.size ?? 20;
+    const response = await axiosClient.get<ApiResponse<InventoryStock[]>>('/inventory-stocks', {
+      params: { page, size },
+    });
+    return {
+      data: response.data.data,
+      meta: response.data.meta,
+    };
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
       return rejectWithValue(error.response.data?.message || 'Lỗi khi lấy danh sách tồn kho!');

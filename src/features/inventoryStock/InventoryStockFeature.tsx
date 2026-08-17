@@ -1,5 +1,6 @@
 import React from 'react';
 import TabNavigation from '../../components/TabNavigation';
+import Pagination from '../../components/Pagination';
 import FilterInventoryStock from './components/FilterInventoryStock';
 import InventoryStockTable from './components/InventoryStockTable';
 import { useInventoryStock } from './useInventoryStock';
@@ -54,11 +55,14 @@ export const InventoryStockFeature: React.FC = () => {
           {state.isLoading ? (
             <div className="py-10 text-center">Loading data...</div>
           ) : (
-            <InventoryStockTable
-              heads={tableHeads}
-              data={state.stocks}
-              locations={state.storageLocations}
-            />
+            <>
+              <InventoryStockTable
+                heads={tableHeads}
+                data={state.stocks}
+                locations={state.storageLocations}
+              />
+              <Pagination meta={state.meta} onPageChange={actions.setCurrentPage} />
+            </>
           )}
         </div>
       </div>

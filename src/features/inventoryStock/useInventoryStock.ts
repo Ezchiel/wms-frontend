@@ -8,22 +8,24 @@ export const useInventoryStock = () => {
   const dispatch = useAppDispatch();
 
   // Redux Selectors
-  const { stocks, loading: isStockLoading } = useAppSelector((state) => state.inventoryStocks);
+  const { stocks, meta, loading: isStockLoading } = useAppSelector((state) => state.inventoryStocks);
   const { storageLocations, loading: isLocLoading } = useAppSelector(
     (state) => state.storageLocations
   );
 
   // Local State
   const [tabIndex, setTabIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(20);
 
-  // Fetch initial data
+  // Fetch data on page or size change
   useEffect(() => {
-    dispatch(fetchInventoryStocks());
+    dispatch(fetchInventoryStocks({ page: currentPage, size: pageSize }));
     dispatch(fetchStorageLocations({ size: 1000 }));
-  }, [dispatch]);
+  }, [dispatch, currentPage, pageSize]);
 
   const handleRefresh = () => {
-    dispatch(fetchInventoryStocks());
+    dispatch(fetchInventoryStocks({ page: currentPage, size: pageSize }));
     dispatch(fetchStorageLocations({ size: 1000 }));
   };
 
@@ -34,11 +36,14 @@ export const useInventoryStock = () => {
     state: {
       stocks,
       storageLocations,
+      meta,
+      currentPage,
       tabIndex,
       isLoading,
     },
     actions: {
       setTabIndex,
+      setCurrentPage,
       handleRefresh,
     },
   };

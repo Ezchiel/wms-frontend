@@ -5,6 +5,7 @@ import type { InventoryStockState } from './inventoryStockTypes';
 const initialState: InventoryStockState = {
   stocks: [],
   loading: false,
+  meta: null,
   error: null,
 };
 
@@ -25,7 +26,8 @@ const inventoryStockSlice = createSlice({
       })
       .addCase(fetchInventoryStocks.fulfilled, (state, action) => {
         state.loading = false;
-        state.stocks = action.payload;
+        state.stocks = action.payload.data;
+        state.meta = action.payload.meta;
       })
       .addCase(fetchInventoryStocks.rejected, (state, action) => {
         state.loading = false;

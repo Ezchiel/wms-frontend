@@ -1,3 +1,5 @@
+import type { Meta } from '../../types/api.types';
+
 export interface InventoryStock {
   id: number;
   productId: number;
@@ -21,5 +23,6 @@ export interface InventoryStockPayload {
 export interface InventoryStockState {
   stocks: InventoryStock[];
   loading: boolean;
+  meta: Meta | null;
   error: string | null;
 }
