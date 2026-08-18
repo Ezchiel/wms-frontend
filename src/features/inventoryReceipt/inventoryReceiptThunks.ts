@@ -184,3 +184,19 @@ export const approveDraftReceipt = createAsyncThunk<
     return rejectWithValue('Đã xảy ra lỗi kết nối!');
   }
 });
+
+export const downloadReceiptPdf = async (id: number): Promise<void> => {
+  const response = await axiosClient.get(`/receipts/${id}/pdf`, {
+    responseType: 'blob',
+  });
+  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `phieu-nhap-kho-${id}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+};
+

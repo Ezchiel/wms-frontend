@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { confirmInventoryCheck } from '../inventoryCheckThunks';
+import { confirmInventoryCheck, downloadCheckPdf } from '../inventoryCheckThunks';
 import { clearSelectedCheck } from '../inventoryCheckSlice';
 import type { CheckStatus } from '../inventoryCheckTypes';
 
@@ -45,8 +45,21 @@ export default function InventoryCheckDetailModal({ onClose, onConfirmSuccess }:
   const dispatch = useAppDispatch();
   const { selectedCheck, actionLoading } = useAppSelector((state) => state.inventoryCheck);
   const [confirmError, setConfirmError] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
 
   if (!selectedCheck) return null;
+
+  const handleExportPdf = async () => {
+    try {
+      setIsExporting(true);
+      await downloadCheckPdf(selectedCheck.id);
+    } catch (error) {
+      console.error('Export PDF failed', error);
+      alert('Xuất PDF thất bại, vui lòng thử lại!');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const statusCfg = STATUS_CONFIG[selectedCheck.status];
   const totalItems = selectedCheck.details.length;
@@ -232,6 +245,14 @@ export default function InventoryCheckDetailModal({ onClose, onConfirmSuccess }:
             </p>
           )}
           <div className="flex gap-3 ml-auto">
+            <button
+              onClick={handleExportPdf}
+              disabled={isExporting || actionLoading}
+              className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <i className="fa-solid fa-file-pdf"></i>
+              {isExporting ? 'Đang xuất...' : 'Xuất PDF'}
+            </button>
             <button
               onClick={handleClose}
               className="px-4 py-2.5 text-sm font-medium text-wms-muted border border-wms-border-color rounded-lg hover:bg-wms-bg transition-colors cursor-pointer"

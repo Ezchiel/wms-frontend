@@ -67,3 +67,19 @@ export const confirmInventoryCheck = createAsyncThunk<
     return rejectWithValue('Lỗi kết nối đến máy chủ');
   }
 });
+
+export const downloadCheckPdf = async (id: number): Promise<void> => {
+  const response = await axiosClient.get(`/checks/${id}/pdf`, {
+    responseType: 'blob',
+  });
+  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `bien-ban-kiem-ke-${id}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+};
+

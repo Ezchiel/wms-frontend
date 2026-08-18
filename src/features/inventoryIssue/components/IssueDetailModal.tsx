@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppSelector } from '../../../app/hooks';
 import type { InventoryIssue } from '../inventoryIssueTypes';
+import { downloadIssuePdf } from '../inventoryIssueThunks';
 
 interface Props {
   isOpen: boolean;
@@ -22,8 +23,21 @@ const IssueDetailModal: React.FC<Props> = ({
 }) => {
   const user = useAppSelector((state) => state.auth.user);
   const isAuthorized = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+  const [isExporting, setIsExporting] = useState(false);
 
   if (!isOpen || !issue) return null;
+
+  const handleExportPdf = async () => {
+    try {
+      setIsExporting(true);
+      await downloadIssuePdf(issue.id);
+    } catch (error) {
+      console.error('Export PDF failed', error);
+      alert('Xuất PDF thất bại, vui lòng thử lại!');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -150,6 +164,14 @@ const IssueDetailModal: React.FC<Props> = ({
 
         {/* Footer */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-solid border-wms-border-color bg-gray-50/50 sticky bottom-0 z-10">
+          <button
+            onClick={handleExportPdf}
+            disabled={isExporting || actionLoading}
+            className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-red-600 border border-solid border-red-600 text-white hover:bg-red-700 transition-all shadow-sm flex items-center gap-2 disabled:opacity-60"
+          >
+            <i className="fa-solid fa-file-pdf"></i>
+            {isExporting ? 'Đang xuất...' : 'Xuất PDF'}
+          </button>
           <button
             onClick={onClose}
             disabled={actionLoading}

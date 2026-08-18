@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { InventoryReceipt } from '../inventoryReceiptTypes';
+import { downloadReceiptPdf } from '../inventoryReceiptThunks';
 
 interface Props {
   isOpen: boolean;
@@ -9,7 +10,21 @@ interface Props {
 }
 
 const ReceiptDetailModal: React.FC<Props> = ({ isOpen, receipt, onClose, onConfirm }) => {
+  const [isExporting, setIsExporting] = useState(false);
+
   if (!isOpen || !receipt) return null;
+
+  const handleExportPdf = async () => {
+    try {
+      setIsExporting(true);
+      await downloadReceiptPdf(receipt.id);
+    } catch (error) {
+      console.error('Export PDF failed', error);
+      alert('Xuất PDF thất bại, vui lòng thử lại!');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity p-4">
@@ -112,8 +127,16 @@ const ReceiptDetailModal: React.FC<Props> = ({ isOpen, receipt, onClose, onConfi
         {/* Footer */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-solid border-wms-border-color bg-gray-50/50 sticky bottom-0 z-10">
           <button
+            onClick={handleExportPdf}
+            disabled={isExporting}
+            className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-red-600 border border-solid border-red-600 text-white hover:bg-red-700 transition-all shadow-sm flex items-center gap-2 disabled:opacity-60"
+          >
+            <i className="fa-solid fa-file-pdf"></i>
+            {isExporting ? 'Đang xuất...' : 'Xuất PDF'}
+          </button>
+          <button
             onClick={onClose}
-            className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-wms-primary border border-solid border-wms-primary text-white hover:opacity-90 transition-all shadow-sm"
+            className="py-2 px-5 rounded-md text-[13px] font-medium cursor-pointer bg-white border border-solid border-wms-border-color text-wms-text-main hover:bg-gray-50 transition-colors shadow-sm"
           >
             Close
           </button>
